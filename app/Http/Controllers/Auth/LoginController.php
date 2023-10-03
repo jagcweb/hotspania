@@ -47,6 +47,12 @@ class LoginController extends Controller
             return back()->with('error', 'Cuenta de email aún no verificada.');
         }
 
+        if (!is_null($user->banned)) {
+            \Auth::logout();
+
+            return back()->with('error', 'El usuario ha sido baneado. Si crees que es un error ponte en contacto con nosotros.');
+        }
+
         return back();
     }
 }

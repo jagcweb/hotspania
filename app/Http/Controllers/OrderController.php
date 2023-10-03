@@ -7,6 +7,7 @@ use App\Models\Discount;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrdersProduct;
+use App\Models\TotalSale;
 use App\Http\Controllers\Controller;
 
 class OrderController extends Controller
@@ -91,6 +92,18 @@ class OrderController extends Controller
             $order_product->name = $c->product->name;
             $order_product->images = $c->product->images;
             $order_product->save();
+
+            $total_sale = TotalSale::where('name', $c->product->name)->first();
+        
+            if(!is_object($total_sale)){
+                $total_sale = new TotalSale();
+                $total_sale->product_id = $c->product->id;
+                $total_sale->quantity = $c->quantity;
+                $total_sale->save();
+            } else {
+                $total_sale->quantity = $total_sale->quantity + $c->quantity;
+                $total_sale->update();
+            }
 
             $c->delete();
         }

@@ -65,22 +65,6 @@
                             <!-- ***** Menu Start ***** -->
                             <ul class="nav">
                                 <li class="scroll-to-section"><a href="#top" class="active">Inicio</a></li>
-                                @php $categories = \App\Models\Category::orderBy('name', 'asc')->get(); @endphp
-
-                                @foreach ($categories as $cat)
-                                    @if(count($cat->subcategories)>0)
-                                    <li class="submenu">
-                                        <a href="javascript:;">{{$cat->name}}</a>
-                                        <ul>
-                                            @foreach ($cat->subcategories as $subcat)
-                                                <li><a href="#">{{$subcat->name}}</a></li>
-                                            @endforeach
-                                        </ul>
-                                    </li>
-                                    @else
-                                        <li class="scroll-to-section"><a href="#">{{$cat->name}}</a></li>
-                                    @endif
-                                @endforeach
 
                                 @if(!\Auth::user())
                                     <li class="scroll-to-section"><a style="font-size: 20px;" href="#" data-toggle="modal" data-target="#login"><i class="fa-regular fa-circle-user"></i></a></li>
@@ -98,31 +82,39 @@
                                         </ul>
                                     </li>
                                 @endif
-                            @php $cart_products = 0; if(\Auth::user()){ $cart_products = \App\Models\Cart::where('user_id', \Auth::user()->id)->count();} @endphp
-                            <li class="scroll-to-section"><a style="position:relative; font-size: 20px;" href="{{route('cart.index')}}"><i class="fa-solid fa-basket-shopping"></i><span style="
-                                display: flex;
-                                justify-content:center;
-                                align-items:center;
-                                position: absolute;
-                                top: -5px;
-                                right:1.5px;
-                                color:#fff;
-                                background:#f86262;
-                                height: 20px;
-                                width: 20px;
-                                line-height:15px;
-                                text-align:center;
-                                border-radius:99999px;
-                                @if($cart_products>9)
-                                font-size:13px;
-                                @else
-                                font-size:14px;
+
+                                @if(\Auth::user())
+                                    @php $cart_products = 0; $cart_products = \App\Models\Cart::where('user_id', \Auth::user()->id)->count(); @endphp
+                                    <li class="scroll-to-section">
+                                        <a style="position:relative; font-size: 20px;" href="{{route('cart.index')}}">
+                                            <i class="fa-solid fa-basket-shopping"></i>
+                                            <span style="
+                                                display: flex;
+                                                justify-content:center;
+                                                align-items:center;
+                                                position: absolute;
+                                                top: -5px;
+                                                right:1.5px;
+                                                color:#fff;
+                                                background:#f86262;
+                                                height: 20px;
+                                                width: 20px;
+                                                line-height:15px;
+                                                text-align:center;
+                                                border-radius:99999px;
+                                                @if($cart_products>9)
+                                                font-size:13px;
+                                                @else
+                                                font-size:14px;
+                                                @endif
+                                                ">
+                                                <span style="margin-left: 1px;">
+                                                @if($cart_products>9) 9+ @else {{$cart_products}} @endif
+                                                </span>
+                                            </span>
+                                        </a>
+                                    </li>
                                 @endif
-                                ">
-                                <span style="margin-left: 1px;">
-                                @if($cart_products>9) 9+ @else {{$cart_products}} @endif
-                                </span>
-                            </span></a></li>
                             </ul>        
                             <a class='menu-trigger'>
                                 <span>Menu</span>
@@ -174,20 +166,21 @@
                             <li><a href="#">Contact Us</a></li>
                         </ul>
                     </div>--}}
+                    
                     <div class="col-lg-4">
-                        <h4 class="text-center">Ayuda e información</h4>
+                        <h4 class="text-center">Categorías</h4>
                         <ul class="text-center">
-                            <li><a href="#">Help</a></li>
-                            <li><a href="#">FAQ's</a></li>
-                            <li><a href="#">Shipping</a></li>
-                            <li><a href="#">Tracking ID</a></li>
+                            @foreach ($categories as $cat)
+                                <li><a href="{{ route('categories.get', ['name' => $cat->name]) }}">{{ ucfirst($cat->name) }}</a></li>
+                            @endforeach
                         </ul>
                     </div>
-                    <div class="col-lg-4">
+                    
+                    <div class="col-lg-4 text-right">
                         <h4 class="text-center">Redes sociales</h4>
                         <ul class="text-center">
-                            <li><a style="font-size: 28px;" href="#"><i class="fa-brands fa-instagram"></i></a></li>
-                            <li><a style="font-size: 28px;" href="#"><i class="fa-brands fa-tiktok"></i></a></li>
+                            <li><a style="font-size: 28px;" target="_blank" href="https://www.instagram.com/diavlahookah/"><i class="fa-brands fa-instagram"></i></a></li>
+                            <li><a style="font-size: 28px;" target="_blank" href="https://www.tiktok.com/@diavlahookah"><i class="fa-brands fa-tiktok"></i></a></li>
                         </ul>
                     </div>
                     <div class="col-lg-12">

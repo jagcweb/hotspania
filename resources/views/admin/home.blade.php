@@ -15,7 +15,7 @@
                 <a href="#users" class="btn" style="font-size:18px!important;"><i class="fas fa-users"></i>
                     Usuarios</a>
                 <div class="smenu">
-                    <a style="color:#fff;" href="">Ver</a>
+                    <a style="color:#fff;" href="{{route('admin.user.get')}}">Ver</a>
                 </div>
             </li>
             <li class="item" id="categories">

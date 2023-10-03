@@ -56,6 +56,12 @@ Route::post('/account/update-password', [App\Http\Controllers\AccountController:
 Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin');
 Route::get('/admin/get-subcategories/{id}', [App\Http\Controllers\AdminController::class, 'getSubcategories'])->name('admin.getSubcategories');
 
+//UserController
+Route::get('/admin/users/get', [App\Http\Controllers\Admin\UserController::class, 'get'])->name('admin.user.get');
+Route::post('/admin/users/update/{id}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('admin.user.update');
+Route::get('/admin/users/verify/{id}', [App\Http\Controllers\Admin\UserController::class, 'verify'])->name('admin.user.verify');
+Route::get('/admin/users/ban/{id}', [App\Http\Controllers\Admin\UserController::class, 'ban'])->name('admin.user.ban');
+
 //CategoryController
 Route::post('/admin/categories/create', [App\Http\Controllers\Admin\CategoryController::class, 'create'])->name('admin.category.create');
 Route::get('/admin/categories/get', [App\Http\Controllers\Admin\CategoryController::class, 'get'])->name('admin.category.get');
