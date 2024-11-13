@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Models\User;
 
 class AccountController extends Controller
@@ -14,57 +15,26 @@ class AccountController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('logged')->except('get');
     }
 
-    
-    public function index(){
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function index()
+    {
         return view('account.index');
     }
 
-    public function update(Request $request)
+    public function get($nickname)
     {
-        $validate = $this->validate($request, [
-            'name' => ['required', 'string'],
-            'surname' => ['required', 'string'],
-            'email' => ['required', 'email', 'unique:users,email,'. \Auth::user()->id],
+        $user = User::where('nickname', $nickname)->first();
+
+
+        return view('account.get', [
+            'user' => $user,
         ]);
-
-        $name = $request->get('name');
-        $surname = $request->get('surname');
-        $email = $request->get('email');
-
-        $user = User::find(\Auth::user()->id);
-
-        $user->name = $name;
-        $user->surname = $surname;
-        $user->email = $email;
-        $user->update();
-
-        return back()->with('exito', 'Datos actualizados!');
-
-    }
-
-    public function updatePassword(Request $request)
-    {
-        $validate = $this->validate($request, [
-            'current' => ['required', 'string', 'min:8'],
-            'new' => ['required', 'string', 'min:8'],
-        ]);
-
-        $current = $request->get('current');
-        $new = $request->get('new');
-
-        if(!\Hash::check($current, \Auth::user()->password)){
-            return back()->with("error", "La contraseña actual no coincide con la introducida.");
-        }
-
-        $user = User::find(\Auth::user()->id);
-
-        $user->password = \Hash::make($new);
-        $user->update();
-
-        return back()->with('exito', 'Contraseña actualizada!');
-
     }
 }

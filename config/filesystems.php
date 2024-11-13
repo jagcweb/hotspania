@@ -30,6 +30,14 @@ return [
 
     'disks' => [
 
+        
+        'images' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/images'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -42,6 +50,12 @@ return [
             'visibility' => 'public',
         ],
 
+        'users_pdf' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/users_pdf'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
         
         'categories' => [
             'driver' => 'local',

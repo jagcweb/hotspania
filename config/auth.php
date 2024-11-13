@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [
+            'driver' => 'session', // Or a different driver if needed (e.g., jwt)
+            'provider' => 'admins', // Assuming a separate table for admins
+        ],
     ],
 
     /*

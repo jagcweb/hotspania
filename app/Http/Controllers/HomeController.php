@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\User;
 
 class HomeController extends Controller
 {
@@ -14,7 +15,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth')->except('getImage');
+        //$this->middleware('auth')->except(['getImage']);
     }
 
     /**
@@ -24,15 +25,28 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $users = User::whereHas(
+            'roles', function($q){
+                $q->where('name', 'user');
+            })
+            ->whereNotNull('active')
+            ->whereNotNull('completed')
+            ->whereNull('banned')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('home' , [
+            'users' => $users
+        ]);
     }
 
-    public function getImage($filesystem, $filename) {
-        $file = \Storage::disk($filesystem)->get($filename);
+    public function privacyPolicies()
+    {
+        return view('privacy_policies');
+    }
 
-        $headers = array(
-            'Content-Type' => 'image/jpg'
-        );
+    public function getImage($filename) {
+        $file = \Storage::disk('images')->get($filename);
 
         return new Response($file, 200);
     }

@@ -2,92 +2,320 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use App\Models\City;
+use App\Models\CityUser;
 
 class UserController extends Controller
 {
     /**
-     * Create a new controller instance.
+     * Display a form to create a new user.
      *
-     * @return void
+     * @return \Illuminate\Http\Response
      */
-    public function __construct()
+    public function create()
     {
-        $this->middleware('auth');
-        
-        if(!\Auth::user() || \Auth::user()->getRoleNames()[0] != "admin"){
-            return back();
+        $cities = City::orderBy('id', 'asc')->get();
+
+        if(count($cities) == 0){
+            return redirect()->route('admin.utilities.zones')->with('error', 'Antes de crear un usuario, debes tener alguna ciudad creada para poder asignarsela.');
         }
+
+        return view('admin.users.create', compact("cities"));
     }
 
-    public function get(){
+    /**
+     * Store a newly created user in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function save(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'required|string|max:255',
+            'dni' => 'required|string|max:20', // Ajusta la longitud según tu país
+            'date_of_birth' => 'required|date',
+            'email' => 'required|email|unique:users',
+            'dni_file' => 'required|file|mimes:jpg,jpeg,png,webp',
+            'nickname' => 'required|string|max:50|unique:users',
+            'age' => 'required|numeric|min:18|max:99',
+            'whatsapp' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
+            'smoker' => 'required|boolean', // Assuming a boolean field for smoker
+            'working_zone' => 'required|string',
+            'service_location' => 'required|string',
+            'gender' => 'required|in:hombre,mujer,otro',
+            'height' => 'required|numeric', // Ajusta el rango según tus necesidades
+            'weight' => 'required|numeric', // Ajusta el rango según tus necesidades
+            'bust' => 'required|numeric',
+            'waist' => 'required|numeric',
+            'hip' => 'required|numeric',
+            'start_day' => 'required|in:fulltime,lunes,martes,miercoles,jueves,viernes,sabado,domingo',
+            'end_day' => 'required|in:fulltime,lunes,martes,miercoles,jueves,viernes,sabado,domingo',
+            'start_time' => 'nullable|numeric|min:0|max:23',
+            'end_time' => 'nullable|numeric|min:0|max:23',
+            'fulltime_time' => 'nullable|numeric',
+            'city' => 'required|array',
+            'city.*' => 'alpha_num',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator->errors())->withInput();
+        }
+
+        if(count($request->get('city')) == 0) {
+            return redirect()->back()->with('error', 'Debes seleccionar al menos una ciudad.');
+        }
+
+        if(is_null($request->get('start_time')) && is_null($request->get('end_time')) && is_null($request->get('fulltime_time'))) {
+            return redirect()->back()->with('error', 'Debes seleccionar un horario.');
+        }
+
+        $file = $request->file('dni_file');
+
+        $imageName = time() . $file->getClientOriginalName();
+        \Storage::disk('images')->put($imageName, \File::get($file));
+
+        $create = User::create([
+            'full_name' => $request->full_name,
+            'nickname' => $request->nickname,
+            'age' => $request->age,
+            'whatsapp' => $request->whatsapp,
+            'phone' => $request->phone,
+            'is_smoker' => $request->smoker,
+            'working_zone' => $request->working_zone,
+            'service_location' => $request->service_location,
+            'gender' => $request->gender,
+            'dni' => $request->dni,
+            'dni_file' => $imageName,
+            'date_of_birth' => $request->date_of_birth,
+            'email' => $request->email,
+            'height' => $request->height,
+            'weight' => $request->weight,
+            'bust' => $request->bust,
+            'waist' => $request->waist,
+            'hip' => $request->hip,
+            'start_day' => $request->start_day,
+            'end_day' => $request->end_day,
+            'start_time' => !is_null($request->get('fulltime_time')) ? 'fulltime' : $request->start_time,
+            'end_time' => !is_null($request->get('fulltime_time')) ? 'fulltime' : $request->end_time,
+            'status' => 0,
+            'profile_image' => NULL,
+            'active' => 1,
+            'frozen' => NULL,
+            'visible' => NULL,
+            'online' => NULL,
+            'email_verified_at' => NULL,
+            'banned' => NULL,
+            'password' => \Hash::make($request->dni),
+            'completed' => 1
+        ]);
+
+        $create->assignRole('user');
+
+        foreach($request->get('city') as $city){
+            $city_user = new CityUser();
+            $city_user->city_id = $city;
+            $city_user->user_id = $create->id;
+            $city_user->save();
+        }
+
+        return redirect()->route('admin.users.getActive')->with('exito', 'Usuario creado');
+    }
+
+    public function edit($id) {
+        $user = User::find($id);
+        $cities = City::orderBy('id', 'asc')->get();
+        return view('admin.users.edit', [
+            'user' => $user,
+            'cities' => $cities
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'required|string|max:255',
+            'dni' => 'required|string|max:20', // Ajusta la longitud según tu país
+            'date_of_birth' => 'required|date',
+            'email' => 'required|email|unique:users,id',
+            'dni_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
+            'nickname' => 'required|string|max:50|unique:users,id',
+            'age' => 'required|numeric|min:18|max:99',
+            'whatsapp' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
+            'smoker' => 'required|boolean', // Assuming a boolean field for smoker
+            'working_zone' => 'required|string',
+            'service_location' => 'required|string',
+            'gender' => 'required|in:hombre,mujer,otro',
+            'height' => 'required|numeric', // Ajusta el rango según tus necesidades
+            'weight' => 'required|numeric', // Ajusta el rango según tus necesidades
+            'bust' => 'required|numeric',
+            'waist' => 'required|numeric',
+            'hip' => 'required|numeric',
+            'start_day' => 'required|in:fulltime,lunes,martes,miercoles,jueves,viernes,sabado,domingo',
+            'end_day' => 'required|in:fulltime,lunes,martes,miercoles,jueves,viernes,sabado,domingo',
+            'start_time' => 'nullable|numeric|min:0|max:23',
+            'end_time' => 'nullable|numeric|min:0|max:23',
+            'fulltime_time' => 'nullable|numeric',
+            'user_id' => 'required|integer',
+            'city' => 'required|array',
+            'city.*' => 'alpha_num',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator->errors());
+        }
+
+        if(count($request->get('city')) == 0) {
+            return redirect()->back()->with('error', 'Debes seleccionar al menos una ciudad.');
+        }
+
+        if(is_null($request->get('start_time')) && is_null($request->get('end_time')) && is_null($request->get('fulltime_time'))) {
+            return redirect()->back()->with('error', 'Debes seleccionar un horario.');
+        }
+
+        $id = $request->get('user_id');
+
+        $user = User::find($id);
+
+        if(!is_null($request->file('dni_file'))) {
+            \Storage::disk('images')->delete($user->dni_file);
+
+            $file = $request->file('dni_file');
+
+            $imageName = time() . $file->getClientOriginalName();
+            \Storage::disk('images')->put($imageName, \File::get($file));
+        }
+
+        $cities = \App\Models\CityUser::where('user_id', $user->id)->get();
+
+        foreach($cities as $city){
+            $city->delete();
+        }
+
+        $user->update([
+            'full_name' => $request->full_name,
+            'nickname' => $request->nickname,
+            'age' => $request->age,
+            'whatsapp' => $request->whatsapp,
+            'phone' => $request->phone,
+            'is_smoker' => $request->smoker,
+            'working_zone' => $request->working_zone,
+            'service_location' => $request->service_location,
+            'gender' => $request->gender,
+            'dni' => $request->dni,
+            'dni_file' => !is_null($request->file('dni_file')) ? $imageName : $user->dni_file,
+            'date_of_birth' => $request->date_of_birth,
+            'email' => $request->email,
+            'height' => $request->height,
+            'weight' => $request->weight,
+            'bust' => $request->bust,
+            'waist' => $request->waist,
+            'hip' => $request->hip,
+            'start_day' => $request->start_day,
+            'end_day' => $request->end_day,
+            'start_time' => !is_null($request->get('fulltime_time')) ? 'fulltime' : $request->start_time,
+            'end_time' => !is_null($request->get('fulltime_time')) ? 'fulltime' : $request->end_time,
+            'updated_at' => \Carbon\Carbon::now()
+        ]);
+
+        foreach($request->get('city') as $city){
+            $city_user = new CityUser();
+            $city_user->city_id = $city;
+            $city_user->user_id = $user->id;
+            $city_user->save();
+        }
+
+        return back()->with('exito', 'Usuario modificado!');
+    }
+
+    public function updateStatus(Request $request) {
+        $id = $request->get('user_id');
+
+        $user = User::find($id);
+
+        $user->update([
+            'active' => $request->active,
+            'frozen' => $request->frozen,
+            'visible' => $request->visible,
+        ]);
+
+        return back()->with('exito', 'Usuario actualizado!');
+    }
+
+    public function updatePassword(Request $request, $id)
+    {
+        $request->validate([  
+            'password' => ['required', 'min:8'],
+        ]);
+
+        $user = User::find($id);
+
+        $user->update(['password' => Hash::make($request->password)]);
+
+        return back()->with('exito', 'La contraseña se ha actualizado correctamente.');
+    }
+
+    /**
+     * Get a list of pending users (e.g. not activated).
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getPending()
+    {
         $users = User::whereHas(
             'roles', function($q){
-                $q->where('name', '!=', 'admin');
-            }
-        )->orderBy('id', 'asc')->get();
+                $q->where('name', 'user');
+            })
+            ->whereNull('active')
+            ->get(); // Replace 0 with your pending user status value
 
-        return view('admin.users.get', [
-            'users' => $users
-        ]);
+        return view('admin.users.pending', compact('users'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Get a list of active users.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getActive()
     {
+        $users = User::whereHas(
+            'roles', function($q){
+                $q->where('name', 'user');
+            })
+            ->where('active', 1)->get(); // Replace 1 with your active user status value
 
-        $validate = $this->validate($request, [
-            'name' => ['required', 'string'],
-            'surname' => ['required', 'string'],
-            'email' => ['required', 'email', 'unique:users,email,'. $id],
-        ]);
-
-        $name = $request->get('name');
-        $surname = $request->get('surname');
-        $email = $request->get('email');
-
-        $user = User::find($id);
-
-        $user->name = $name;
-        $user->surname = $surname;
-        $user->email = $email;
-        $user->update();
-
-        return back()->with('exito', 'Datos usuario '.$user->email. ' actualizados!');
+        return view('admin.users.active', compact('users'));
     }
 
-    public function ban($id)
+        /**
+     * Get a list of requests.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getRequests()
     {
-        $user = User::find($id);
+        $users = User::where('status', 1)->get(); // Replace 1 with your active user status value
 
-        if(is_null($user->banned)){
-            $user->banned = 1;
-            $text = "baneado";
-        } else {
-            $user->banned = NULL;
-            $text = "desbaneado";
-        }
-
-        $user->update();
-
-        return back()->with('exito', 'Usuario '.$user->email. " " .$text);
+        return view('admin.users.active', compact('users'));
     }
 
-    public function verify($id)
+    /**
+     * Get a list of user login records.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getLoginRecords()
     {
-        $user = User::find($id);
+        // You might need to implement login history functionality or use an existing package
 
-        if(is_null($user->email_verified_at)){
-            $user->email_verified_at = \Carbon\Carbon::now();
-            $text = "verificado";
-        } else {
-            $user->email_verified_at = NULL;
-            $text = "desverificado";
-        }
-
-        $user->update();
-
-        return back()->with('exito', 'Email '. $user->email. ' de usuario '.$text);
+        return view('admin.users.login-records');
     }
 }

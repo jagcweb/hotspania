@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,20 +18,39 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'surname',
+        'full_name',
+        'nickname',
+        'age',
+        'whatsapp',
+        'phone',
+        'is_smoker',
+        'working_zone',
+        'service_location',
+        'gender',
+        'services',
+        'dni',
+        'dni_file',
+        'phone_number',
+        'date_of_birth',
         'email',
+        'height',
+        'weight',
+        'bust',
+        'waist',
+        'hip',
+        'start_day',
+        'end_day',
+        'start_time',
+        'end_time',
+        'profile_image',
+        'active',
+        'frozen',
+        'visible',
+        'online',
         'password',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
+        'banned',
+        'email_verified_at',
+        'completed'
     ];
 
     /**
@@ -41,6 +59,16 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'is_smoker' => 'boolean',
     ];
+
+    public function images(){
+        return $this->hasMany('App\Models\Image', 'user_id','id');
+    }
+
+    public function getRoleNames()
+    {
+        // Assuming you have a 'roles' pivot table
+        return $this->roles->pluck('name')->toArray();
+    }
 }

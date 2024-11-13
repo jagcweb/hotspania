@@ -381,8 +381,6 @@ header
   -moz-transition: all 0.3s ease 0s;
   -o-transition: all 0.3s ease 0s;
   transition: all 0.3s ease 0s;
-  height: 40px;
-  line-height: 40px;
   border: 1px solid #888888;
   letter-spacing: 1px;
 }
@@ -395,6 +393,10 @@ header
   transition: all 0.3s ease 0s;
   border: 1px solid #888888;
   letter-spacing: 1px;
+}
+
+.btn {
+  padding: 8px 10px!important;
 }
 
 .btn-input {

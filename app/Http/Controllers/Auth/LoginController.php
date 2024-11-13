@@ -41,7 +41,7 @@ class LoginController extends Controller
 
     public function authenticated(Request $request, $user)
     {
-        if (is_null($user->email_verified_at)) {
+       /* if (is_null($user->email_verified_at)) {
             \Auth::logout();
 
             return back()->with('error', 'Cuenta de email aún no verificada.');
@@ -51,8 +51,19 @@ class LoginController extends Controller
             \Auth::logout();
 
             return back()->with('error', 'El usuario ha sido baneado. Si crees que es un error ponte en contacto con nosotros.');
+        }*/
+
+        if ($user->getRoleNames()[0] == 'admin') {
+            return redirect()->route('admin.citychanges');
+        } else {
+            if (!is_null($user->banned)) {
+                \Auth::logout();
+                return back()->with('error', 'El usuario ha sido baneado. Si crees que es un error ponte en contacto con nosotros.');
+            } else {
+                return redirect()->route('home');
+            }
+
         }
 
-        return back();
     }
 }

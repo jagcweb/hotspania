@@ -42,17 +42,16 @@ body {
     color: #222220;
     position: relative;
     font-weight: bold;
-}
-
-.btn:before {
-    content: "";
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: #f1f1f1;
-    left: 20px;
-    bottom: -7px;
-    transform: rotate(45deg);
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    color: #2a2a2a;
+    -webkit-transition: all 0.3s ease 0s;
+    -moz-transition: all 0.3s ease 0s;
+    -o-transition: all 0.3s ease 0s;
+    transition: all 0.3s ease 0s;
+    border: 1px solid #888888;
+    letter-spacing: 1px;
 }
 
 .btn i {
