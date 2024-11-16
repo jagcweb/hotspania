@@ -92,6 +92,7 @@ class RegisterController extends Controller
                     'email_verified_at' => NULL,
                     'banned' => NULL,
                     'password' => Str::random(30),
+                    'link' => $request->link,
                     'completed' => NULL
                 ]);
 

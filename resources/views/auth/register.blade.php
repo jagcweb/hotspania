@@ -152,7 +152,6 @@
                                         <div class="form-group">
                                             <label for="start_day">Dia de Inicio</label>
                                             <select class="form-control" id="start_day" name="start_day" required>
-                                                <option class="option" value="fulltime" {{ old('start_day') == 'fulltime' ? 'selected' : '' }}>Fulltime</option>
                                                 <option class="option" value="lunes" {{ old('start_day') == 'lunes' ? 'selected' : '' }}>Lunes</option>
                                                 <option class="option" value="martes" {{ old('start_day') == 'martes' ? 'selected' : '' }}>Martes</option>
                                                 <option class="option" value="miercoles" {{ old('start_day') == 'miercoles' ? 'selected' : '' }}>Miércoles</option>
@@ -166,7 +165,6 @@
                                         <div class="form-group">
                                             <label for="end_day">Dia de Fin</label>
                                             <select class="form-control" id="end_day" name="end_day" required>
-                                                <option class="option" value="fulltime" {{ old('end_day') == 'fulltime' ? 'selected' : '' }}>Fulltime</option>
                                                 <option class="option" value="lunes" {{ old('end_day') == 'lunes' ? 'selected' : '' }}>Lunes</option>
                                                 <option class="option" value="martes" {{ old('end_day') == 'martes' ? 'selected' : '' }}>Martes</option>
                                                 <option class="option" value="miercoles" {{ old('end_day') == 'miercoles' ? 'selected' : '' }}>Miércoles</option>
@@ -180,7 +178,7 @@
                                         <div class="form-check mt-2">
                                             <input class="form-check-input" type="checkbox" id="fulltime" name="fulltime_time" value="1" {{ old('fulltime_time') ? 'checked' : '' }}/>
                                             <label class="form-check-label" for="fulltime">
-                                                ¿Horario 24/7? (fulltime)
+                                                ¿Horario 24h? (fulltime)
                                             </label>  
                                         </div>
                                         
@@ -202,6 +200,11 @@
                                                     <option class="option" value="{{ $i }}" {{ old('end_time') == $i ? 'selected' : '' }}>{{ $i }}</option>
                                                 @endfor
                                             </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="link">Enlace</label>
+                                            <input type="url" class="form-control" id="link" name="link" value="{{ old('link') }}" placeholder="https://example.com" pattern="https://.*" size="80" />
                                         </div>
 
                                         <button class="btnstep1 disabled button btn-navigate-form-step submit_btn" disabled type="submit" step_number="2" data="step-1">Siguiente</button>           
@@ -356,6 +359,21 @@
                     valid = timeValue >= 0 && timeValue <= 23;
                     errorMessage = valid ? '' : 'La hora debe estar entre 0 y 23.';
                     break;
+
+                case 'link':
+                    if (value.trim() === '') {
+                    } else if (!/^https?:\/\//.test(value)) {
+                        valid = false;
+                        errorMessage = 'La URL debe comenzar con "http://" o "https://".';
+                    } else if (!isValidURL(value)) {
+                        valid = false;
+                        errorMessage = 'La URL no es válida.';
+                    } else {
+                        valid = true;
+                        errorMessage = '';
+                    }
+                    break;
+
 
                 case 'user_id':
                     valid = Number.isInteger(parseInt(value, 10));

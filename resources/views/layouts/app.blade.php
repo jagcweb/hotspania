@@ -316,6 +316,10 @@
                 $("#login").modal('toggle');
                 $("#register").modal('toggle');
             });
+
+            $('img, .gallery-image, .gallery-item').on('contextmenu', function(event) {
+                event.preventDefault();
+            });
         });
     </script>
 </body>

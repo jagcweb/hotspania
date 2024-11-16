@@ -62,6 +62,7 @@ class UserController extends Controller
             'fulltime_time' => 'nullable|numeric',
             'city' => 'required|array',
             'city.*' => 'alpha_num',
+            'link' => 'nullable|regex:/^https:\/\//',
         ]);
 
         if ($validator->fails()) {
@@ -113,6 +114,7 @@ class UserController extends Controller
             'email_verified_at' => NULL,
             'banned' => NULL,
             'password' => \Hash::make($request->dni),
+            'link' => $request->link,
             'completed' => 1
         ]);
 
@@ -222,6 +224,7 @@ class UserController extends Controller
             'end_day' => $request->end_day,
             'start_time' => !is_null($request->get('fulltime_time')) ? 'fulltime' : $request->start_time,
             'end_time' => !is_null($request->get('fulltime_time')) ? 'fulltime' : $request->end_time,
+            'link' => $request->link,
             'updated_at' => \Carbon\Carbon::now()
         ]);
 

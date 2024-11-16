@@ -218,6 +218,11 @@
                             </select>
                             </div>
 
+                            <div class="form-group">
+                                <label for="link">Enlace</label>
+                                <input type="url" class="form-control" id="link" name="link" value="{{ $user->link }}" placeholder="https://example.com" pattern="https://.*" size="80" />
+                            </div>
+
                             <input type="text" hidden name="user_id" value="{{$user->id}}" />
                         
                         <button type="submit" class="btn btn-primary">Enviar</button>

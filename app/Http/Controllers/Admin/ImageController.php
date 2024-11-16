@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Image;  
 use App\Models\User;  
 use Illuminate\Http\Response;
- // Assuming you have an Image model
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class ImageController extends Controller
 {
@@ -66,35 +67,73 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen como portada.');
     }
 
+
     public function upload(Request $request)
     {
         // Validate the request data
         $request->validate([
             'images' => 'required|array',
-            'images.*' => 'required|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,wmv,avchd,webm,flv|max:10240',
+            'images.*' => 'required|mimes:jpeg,png,jpg,gif,webp|max:10240', // Adjust max size as needed
             'user_id' => 'required|integer',
         ]);
 
+        // Get the uploaded files
         $files = $request->file('images');
+
+        // Initialize the ImageManager with the GD driver (explicitly using GD)
+        $manager = new ImageManager(new Driver());
 
         // Process each file
         foreach ($files as $file) {
-            // Upload the image
-            $imageName = time() . $file->getClientOriginalName();
-            \Storage::disk('images')->put($imageName, \File::get($file));
+            // Generate a unique name for the image
+            $imageName = time() . '_' . $file->getClientOriginalName();
 
-            // Create an Image model and save it to the database
-            $image = new Image();
-            $image->user_id = $request->input('user_id');
-            $image->route = $imageName;
-            $image->size = round($file->getSize() / 1024, 2);
-            $image->type = "images";
-            $image->status = 'pending'; // Set initial status to pending
-            $image->save();
+            // Read the uploaded image
+            $image = $manager->read($file);
+
+            // Path to the watermark image (the image you want to use as a pattern)
+            $watermarkPath = public_path('images/marca_agua.png');  // Adjust the path as needed
+
+            // Read the watermark image
+            $watermark = $manager->read($watermarkPath);
+
+            // Resize the watermark image to a smaller size if needed (optional)
+            $watermark->resize(200, 280);  // Example size, adjust as needed
+
+            // Get the dimensions of the original image
+            $imageWidth = $image->width();
+            $imageHeight = $image->height();
+
+            // Now, we need to "tile" the watermark image across the entire background of the original image
+            // Loop through the image to tile the watermark
+
+            for ($y = 0; $y < $imageHeight; $y += $watermark->height()) {
+                for ($x = 0; $x < $imageWidth; $x += $watermark->width()) {
+                    // Insert the watermark image at every position (tiled pattern)
+                    $image->place($watermark, 'top-left', $x, $y);
+                }
+            }
+
+            // Save the image to the storage path (app/public/images)
+            // Save the image with watermark to the storage path
+            $image->toPng()->save(storage_path('app/public/images/' . $imageName));
+
+            // Optionally, store the image path in the database
+            $imagePath = 'storage/images/' . $imageName; // Path to access the image from the web
+
+            // Assuming you have an Image model to store this image information in the database
+            $imageModel = new Image(); // Assuming you have an Image model
+            $imageModel->user_id = $request->input('user_id');
+            $imageModel->route = $imageName;
+            $imageModel->size = round($file->getSize() / 1024, 2);
+            $imageModel->type = "images";
+            $imageModel->status = 'pending'; // Set initial status to pending
+            $imageModel->save();
         }
 
-        return redirect()->back()->with('exito', 'Imagenes subidas correctamente.');
+        return back()->with('success', 'Images uploaded with watermark pattern successfully!');
     }
+
 
     public function approve($id)
     {

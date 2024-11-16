@@ -38,14 +38,20 @@
 
             <div class="profile-bio mt-3">
 
-                <p style="font-size:16px;">{{ \Auth::user()->working_zone ?? '' }} - Barcelona</p>
+                <p style="font-size:16px;">{{ $user->working_zone ?? '' }} - Barcelona</p>
                 <p class="mt-2"></p>
                 <p style="font-size:16px; color:#fff;">{{ $user->age }} Años</p>
                 <p style="font-size:16px; color:#fff;">{{ $user->weight }} KG</p>
                 <p style="font-size:16px; color:#fff;">{{ $user->height }} CM</p>
                 <p style="font-size:16px; color:#fff;">{{ $user->bust }} - {{ $user->waist }} - {{ $user->hip }}</p>
                 <p style="font-size:16px; color:#fff;">Fuma: {{ $user->is_smoker === 1 ? 'Si' : 'No' }}</p>
-                <p style="font-size:16px; color:#fff;">{{ ucfirst($user->start_day) }} a {{ ucfirst($user->end_day) }}</p>
+                <p style="font-size:16px; color:#fff;">
+                    @if($user->start_day == "fulltime" && $user->end_day == "fulltime")
+                    Todos los días
+                    @else
+                    {{ ucfirst($user->start_day) }} a {{ ucfirst($user->end_day) }}
+                    @endif
+                </p>
                 <p style="font-size:16px; color:#fff;">
                     Horario: 
                     @if($user->start_time == 0 && $user->end_time == 0)
@@ -79,6 +85,9 @@
             <button class="btn profile-edit-btn whatsapp_btn">WhatsApp</button>
             <button class="btn profile-edit-btn call_btn" style="margin-left:20px;">Llámame</button>
         </div>
+        <p class="mt-4 w-100 text-center">
+            <i class="fa-solid fa-link mr-1" style="font-size:18px;"></i><a href="{{ $user->link }}" target="_blank" style="color:#f65807; font-size:16px; text-decoration:underline!important;">{{ $user->link }}</a>
+        </p>
     </div>
 
     <input type="text" class="user_number" value="{{ $user->phone }}" hidden/>
@@ -93,7 +102,7 @@
                     list($width, $height) = getimagesize(\Storage::disk('images')->path($image->route));
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    <div class="gallery-item image-hover-zoom" tabindex="0" data="{{ asset('storage/images/'.$image->route) }}">
+                    <div class="gallery-item image-hover-zoom" tabindex="0"{{--  data="{{ asset('storage/images/'.$image->route) }}" --}}>
 
                         <img src="{{ route('home.imageget', ['filename' => $image->route]) }}" class="gallery-image" alt="">
                     
@@ -119,7 +128,7 @@
 
                     </div>
                 @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
-                    <div class="gallery-item" tabindex="0" data="{{ asset('storage/images/'.$image->route) }}">
+                    <div class="gallery-item" tabindex="0"{{--  data="{{ asset('storage/images/'.$image->route) }}" --}}>
 
                         <video controls class="gallery-image">
                             <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}">
@@ -153,6 +162,183 @@
     <!-- End of container -->
 
 </main>
+
+<!-- Modal Structure -->
+<div id="contentModal" style="display: none;">
+    <span id="closeBtn">&times;</span>
+    <!-- Contenido dinámico: imagen o video -->
+    <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
+    <video id="modalVideo" controls style="display:none;">
+        <source src="" type="">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<!-- Barra Sticky -->
+<div id="stickyBar" class="sticky-bar">
+    <div class="container">
+        <div class="user-info">
+            <span id="username">{{ $user->nickname }}</span> <!-- Aquí puedes poner el nombre de usuario dinámicamente -->
+        </div>
+        <div class="contact-icons">
+            <a href="https://api.whatsapp.com/send/?phone=+34{{ $user->phone }}&text=¡Hola%20{{ $user->nickname }}!%20Acabo%20de%20ver%20tu%20ficha%20en%20Hotspania.es%20¿Me%20comentas%20sobre%20tus%20servicios?" target="_blank" id="whatsappIcon" aria-label="WhatsApp">
+                <i class="fab fa-whatsapp"></i> <!-- Icono de WhatsApp -->
+            </a>
+            <a href="tel:+34{{ $user->phone }}" id="phoneIcon" aria-label="Llamar">
+                <i class="fas fa-phone"></i> <!-- Icono de Teléfono -->
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos generales para la barra sticky */
+    .sticky-bar {
+        position: fixed; /* Hacer la barra fija en la parte superior */
+        top: -60px; /* Inicialmente fuera de la pantalla */
+        left: 0;
+        width: 100%;
+        background-color: #111; /* Fondo oscuro para la barra */
+        color: white;
+        padding: 10px 0;
+        z-index: 9999; /* Asegurarse de que esté por encima de otros elementos */
+        transition: top 0.3s; /* Animación para que aparezca suavemente */
+    }
+
+    /* Contenedor de la barra */
+    .sticky-bar .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+    }
+
+    /* Información del usuario */
+    .user-info {
+        font-size: 16px;
+    }
+
+    /* Iconos de contacto */
+    .contact-icons a {
+        color: white;
+        font-size: 20px;
+        margin-left: 15px;
+        transition: color 0.3s ease;
+    }
+
+    .contact-icons a:hover {
+        color: #25d366; /* Cambio de color en hover para WhatsApp */
+    }
+
+    .contact-icons i {
+        vertical-align: middle;
+    }
+
+    /* Mostrar la barra cuando está activa */
+    .sticky-bar.show {
+        top: 0; /* Cuando la barra está activa, la movemos hacia la parte superior */
+    }
+
+</style>
+
+
+<style>
+    /* Modal Styles */
+    #contentModal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        z-index: 1000;
+    }
+
+    /* Modal image and video styles */
+    #modalImage, #modalVideo {
+        max-width: 80%;  /* Maximum width */
+        max-height: 80%; /* Maximum height */
+        display: block;  /* Make sure they are displayed */
+    }
+
+    /* Close button */
+    #closeBtn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 30px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Cuando se hace clic en cualquier .gallery-item
+        $('.gallery-item').on('click', function() {
+            // Verificar si el contenido es una imagen o un video
+            var isImage = $(this).find('img').length > 0; // Si tiene una imagen
+            var contentSrc = "";
+            var mimeType = "";
+
+            if (isImage) {
+                // Si es una imagen, obtenemos el src de la imagen
+                contentSrc = $(this).find('img').attr('src');
+                $('#modalImage').attr('src', contentSrc).show(); // Mostrar la imagen
+                $('#modalVideo').hide(); // Ocultar el video
+            } else {
+                // Si es un video, obtenemos el src y el tipo MIME
+                contentSrc = $(this).find('video source').attr('src');
+                mimeType = $(this).find('video source').attr('type');
+                $('#modalVideo').find('source').attr('src', contentSrc);
+                $('#modalVideo').find('source').attr('type', mimeType);
+                $('#modalVideo').show(); // Mostrar el video
+                $('#modalImage').hide(); // Ocultar la imagen
+            }
+
+            // Mostrar el modal
+            $('#contentModal').fadeIn();
+            
+            // Cargar el video si es necesario
+            if ($('#modalVideo').is(':visible')) {
+                $('#modalVideo')[0].load();
+            }
+        });
+
+        // Cerrar el modal al hacer clic en el botón de cierre
+        $('#closeBtn').on('click', function() {
+            $('#contentModal').fadeOut();
+            
+            // Detener el video cuando se cierra el modal
+            $('#modalVideo')[0].pause();
+        });
+
+        // Cerrar el modal si se hace clic fuera del contenido
+        $('#contentModal').on('click', function(e) {
+            if (e.target === this) { // Si el clic es fuera del contenido
+                $('#contentModal').fadeOut();
+                // Detener el video si está reproduciéndose
+                $('#modalVideo')[0].pause();
+            }
+        });
+
+        $(window).scroll(function() {
+        // Verificar si el scroll ha pasado los 300px
+        if ($(this).scrollTop() > 50) {
+            $('#stickyBar').addClass('show');  // Mostrar la barra
+        } else {
+            $('#stickyBar').removeClass('show'); // Ocultar la barra
+        }
+    });
+    });
+
+</script>
 
 <style>
     /*
@@ -370,12 +556,8 @@
     }
 
     .buttons button:first-child {
-        color: #F65807;
+        background: #F65807;
         border: 1px solid #F65807!important;
-    }
-
-    .buttons button:first-child:hover {
-        color: #F65807!important;
     }
 
     .fa-clone,
@@ -688,12 +870,12 @@
 </script>
 
 <script>
-    document.querySelectorAll('.gallery-item').forEach(function(item) {
+    /*document.querySelectorAll('.gallery-item').forEach(function(item) {
       item.addEventListener('click', function() {
         var url = item.getAttribute('data'); // Get the URL from the data attribute
         window.open(url, '_blank'); // Open the URL in a new tab
       });
-    });
+    });*/
 </script>
   
 @endsection

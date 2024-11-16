@@ -191,6 +191,11 @@
                                 @endfor
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="link">Enlace</label>
+                            <input type="url" class="form-control" id="link" name="link" value="{{ old('link') }}" placeholder="https://example.com" pattern="https://.*" size="80" />
+                        </div>
                         
                         <button type="submit" class="btn btn-primary">Enviar</button>
                     </form>                    

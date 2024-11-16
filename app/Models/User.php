@@ -50,7 +50,8 @@ class User extends Authenticatable
         'password',
         'banned',
         'email_verified_at',
-        'completed'
+        'completed',
+        'link'
     ];
 
     /**
