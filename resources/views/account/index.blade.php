@@ -162,6 +162,11 @@
 <!-- Modal Structure -->
 <div id="contentModal" style="display: none;">
     <span id="closeBtn">&times;</span>
+    
+    <!-- Flechas de navegación -->
+    <span id="prevBtn" class="nav-arrow">&#10094;</span> <!-- Flecha izquierda -->
+    <span id="nextBtn" class="nav-arrow">&#10095;</span> <!-- Flecha derecha -->
+    
     <!-- Contenido dinámico: imagen o video -->
     <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
     <video id="modalVideo" controls style="display:none;">
@@ -169,6 +174,7 @@
         Your browser does not support the video tag.
     </video>
 </div>
+
 
 <!-- Barra Sticky -->
 <div id="stickyBar" class="sticky-bar">
@@ -234,7 +240,6 @@
     .sticky-bar.show {
         top: 0; /* Cuando la barra está activa, la movemos hacia la parte superior */
     }
-
 </style>
 
 
@@ -271,69 +276,228 @@
         cursor: pointer;
     }
 
+    /* Flechas de navegación */
+    .nav-arrow {
+        position: absolute;
+        top: 50%;
+        font-size: 40px;
+        color: #fff;
+        cursor: pointer;
+        z-index: 1001;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+        z-index: 999;
+    }
+
+    #prevBtn {
+        left: 10px;
+        transform: translateY(-50%);
+        z-index: 999;
+    }
+
+    #nextBtn {
+        right: 10px;
+        transform: translateY(-50%);
+        z-index: 999;
+    }
+
+    /* Cambio de color al pasar el ratón por encima */
+    .nav-arrow:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+
 </style>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Cuando se hace clic en cualquier .gallery-item
-        $('.gallery-item').on('click', function() {
-            // Verificar si el contenido es una imagen o un video
-            var isImage = $(this).find('img').length > 0; // Si tiene una imagen
-            var contentSrc = "";
-            var mimeType = "";
+        let currentIndex = 0; // Índice de la imagen/video actual
+        let contentList = []; // Array de contenido (imagen/video)
+        let isDragging = false; // Flag para saber si estamos en modo de arrastre
+        let startX = 0; // Posición inicial del ratón al iniciar el arrastre
+        let displacement = 0; // Distancia de desplazamiento acumulada durante el arrastre
+        let minDisplacement = 250; // Umbral mínimo de desplazamiento para cambiar de imagen (ahora 250 píxeles)
+        let isVideoClick = false; // Flag para controlar si el clic fue un intento de reproducir el video
+        let isInsideContent = false; // Flag para saber si el clic es dentro del contenido (imagen o video)
+        let isModalActive = false; // Flag para verificar si el modal está activo
 
-            if (isImage) {
-                // Si es una imagen, obtenemos el src de la imagen
-                contentSrc = $(this).find('img').attr('src');
-                $('#modalImage').attr('src', contentSrc).show(); // Mostrar la imagen
-                $('#modalVideo').hide(); // Ocultar el video
-            } else {
-                // Si es un video, obtenemos el src y el tipo MIME
-                contentSrc = $(this).find('video source').attr('src');
-                mimeType = $(this).find('video source').attr('type');
-                $('#modalVideo').find('source').attr('src', contentSrc);
-                $('#modalVideo').find('source').attr('type', mimeType);
-                $('#modalVideo').show(); // Mostrar el video
-                $('#modalImage').hide(); // Ocultar la imagen
-            }
-
-            // Mostrar el modal
-            $('#contentModal').fadeIn();
-            
-            // Cargar el video si es necesario
-            if ($('#modalVideo').is(':visible')) {
-                $('#modalVideo')[0].load();
-            }
+        // Al cargar la galería, almacenamos todas las imágenes y videos
+        $('.gallery-item').each(function() {
+            let isImage = $(this).find('img').length > 0;
+            let contentSrc = isImage ? $(this).find('img').attr('src') : $(this).find('video source').attr('src');
+            contentList.push({
+                type: isImage ? 'image' : 'video',
+                src: contentSrc
+            });
         });
 
-        // Cerrar el modal al hacer clic en el botón de cierre
+        // Función para cargar el contenido en el modal (imagen o video)
+        function loadContent(index) {
+            let content = contentList[index];
+
+            // Pausar el video si estamos cambiando de contenido y es un video
+            $('#modalVideo')[0].pause(); 
+
+            if (content.type === 'image') {
+                $('#modalImage').attr('src', content.src).show(); // Mostrar imagen
+                $('#modalVideo').hide(); // Ocultar video
+            } else {
+                $('#modalVideo').find('source').attr('src', content.src);
+                $('#modalVideo')[0].load(); // Recargar el video
+                $('#modalVideo').show(); // Mostrar video
+                $('#modalImage').hide(); // Ocultar imagen
+            }
+        }
+
+        // Cuando se hace clic en cualquier .gallery-item
+        $('.gallery-item').on('click', function() {
+            currentIndex = $(this).index(); // Obtener el índice de la imagen/video
+            loadContent(currentIndex); // Cargar el contenido en el modal
+            $('#contentModal').fadeIn(); // Mostrar el modal
+            isModalActive = true; // Marcar que el modal está activo
+        });
+
+        // Función para navegar a la imagen/video anterior
+        function prevContent() {
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : contentList.length - 1;
+            loadContent(currentIndex);
+        }
+
+        // Función para navegar a la imagen/video siguiente
+        function nextContent() {
+            currentIndex = (currentIndex < contentList.length - 1) ? currentIndex + 1 : 0;
+            loadContent(currentIndex);
+        }
+
+        // Navegar a la imagen/video anterior
+        $('#prevBtn').on('click', function() {
+            prevContent(); // Cargar contenido anterior
+        });
+
+        // Navegar a la imagen/video siguiente
+        $('#nextBtn').on('click', function() {
+            nextContent(); // Cargar contenido siguiente
+        });
+
+        // Cerrar el modal
         $('#closeBtn').on('click', function() {
             $('#contentModal').fadeOut();
-            
-            // Detener el video cuando se cierra el modal
-            $('#modalVideo')[0].pause();
+            $('#modalVideo')[0].pause(); // Detener el video
+            isModalActive = false; // Desactivar el modal
         });
 
         // Cerrar el modal si se hace clic fuera del contenido
-        $('#contentModal').on('click', function(e) {
-            if (e.target === this) { // Si el clic es fuera del contenido
+        $('#contentModal').on('mousedown', function(e) {
+            // Si el clic es fuera de la imagen/video y de los botones, cerramos el modal
+            if (!$(e.target).closest('#modalImage, #modalVideo, #prevBtn, #nextBtn, #closeBtn').length && isModalActive) {
                 $('#contentModal').fadeOut();
-                // Detener el video si está reproduciéndose
-                $('#modalVideo')[0].pause();
+                $('#modalVideo')[0].pause(); // Detener el video si está reproduciéndose
+                isModalActive = false; // Desactivar el modal
             }
         });
 
-        $(window).scroll(function() {
-        // Verificar si el scroll ha pasado los 300px
-        if ($(this).scrollTop() > 50) {
-            $('#stickyBar').addClass('show');  // Mostrar la barra
-        } else {
-            $('#stickyBar').removeClass('show'); // Ocultar la barra
-        }
-    });
-    });
+        // Detectar el inicio del arrastre en el modal (imagen o video)
+        $('#contentModal').on('mousedown', function(e) {
+            if ($(e.target).is('#modalImage') || $(e.target).is('#modalVideo')) {
+                startX = e.pageX; // Guardamos la posición inicial
+                displacement = 0; // Resetear desplazamiento
+                isDragging = true; // Activamos el estado de arrastre
 
+                // Prevención de reproducción del video al hacer click
+                if ($(e.target).is('#modalVideo')) {
+                    isVideoClick = true; // Marcar que es un clic sobre el video
+                    e.preventDefault(); // Evitar la reproducción al hacer mousedown
+                }
+            }
+        });
+
+        // Función para mover el ratón dentro del área del modal
+        $('#contentModal').on('mousemove', function(e) {
+            if (isDragging) {
+                // Calculamos el desplazamiento horizontal
+                displacement = e.pageX - startX;
+
+                // Si la distancia de desplazamiento no ha alcanzado el umbral mínimo, no hacemos nada
+                if (Math.abs(displacement) < minDisplacement) {
+                    return; // No hacemos nada si el desplazamiento es menor al umbral
+                }
+
+                // Evitamos cambiar de imagen mientras estamos arrastrando, solo se hará al levantar el click
+            }
+        });
+
+        // Detectar el final del arrastre
+        $('#contentModal').on('mouseup', function(e) {
+            if (isDragging) {
+                isDragging = false; // Resetear el estado de arrastre
+                displacement = 0; // Resetear desplazamiento
+
+                // Si el desplazamiento es suficiente, cambiamos la imagen o el video
+                if (Math.abs(displacement) >= minDisplacement) {
+                    if (displacement < 0) { // Desplazamiento hacia la izquierda (cambiar a siguiente)
+                        nextContent();
+                    } else if (displacement > 0) { // Desplazamiento hacia la derecha (cambiar a anterior)
+                        prevContent();
+                    }
+                }
+
+                // Si es un video y el clic no fue para arrastrar, reproducimos el video
+                if (isVideoClick) {
+                    $('#modalVideo')[0].play(); // Reproducir el video al soltar el clic
+                    isVideoClick = false; // Resetear la bandera
+                }
+            }
+        });
+
+        // Evitar que el ratón salga del área de la imagen/video mientras se está arrastrando
+        $('#contentModal').on('mouseleave', function() {
+            if (isDragging) {
+                isDragging = false; // Resetear el estado de arrastre si el ratón sale del área
+                displacement = 0; // Resetear desplazamiento
+            }
+        });
+
+        // Evitar que el navegador intente arrastrar la imagen o video
+        $('#modalImage, #modalVideo').on('dragstart', function(e) {
+            e.preventDefault(); // Prevenir el comportamiento de arrastre del navegador
+        });
+
+        // Prevenir la reproducción del video durante el arrastre
+        $('#modalVideo').on('mousedown', function(e) {
+            if (isDragging) {
+                e.preventDefault(); // Evitar que el video se reproduzca si estamos en modo de arrastre
+            }
+        });
+
+        // Evitar que se inicie la reproducción del video al hacer clic en él si estamos en arrastre
+        $('#modalVideo').on('click', function(e) {
+            if (isDragging) {
+                e.preventDefault(); // Evitar que el video se reproduzca si estamos arrastrando
+            }
+        });
+
+        // Detectar si el clic fue dentro del contenido del modal (imagen o video)
+        $('#contentModal').on('mousedown', function(e) {
+            if ($(e.target).is('#modalImage') || $(e.target).is('#modalVideo')) {
+                isInsideContent = true; // Marcar que el clic fue dentro del contenido
+            } else {
+                isInsideContent = false; // Marcar que el clic fue fuera del contenido
+            }
+        });
+
+        // Si se hace clic fuera del contenido, cerrar el modal
+        $('#contentModal').on('mouseup', function(e) {
+            if (!isInsideContent && !$(e.target).closest('#prevBtn, #nextBtn, #modalImage, #modalVideo').length) {
+                $('#contentModal').fadeOut();
+                $('#modalVideo')[0].pause(); // Detener el video
+                isModalActive = false; // Desactivar el modal
+            }
+        });
+    });
 </script>
 
 <style>
