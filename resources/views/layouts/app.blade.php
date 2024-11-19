@@ -317,7 +317,7 @@
                 $("#register").modal('toggle');
             });
 
-            $('img, .gallery-image, .gallery-item').on('contextmenu', function(event) {
+            $('img, video, .gallery-image, .gallery-item').on('contextmenu', function(event) {
                 event.preventDefault();
             });
         });

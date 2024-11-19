@@ -268,6 +268,41 @@
 </div>
 
 <script>
+    // Obtener el paso actual desde la URL
+    const pasoActual = window.location.pathname.split('/').pop(); // Esto obtiene "paso-1", "paso-2", "paso-3" de la URL
+    
+    // Verifica si el paso anterior está completado (esto se debe manejar desde el backend, aquí usamos la sesión)
+    const pasoCompletado = {
+        'paso-1': {{ session()->has('paso-1-completado') ? 'true' : 'false' }},
+        'paso-2': {{ session()->has('paso-2-completado') ? 'true' : 'false' }},
+        'paso-3': {{ session()->has('paso-3-completado') ? 'true' : 'false' }}
+    };
+    
+    // Si el paso 1 está completado pero el usuario está en paso-1, redirige al paso-2
+    if (pasoCompletado['paso-1'] && pasoActual === 'paso-1') {
+        window.location.href = "{{ route('user.register', ['step' => '2', 'user' => \Crypt::encryptString($user->id)]) }}";
+    }
+    
+    // Si el paso 2 está completado pero el usuario está en paso-2, redirige al paso-3
+    if (pasoCompletado['paso-2'] && pasoActual === 'paso-2') {
+        window.location.href = "{{ route('user.register', ['step' => '3', 'user' => \Crypt::encryptString($user->id)]) }}";
+    }
+    
+    // Evita que el usuario pueda ir hacia atrás al paso anterior en el navegador
+    window.history.pushState(null, null, window.location.href); // Agrega un nuevo estado en el historial
+    window.onpopstate = function () {
+        // Si el usuario presiona "Atrás", redirige al paso siguiente
+        if (pasoActual === 'paso-1' && pasoCompletado['paso-1']) {
+            window.location.href = "{{ route('user.register', ['step' => '2', 'user' => \Crypt::encryptString($user->id)]) }}";
+        } else if (pasoActual === 'paso-2' && pasoCompletado['paso-2']) {
+            window.location.href = "{{ route('user.register', ['step' => '3', 'user' => \Crypt::encryptString($user->id)]) }}";
+        }
+    };
+</script>
+    
+    
+
+<script>
     // Validations and AJAX
  
     document.addEventListener('DOMContentLoaded', () => {

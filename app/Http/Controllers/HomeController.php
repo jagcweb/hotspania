@@ -50,4 +50,10 @@ class HomeController extends Controller
 
         return new Response($file, 200);
     }
+
+    public function getGif($filename) {
+        $file = \Storage::disk('videogif')->get($filename);
+
+        return new Response($file, 200);
+    }
 }

@@ -33,9 +33,11 @@ Route::get('/logout', function(){
 //HomeController
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home/image-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getImage'])->name('home.imageget');
+Route::get('/home/gif-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getGif'])->name('home.gifget');
 
 //AccountController
 Route::get('/account', [App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
+Route::get('/account/edit', [App\Http\Controllers\AccountController::class, 'edit'])->name('account.edit');
 Route::get('/account/{nickname}', [App\Http\Controllers\AccountController::class, 'get'])->name('account.get');
 //RegistersController
 Route::get('/register/paso-{step}/{user?}', [App\Http\Controllers\RegisterController::class, 'create'])->name('user.register');
@@ -101,7 +103,6 @@ Route::prefix('admin')->middleware('admin')->group(function () {
 
 //HomeController
 Route::get('/privacy-policies', [App\Http\Controllers\HomeController::class, 'privacyPolicies'])->name('home.privacy_policies');
-Route::get('/get-image/{filesystem}/{filename}', [App\Http\Controllers\HomeController::class, 'getImage'])->name('home.getImage');
 
 //UserController
 Route::get('/admin/users/get', [App\Http\Controllers\Admin\UserController::class, 'get'])->name('admin.user.get');

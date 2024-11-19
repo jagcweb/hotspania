@@ -29,7 +29,7 @@
             <div class="profile-stats">
 
                 <ul>
-                    <li><span class="profile-stat-count">{{ count($user->images) }}</span> archivos</li>
+                    <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
                     <li><span class="profile-stat-count">43534</span> visitas</li>
                     <li><span class="profile-stat-count">3678</span> me gusta</li>
                 </ul>
@@ -96,7 +96,7 @@
     <div class="container mt-5 container_mobile">
 
         <div class="gallery">
-            @foreach ($user->images as $i=>$image)
+            @foreach ($images as $i=>$image)
                 @php
                     $mimeType = \Storage::disk('images')->mimeType($image->route);
                     list($width, $height) = getimagesize(\Storage::disk('images')->path($image->route));

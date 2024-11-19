@@ -105,10 +105,15 @@ class RegisterController extends Controller
                     $city_user->save();
                 }
 
+                session(['paso-1-completado' => true]);
                 return redirect()->route('user.register', ['step' => '2', 'user' => \Crypt::encryptString($create->id)])->with('exito', 'Paso 1 completado. Datos guardados.');
             break;
 
             case 'step-2':
+
+                if (!session()->has('paso-1-completado')) {
+                    return redirect()->route('user.register', ['step' => '1'])->with('error', 'Debe completar el paso 1 antes de continuar.');
+                }
 
                 $request->validate([
                     'files.*' => 'required|file|mimes:png,jpeg,jpg,webp,gif,bmp,avi,mp4,mpg,mov,3gp,wmv,flv|max:10240', // 10MB
@@ -131,14 +136,20 @@ class RegisterController extends Controller
                     $image->route = $imageName;
                     $image->size = round($file->getSize() / 1024, 2); // Size in KB
                     $image->type = "images";
-                    $image->status = 'active'; // Set initial status to active
+                    $image->status = 'pending'; // Set initial status to active
                     $image->save();
                 }
         
+                session(['paso-2-completado' => true]);
                 return redirect()->route('user.register', ['step' => '3', 'user' => \Crypt::encryptString($user->id)])->with('exito', 'Paso 2 completado. Imágenes subidas.');
             break;
 
             case 'step-3':
+
+                if (!session()->has('paso-2-completado')) {
+                    return redirect()->route('user.register', ['step' => '2'])->with('error', 'Debe completar el paso 2 antes de continuar.');
+                }
+                
                 $id = \Crypt::decryptString($id);
                 $user = User::find($id);
 

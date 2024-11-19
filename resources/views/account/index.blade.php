@@ -24,7 +24,7 @@
 
                 <h1 class="profile-user-name text-white">{{ \Auth::user()->nickname }}</h1>
 
-                <button class="btn profile-edit-btn">Editar perfil</button>
+                <button class="btn profile-edit-btn" id="profile-edit-btn">Editar perfil</button>
 
                 <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog"
                         aria-hidden="true"></i></button>
@@ -34,7 +34,7 @@
             <div class="profile-stats">
 
                 <ul>
-                    <li><span class="profile-stat-count">{{ count(\Auth::user()->images) }}</span> archivos</li>
+                    <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
                     <li><span class="profile-stat-count">43534</span> visitas</li>
                     <li><span class="profile-stat-count">3678</span> me gusta</li>
                 </ul>
@@ -91,7 +91,7 @@
     <div class="container mt-5 container_mobile">
 
         <div class="gallery">
-            @foreach (\Auth::user()->images as $i=>$image)
+            @foreach ($images as $i=>$image)
                 @php
                     $mimeType = \Storage::disk('images')->mimeType($image->route);
                     list($width, $height) = getimagesize(\Storage::disk('images')->path($image->route));
@@ -787,6 +787,13 @@
     }
 
 </style>
+
+<script>
+    document.getElementById('profile-edit-btn').addEventListener('click', function() {
+        window.location.href = '/account/edit';
+    });
+    
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

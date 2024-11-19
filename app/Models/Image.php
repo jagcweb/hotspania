@@ -12,6 +12,7 @@ class Image extends Model
     protected $fillable = [
         'user_id',
         'route',
+        'route_gif',
         'size',
         'type',
         'status',

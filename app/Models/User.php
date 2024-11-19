@@ -67,6 +67,10 @@ class User extends Authenticatable
         return $this->hasMany('App\Models\Image', 'user_id','id');
     }
 
+    public function cities(){
+        return $this->hasMany('App\Models\City', 'user_id','id');
+    }
+
     public function getRoleNames()
     {
         // Assuming you have a 'roles' pivot table

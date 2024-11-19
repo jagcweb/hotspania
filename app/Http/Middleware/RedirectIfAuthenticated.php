@@ -23,7 +23,13 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+
+                if(Auth::user()->getRoleNames()[0] == "admin"){
+                    return redirect()->route('admin.citychanges');
+                }
+                
                 return redirect()->route('home');
+                
             }
         }
 

@@ -296,18 +296,20 @@
         transform: rotateY(180deg);
     }
 
+    
+
     .gallery-item {
-    position: relative;
-    flex: 1 0 22rem; /* Ajusta el tamaño base de cada imagen */
-    margin: 1rem;
-    color: #fff;
-    cursor: pointer;
-    width: 100%; /* Asegura que la imagen ocupe todo el ancho disponible */
-    padding-top: 100%; /* Esto hace que el contenedor sea cuadrado, con una altura igual al ancho */
-    overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
-    display: flex; /* Usamos flexbox para centrar la imagen */
-    justify-content: center; /* Centrado horizontal */
-    align-items: center; /* Centrado vertical */
+        position: relative;
+        flex: 1 0 22rem; /* Ajusta el tamaño base de cada imagen */
+        margin: 1rem;
+        color: #fff;
+        cursor: pointer;
+        width: 100%; /* Asegura que la imagen ocupe todo el ancho disponible */
+        padding-top: 100%; /* Esto hace que el contenedor sea cuadrado, con una altura igual al ancho */
+        overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
+        display: flex; /* Usamos flexbox para centrar la imagen */
+        justify-content: center; /* Centrado horizontal */
+        align-items: center; /* Centrado vertical */
     }
 
     .gallery-image {
