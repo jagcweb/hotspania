@@ -126,7 +126,7 @@
                 @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
                     <div class="gallery-item" tabindex="0" data="{{ asset('storage/images/'.$image->route) }}">
 
-                        <video controls class="gallery-image">
+                        <video crossorigin="anonymous" controls class="gallery-image">
                             <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}" class="gallery-image">
                             Your browser does not support the video tag.
                         </video>
@@ -169,7 +169,7 @@
     
     <!-- Contenido dinámico: imagen o video -->
     <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
-    <video id="modalVideo" controls style="display:none;">
+    <video crossorigin="anonymous" id="modalVideo" controls style="display:none;">
         <source src="" type="">
         Your browser does not support the video tag.
     </video>
@@ -964,6 +964,9 @@
         // Seleccionamos todos los videos de la galería
         const videos = document.querySelectorAll('.gallery-item video');
         videos.forEach((video) => {
+            // Añadimos el atributo crossorigin para evitar problemas con CORS
+            video.setAttribute('crossorigin', 'anonymous');
+
             // Seleccionamos el contenedor de la portada de cada video
             const thumbnail = video.parentElement.querySelector('.video-thumbnail');
             const canvas = document.createElement('canvas');
@@ -982,29 +985,33 @@
         function captureRandomFrame(video, thumbnail, canvas, ctx) {
             // Obtener un tiempo aleatorio dentro del video
             const randomTime = Math.random() * video.duration;
-    
-            // Movemos el video a ese tiempo aleatorio
             video.currentTime = randomTime;
     
-            // Cuando el video llegue a la posición deseada, extraemos el fotograma
-            video.onseeked = function() {
-                // Establecemos el tamaño del canvas al tamaño del video
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+            // Usamos el evento timeupdate para asegurarnos de que el video ha alcanzado el fotograma adecuado
+            video.ontimeupdate = function() {
+                if (Math.abs(video.currentTime - randomTime) < 0.1) {
+                    // Establecemos el tamaño del canvas al tamaño del video
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
     
-                // Dibujamos el fotograma del video en el canvas
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    // Dibujamos el fotograma del video en el canvas
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-                // Convertimos el canvas a una imagen base64
-                const imageUrl = canvas.toDataURL('image/png');
+                    // Convertimos el canvas a una imagen base64
+                    const imageUrl = canvas.toDataURL('image/png');
     
-                // Asignamos la imagen base64 como fuente de la imagen de la portada
-                thumbnail.src = imageUrl;
-                thumbnail.style.display = 'block'; // Hacemos visible la portada
+                    // Asignamos la imagen base64 como fuente de la imagen de la portada
+                    thumbnail.src = imageUrl;
+                    thumbnail.style.display = 'block'; // Hacemos visible la portada
+    
+                    // Detenemos el evento once el fotograma se captura
+                    video.ontimeupdate = null;
+                }
             };
         }
     });
 </script>
+
 
 <script>
     document.querySelectorAll('.gallery-item').forEach(function(item) {

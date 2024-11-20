@@ -22,7 +22,7 @@
                         </a>
                         @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
                         <div ondblclick="openVideo('{{ asset('storage/images/' . $image->route) }}')" style="cursor: pointer;">
-                            <video controls style="height: 200px;">
+                            <video crossorigin="anonymous" controls style="height: 200px;">
                                 <source src="{{ route('admin.images.get', ['filename' => $image->route]) }}" type="{{ $mimeType }}">
                                 Your browser does not support the video tag.
                             </video>
