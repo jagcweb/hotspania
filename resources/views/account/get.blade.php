@@ -102,7 +102,7 @@
                     list($width, $height) = getimagesize(\Storage::disk('images')->path($image->route));
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    <div class="gallery-item image-hover-zoom" tabindex="0"{{--  data="{{ asset('storage/images/'.$image->route) }}" --}}>
+                    <div class="gallery-item image-hover-zoom" tabindex="0">
 
                         <img src="{{ route('home.imageget', ['filename' => $image->route]) }}" class="gallery-image" alt="">
                     
@@ -128,9 +128,9 @@
 
                     </div>
                 @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
-                    <div class="gallery-item" tabindex="0"{{--  data="{{ asset('storage/images/'.$image->route) }}" --}}>
+                    <div class="gallery-item" tabindex="0">
 
-                        <video crossorigin="anonymous" controls class="gallery-image">
+                        <video crossorigin="anonymous" class="gallery-image">
                             <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}">
                             Your browser does not support the video tag.
                         </video>
@@ -173,7 +173,7 @@
     
     <!-- Contenido dinámico: imagen o video -->
     <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
-    <video crossorigin="anonymous" id="modalVideo" controls style="display:none;">
+    <video crossorigin="anonymous" id="modalVideo" style="display:none;">
         <source src="" type="">
         Your browser does not support the video tag.
     </video>
@@ -320,12 +320,6 @@
     $(document).ready(function() {
         let currentIndex = 0; // Índice de la imagen/video actual
         let contentList = []; // Array de contenido (imagen/video)
-        let isDragging = false; // Flag para saber si estamos en modo de arrastre
-        let startX = 0; // Posición inicial del ratón al iniciar el arrastre
-        let displacement = 0; // Distancia de desplazamiento acumulada durante el arrastre
-        let minDisplacement = 250; // Umbral mínimo de desplazamiento para cambiar de imagen (ahora 250 píxeles)
-        let isVideoClick = false; // Flag para controlar si el clic fue un intento de reproducir el video
-        let isInsideContent = false; // Flag para saber si el clic es dentro del contenido (imagen o video)
         let isModalActive = false; // Flag para verificar si el modal está activo
 
         // Al cargar la galería, almacenamos todas las imágenes y videos
@@ -403,92 +397,25 @@
             }
         });
 
-        // Detectar el inicio del arrastre en el modal (imagen o video)
-        $('#contentModal').on('mousedown', function(e) {
-            if ($(e.target).is('#modalImage') || $(e.target).is('#modalVideo')) {
-                startX = e.pageX; // Guardamos la posición inicial
-                displacement = 0; // Resetear desplazamiento
-                isDragging = true; // Activamos el estado de arrastre
+        // Detectar click en el video para pausar o reproducir
+        $('#modalVideo').on('click', function() {
+            const video = $('#modalVideo')[0];
 
-                // Prevención de reproducción del video al hacer click
-                if ($(e.target).is('#modalVideo')) {
-                    isVideoClick = true; // Marcar que es un clic sobre el video
-                    e.preventDefault(); // Evitar la reproducción al hacer mousedown
-                }
-            }
-        });
-
-        // Función para mover el ratón dentro del área del modal
-        $('#contentModal').on('mousemove', function(e) {
-            if (isDragging) {
-                // Calculamos el desplazamiento horizontal
-                displacement = e.pageX - startX;
-
-                // Si la distancia de desplazamiento no ha alcanzado el umbral mínimo, no hacemos nada
-                if (Math.abs(displacement) < minDisplacement) {
-                    return; // No hacemos nada si el desplazamiento es menor al umbral
-                }
-
-                // Evitamos cambiar de imagen mientras estamos arrastrando, solo se hará al levantar el click
-            }
-        });
-
-        // Detectar el final del arrastre
-        $('#contentModal').on('mouseup', function(e) {
-            if (isDragging) {
-                isDragging = false; // Resetear el estado de arrastre
-                displacement = 0; // Resetear desplazamiento
-
-                // Si el desplazamiento es suficiente, cambiamos la imagen o el video
-                if (Math.abs(displacement) >= minDisplacement) {
-                    if (displacement < 0) { // Desplazamiento hacia la izquierda (cambiar a siguiente)
-                        nextContent();
-                    } else if (displacement > 0) { // Desplazamiento hacia la derecha (cambiar a anterior)
-                        prevContent();
-                    }
-                }
-
-                // Si es un video y el clic no fue para arrastrar, reproducimos el video
-                if (isVideoClick) {
-                    $('#modalVideo')[0].play(); // Reproducir el video al soltar el clic
-                    isVideoClick = false; // Resetear la bandera
-                }
-            }
-        });
-
-        // Evitar que el ratón salga del área de la imagen/video mientras se está arrastrando
-        $('#contentModal').on('mouseleave', function() {
-            if (isDragging) {
-                isDragging = false; // Resetear el estado de arrastre si el ratón sale del área
-                displacement = 0; // Resetear desplazamiento
-            }
-        });
-
-        // Evitar que el navegador intente arrastrar la imagen o video
-        $('#modalImage, #modalVideo').on('dragstart', function(e) {
-            e.preventDefault(); // Prevenir el comportamiento de arrastre del navegador
-        });
-
-        // Prevenir la reproducción del video durante el arrastre
-        $('#modalVideo').on('mousedown', function(e) {
-            if (isDragging) {
-                e.preventDefault(); // Evitar que el video se reproduzca si estamos en modo de arrastre
-            }
-        });
-
-        // Evitar que se inicie la reproducción del video al hacer clic en él si estamos en arrastre
-        $('#modalVideo').on('click', function(e) {
-            if (isDragging) {
-                e.preventDefault(); // Evitar que el video se reproduzca si estamos arrastrando
+            // Toggle play/pause based on current video state
+            if (video.paused) {
+                video.play();  // Play the video if it is paused
+            } else {
+                video.pause();  // Pause the video if it is playing
             }
         });
 
         // Detectar si el clic fue dentro del contenido del modal (imagen o video)
         $('#contentModal').on('mousedown', function(e) {
             if ($(e.target).is('#modalImage') || $(e.target).is('#modalVideo')) {
-                isInsideContent = true; // Marcar que el clic fue dentro del contenido
+                // Mark that the click was inside the content
+                isInsideContent = true;
             } else {
-                isInsideContent = false; // Marcar que el clic fue fuera del contenido
+                isInsideContent = false; // Mark that the click was outside the content
             }
         });
 

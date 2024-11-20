@@ -60,9 +60,15 @@
   
   
     </div>
-  </div>
+</div>
 
-  <style>
+<style>
+
+    .container-fluid {
+        min-height: 100vh; /* Asegura que el contenedor ocupe al menos la altura completa de la ventana */
+        display: flex;
+        flex-direction: column;
+    }
 
     .form {
         width:500px;
@@ -161,6 +167,12 @@
     }
     .fondo{
         background-color: #252525;
+    }
+    .textura, .fondo {
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Asegura que el contenido y el footer se distribuyan adecuadamente */
     }
     .img{
         height: auto;
@@ -336,6 +348,21 @@
 
     @media (max-width: 576px) {
         .boton_login, .boton_registro, .acceder  {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .form {
+            width: 90%!important;
+        }
+
+        .boton_login, .boton_registro, .acceder {
+            width: 100%; /* Ajustar el tamaño de los botones para dispositivos móviles */
+        }
+
+        .col-xl-6 {
+            /* Asegura que las columnas tomen todo el ancho en dispositivos móviles */
             width: 100%;
         }
     }

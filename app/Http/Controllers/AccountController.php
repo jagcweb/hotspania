@@ -28,7 +28,7 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->get();
+        $images = Image::where('user_id', \Auth::user()->id)->get();
 
         return view('account.index', [
             'images' => $images
@@ -39,7 +39,7 @@ class AccountController extends Controller
     {
         $cities = City::orderBy('name', 'asc')->get();
 
-        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->get();
+        $images = Image::where('user_id', \Auth::user()->id)->get();
 
         return view('account.edit', [
             'images' => $images
@@ -50,7 +50,7 @@ class AccountController extends Controller
     {
         $user = User::where('nickname', $nickname)->first();
 
-        $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->get();
+        $images = Image::where('user_id', $user->id)->get();
 
         return view('account.get', [
             'user' => $user,

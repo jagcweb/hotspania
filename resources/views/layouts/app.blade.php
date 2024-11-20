@@ -88,7 +88,8 @@
       </nav>
 
     @include('partial_msg')
-    <div id="app" style="margin-top: 85px;">
+    <div id="app" style="margin-top: 85px; min-height: 82vh;  display: flex;
+    flex-direction: column;">
         <main>
             @yield('content')
         </main>

@@ -6,6 +6,7 @@
 
 <main role="main">
 
+    
     <div class="container">
 
         <div class="profile">
@@ -23,8 +24,6 @@
             <div class="profile-user-settings">
 
                 <h1 class="profile-user-name text-white">{{ \Auth::user()->nickname }}</h1>
-
-                <button class="btn profile-edit-btn" id="profile-edit-btn">Editar perfil</button>
 
                 <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog"
                         aria-hidden="true"></i></button>
@@ -89,67 +88,100 @@
     </div>
 
     <div class="container mt-5 container_mobile">
-
+        <h2 class="w-100 text-center text-white" style="font-size: 20px;">Aquí solo aparecerán las imágenes aprobadas.</h2>
         <div class="gallery">
             @foreach ($images as $i=>$image)
                 @php
                     $mimeType = \Storage::disk('images')->mimeType($image->route);
-                    list($width, $height) = getimagesize(\Storage::disk('images')->path($image->route));
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    <div class="gallery-item image-hover-zoom" tabindex="0">
+                    @php list($width, $height) = getimagesize(\Storage::disk('images')->path($image->route)); @endphp
+                    <div class="gallery-item-container">
+                        <div class="gallery-item image-hover-zoom" tabindex="0">
 
-                        <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
-                            class="gallery-image" alt="">
+                            <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
+                                class="gallery-image" alt="">
 
-                        @if(!is_null($image->frontimage))
-                        <div class="gallery-item-type">
+                            @if(!is_null($image->frontimage))
+                            <div class="gallery-item-type">
 
-                            <span class="visually-hidden">Portada</span><i class="fa-solid fa-star" aria-hidden="true"></i>
+                                <span class="visually-hidden">Portada</span><i class="fa-solid fa-star" aria-hidden="true"></i>
+
+                            </div>
+                            @endif
+
+                            <div class="gallery-item-info">
+
+                                <ul>
+                                    <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
+                                            class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                </ul>
+
+                            </div>
+
 
                         </div>
-                        @endif
+                        <div class="gallery-item-buttons">
+                            @if(is_null($image->visible))
+                                <a title="Hacer imagen visible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye"></i></a>
+                            @else
+                                <a title="Hacer imagen invisible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye-slash"></i></a>
+                            @endif
+                            <a title="Hacer imagen como foto de perfil" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-id-badge"></i></a>
+                            @if($image->frontimage === 1)
+                                <a title="Imagen portada" href="javascript:void(0)"  class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                            @endif
 
-                        <div class="gallery-item-info">
-
-                            <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
-                                {{--
-                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
-                            </ul>
-
+                            @if(is_null($image->frontimage) && !is_null($height) && $height > $width)
+                                <a title="Hacer imagen portada" href="#" class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                            @endif
                         </div>
-
                     </div>
                 @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
-                    <div class="gallery-item" tabindex="0">
+                    @if(!is_null($image->route_gif))
+                        @php list($width, $height) = getimagesize(\Storage::disk('videogif')->path($image->route_gif)); @endphp
+                        <div class="gallery-item-container">
+                            <div class="gallery-item image-hover-zoom" tabindex="0">
 
-                        <video crossorigin="anonymous" controls class="gallery-image">
-                            <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}" class="gallery-image">
-                            Your browser does not support the video tag.
-                        </video>
+                                <img src="{{ route('home.gifget', ['filename' => $image->route_gif]) }}"
+                                    class="gallery-image" alt="">
 
-                        <div class="gallery-item-type">
+                                @if(!is_null($image->frontimage))
+                                <div class="gallery-item-type">
 
-                            <span class="visually-hidden">Video</span><i class="fas fa-video" aria-hidden="true"></i>
+                                    <span class="visually-hidden">Portada</span><i class="fa-solid fa-star" aria-hidden="true"></i>
 
+                                </div>
+                                @endif
+
+                                <div class="gallery-item-info">
+
+                                    <ul>
+                                        <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
+                                                class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                    </ul>
+
+                                </div>
+
+                            </div>
+                            <div class="gallery-item-buttons">
+                                @if(is_null($image->visible))
+                                    <a title="Hacer imagen visible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye"></i></a>
+                                @else
+                                    <a title="Hacer imagen invisible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye-slash"></i></a>
+                                @endif
+                                <a title="Hacer imagen como foto de perfil" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-id-badge"></i></a>
+                                @if($image->frontimage === 1)
+                                    <a title="Imagen portada" href="javascript:void(0)"  class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                                @endif
+    
+                                @if(is_null($image->frontimage) && !is_null($height) && $height > $width)
+                                    <a title="Hacer imagen portada" href="#" class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                                @endif
+                            </div>
                         </div>
-
-                        <div class="gallery-item-info">
-
-                            <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-heart" aria-hidden="true"></i> 30</li>
-                                {{--
-                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
-                            </ul>
-                        </div>
-                    </div>
+                    @endif
                 @endif
-
             @endforeach
 
         </div>
@@ -174,7 +206,6 @@
         Your browser does not support the video tag.
     </video>
 </div>
-
 
 <!-- Barra Sticky -->
 <div id="stickyBar" class="sticky-bar">
@@ -240,8 +271,8 @@
     .sticky-bar.show {
         top: 0; /* Cuando la barra está activa, la movemos hacia la parte superior */
     }
-</style>
 
+</style>
 
 <style>
     /* Modal Styles */
@@ -652,29 +683,86 @@
         transform: rotateY(180deg);
     }
 
-    .gallery-item {
-    position: relative;
-    flex: 1 0 22rem; /* Ajusta el tamaño base de cada imagen */
-    margin: 1rem;
-    color: #fff;
-    cursor: pointer;
-    width: 100%; /* Asegura que la imagen ocupe todo el ancho disponible */
-    padding-top: 100%; /* Esto hace que el contenedor sea cuadrado, con una altura igual al ancho */
-    overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
-    display: flex; /* Usamos flexbox para centrar la imagen */
-    justify-content: center; /* Centrado horizontal */
-    align-items: center; /* Centrado vertical */
+    /* Contenedor que agrupa imagen y botones */
+    .gallery-item-container {
+        display: flex;
+        flex-direction: column; /* Asegura que la imagen y los botones se apilen verticalmente */
+        align-items: center; /* Centra el contenido */
+        margin: 1rem; /* Espacio alrededor de cada galería */
     }
 
+    /* Estilo de la galería (imagen) */
+    .gallery-item {
+        position: relative;
+        flex: 1 0 22rem; /* Ajusta el tamaño de la imagen */
+        color: #fff;
+        cursor: pointer;
+        width: 100%;
+        padding-top: 100%; /* Mantiene la relación cuadrada */
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Estilo para la imagen */
     .gallery-image {
-        position: absolute; /* La imagen se posiciona dentro del contenedor */
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100%; /* Hace que la imagen ocupe todo el espacio disponible */
-        height: 100%; /* Asegura que la imagen cubra todo el área cuadrada */
-        object-fit: cover; /* La imagen cubre el contenedor sin distorsionarse */
-        object-position: center; /* Centra la imagen dentro del contenedor */
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
     }
+
+    /* Estilo de los botones debajo de cada imagen */
+    .gallery-item-buttons {
+        display: flex;
+        justify-content: center; /* Centra los botones horizontalmente */
+        margin-top: 1rem; /* Espacio entre la imagen y los botones */
+        gap: 10px; /* Espacio entre los botones */
+        width: 100%;
+    }
+
+    /* Estilo de los botones */
+    .gallery-item-buttons a {
+        text-decoration: none;
+        padding: 8px 16px;
+        font-size: 14px;
+        color: #fff;
+        background-color: #007bff; /* Botón azul */
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Hover de los botones */
+    .gallery-item-buttons a:hover {
+        background-color: #0056b3; /* Color más oscuro al pasar el ratón */
+    }
+
+    /* Estilo de los botones secundarios */
+    .gallery-item-buttons a.btn-secondary {
+        background-color: #28a745; /* Botón verde */
+    }
+
+    .gallery-item-buttons a.btn-secondary:hover {
+        background-color: #218838; /* Color más oscuro para el botón verde */
+    }
+
+    /* Media query para dispositivos móviles */
+    @media screen and (max-width: 768px) {
+        .gallery-item-buttons {
+            flex-direction: column; /* Apila los botones verticalmente en dispositivos pequeños */
+            align-items: stretch; /* Los botones se estiran para ocupar todo el ancho */
+        }
+
+        .gallery-item-buttons a {
+            width: 100%; /* Hace que los botones ocupen el ancho completo */
+            margin-bottom: 10px; /* Espacio entre los botones */
+        }
+    }
+
 
     @media screen and (max-width: 1280px) {
         .gallery-item {
@@ -834,7 +922,6 @@
     .profile-bio,
     .gallery-item,
     .gallery {
-        width: auto;
         margin: 0;
     }
 
