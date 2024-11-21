@@ -28,10 +28,13 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $images = Image::where('user_id', \Auth::user()->id)->get();
+        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->get();
+
+        $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first();
 
         return view('account.index', [
-            'images' => $images
+            'images' => $images,
+            'frontimage' => $frontimage
         ]);
     }
 
@@ -39,10 +42,13 @@ class AccountController extends Controller
     {
         $cities = City::orderBy('name', 'asc')->get();
 
-        $images = Image::where('user_id', \Auth::user()->id)->get();
+        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->get();
+
+        $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first();
 
         return view('account.edit', [
-            'images' => $images
+            'images' => $images,
+            'frontimage' => $frontimage
         ]);
     }
 
@@ -50,11 +56,56 @@ class AccountController extends Controller
     {
         $user = User::where('nickname', $nickname)->first();
 
-        $images = Image::where('user_id', $user->id)->get();
+        $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->get();
+
+        $frontimage = Image::where('user_id', $user->id)->whereNotNull('frontimage')->first();
 
         return view('account.get', [
             'user' => $user,
             'images' => $images,
+            'frontimage' => $frontimage
         ]);
+    }
+
+    public function setFront($id) {
+        $id = \Crypt::decryptString($id);
+        $image = Image::findOrFail($id);
+
+        $last_front = Image::where('user_id', $image->user_id)->whereNotNull('frontimage')->first();
+
+        if(is_object($last_front)) {
+            $last_front->frontimage = NULL;
+            $last_front->updated_at = \Carbon\Carbon::now();
+            $last_front->update();
+        }
+
+       
+        $image->frontimage = 1;
+        $image->updated_at = \Carbon\Carbon::now();
+        $image->update();
+        
+        return redirect()->back()->with('exito', 'Imagen como portada.');
+    }
+
+    public function visible($id)
+    {
+        $id = \Crypt::decryptString($id);
+        $image = Image::findOrFail($id);
+        $image->visible = 1;
+        $image->updated_at = \Carbon\Carbon::now();
+        $image->update();
+
+        return redirect()->back()->with('exito', 'Imagen visible.');
+    }
+
+    public function invisible($id)
+    {
+        $id = \Crypt::decryptString($id);
+        $image = Image::findOrFail($id);
+        $image->visible = NULL;
+        $image->updated_at = \Carbon\Carbon::now();
+        $image->update();
+
+        return redirect()->back()->with('exito', 'Imagen oculta.');
     }
 }

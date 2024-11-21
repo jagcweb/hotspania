@@ -114,8 +114,8 @@ class ImageController extends Controller
                     $ffprobePath = 'C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg/bin/ffprobe.exe';
                 } else {
                     // Linux/Ubuntu system
-                    $ffmpegPath = '/usr/local/bin/ffmpeg';  // Adjust this based on your server
-                    $ffprobePath = '/usr/local/bin/ffprobe'; // Adjust this based on your server
+                    $ffmpegPath = '/usr/bin/ffmpeg';  // Adjust this based on your server
+                    $ffprobePath = '/usr/bin/ffprobe'; // Adjust this based on your server
                 }
 
                 // Initialize FFProbe to get video details

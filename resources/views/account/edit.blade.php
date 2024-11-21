@@ -13,8 +13,12 @@
 
             <div class="profile-image">
 
-                @if(!is_null(\Auth::user()->profile_image))
-                    <img class="img_profile" src="{{ route('home.imageget', ['filename' => \Auth::user()->profile_image]) }}" />
+                @if(is_object($frontimage))
+                    @if(!is_null($frontimage->route_gif))
+                        <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                    @else
+                        <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                    @endif
                 @else
                     <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
                 @endif
@@ -123,17 +127,16 @@
                         </div>
                         <div class="gallery-item-buttons">
                             @if(is_null($image->visible))
-                                <a title="Hacer imagen visible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye"></i></a>
+                                <a title="Hacer imagen visible" href="{{ route('account.images.visible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye"></i></a>
                             @else
-                                <a title="Hacer imagen invisible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye-slash"></i></a>
+                                <a title="Hacer imagen invisible" href="{{ route('account.images.invisible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye-slash"></i></a>
                             @endif
-                            <a title="Hacer imagen como foto de perfil" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-id-badge"></i></a>
                             @if($image->frontimage === 1)
-                                <a title="Imagen portada" href="javascript:void(0)"  class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                                <a title="Imagen portada" href="javascript:void(0)" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-image"></i></a>
                             @endif
 
                             @if(is_null($image->frontimage) && !is_null($height) && $height > $width)
-                                <a title="Hacer imagen portada" href="#" class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                                <a title="Hacer imagen portada" href="{{ route('account.images.setfront', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
                             @endif
                         </div>
                     </div>
@@ -166,17 +169,16 @@
                             </div>
                             <div class="gallery-item-buttons">
                                 @if(is_null($image->visible))
-                                    <a title="Hacer imagen visible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye"></i></a>
+                                    <a title="Hacer imagen visible" href="{{ route('account.images.visible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye"></i></a>
                                 @else
-                                    <a title="Hacer imagen invisible" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye-slash"></i></a>
+                                    <a title="Hacer imagen invisible" href="{{ route('account.images.invisible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye-slash"></i></a>
                                 @endif
-                                <a title="Hacer imagen como foto de perfil" href="#" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-id-badge"></i></a>
                                 @if($image->frontimage === 1)
-                                    <a title="Imagen portada" href="javascript:void(0)"  class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                                    <a title="Imagen portada" href="javascript:void(0)" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-image"></i></a>
                                 @endif
-    
+
                                 @if(is_null($image->frontimage) && !is_null($height) && $height > $width)
-                                    <a title="Hacer imagen portada" href="#" class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                                    <a title="Hacer imagen portada" href="{{ route('account.images.setfront', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
                                 @endif
                             </div>
                         </div>
@@ -201,7 +203,7 @@
     
     <!-- Contenido dinámico: imagen o video -->
     <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
-    <video crossorigin="anonymous" id="modalVideo" controls style="display:none;">
+    <video autoplay crossorigin="anonymous" id="modalVideo" controls style="display:none;">
         <source src="" type="">
         Your browser does not support the video tag.
     </video>

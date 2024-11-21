@@ -39,6 +39,10 @@ Route::get('/home/gif-get/{filename}',  [App\Http\Controllers\HomeController::cl
 Route::get('/account', [App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
 Route::get('/account/edit', [App\Http\Controllers\AccountController::class, 'edit'])->name('account.edit');
 Route::get('/account/{nickname}', [App\Http\Controllers\AccountController::class, 'get'])->name('account.get');
+Route::get('/account/images/{image}/setfront', [App\Http\Controllers\AccountController::class, 'setFront'])->name('account.images.setfront');
+Route::get('/account/images/{image}/visible', [App\Http\Controllers\AccountController::class, 'visible'])->name('account.images.visible');
+Route::get('/account/images/{image}/invisible', [App\Http\Controllers\AccountController::class, 'invisible'])->name('account.images.invisible');
+
 //RegistersController
 Route::get('/register/paso-{step}/{user?}', [App\Http\Controllers\RegisterController::class, 'create'])->name('user.register');
 Route::post('/register-user/{step}/{id?}', [App\Http\Controllers\RegisterController::class, 'save'])->name('user.save');

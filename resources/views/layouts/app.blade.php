@@ -75,8 +75,13 @@
           <li>
             @if(\Auth::user())
               <a href="{{ route('account.index') }}">
-                @if(!is_null(\Auth::user()->profile_image))
-                  <img src="{{ route('home.imageget', ['filename' => \Auth::user()->profile_image]) }}" class="img_logo2 rounded-circle" />
+                @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
+                @if(is_object($frontimage))
+                  @if(!is_null($frontimage->route_gif))
+                    <img class="img_logo2 rounded-circle"  src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                  @else
+                    <img class="img_logo2 rounded-circle"  src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                  @endif
                 @else
                   <img src="{{ asset('images/user.jpg') }}" class="img_logo2 rounded-circle" />
                 @endif

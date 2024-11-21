@@ -12,8 +12,12 @@
 
             <div class="profile-image">
 
-                @if(!is_null($user->profile_image))
-                    <img class="img_profile" src="{{ route('home.imageget', ['filename' => $user->profile_image]) }}" />
+                @if(is_object($frontimage))
+                    @if(!is_null($frontimage->route_gif))
+                    <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                @else
+                    <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                @endif
                 @else
                     <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
                 @endif
@@ -130,7 +134,7 @@
                 @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
                     <div class="gallery-item" tabindex="0">
 
-                        <video crossorigin="anonymous" class="gallery-image">
+                        <video autoplay crossorigin="anonymous" class="gallery-image">
                             <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}">
                             Your browser does not support the video tag.
                         </video>
@@ -173,7 +177,7 @@
     
     <!-- Contenido dinámico: imagen o video -->
     <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
-    <video crossorigin="anonymous" id="modalVideo" style="display:none;">
+    <video autoplay crossorigin="anonymous" id="modalVideo" style="display:none;">
         <source src="" type="">
         Your browser does not support the video tag.
     </video>
