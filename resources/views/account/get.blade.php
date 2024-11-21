@@ -134,7 +134,7 @@
                 @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
                     <div class="gallery-item" tabindex="0">
 
-                        <video autoplay crossorigin="anonymous" class="gallery-image">
+                        <video crossorigin="anonymous" class="gallery-image">
                             <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}">
                             Your browser does not support the video tag.
                         </video>
