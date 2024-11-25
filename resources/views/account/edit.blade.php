@@ -982,17 +982,22 @@
         videos.forEach((video) => {
             // Añadimos el atributo crossorigin para evitar problemas con CORS
             video.setAttribute('crossorigin', 'anonymous');
-
+            video.setAttribute('playsinline', ''); // Hacemos que el video se reproduzca inline en móviles
+            video.muted = true; // Desactivamos el audio del video
+    
             // Seleccionamos el contenedor de la portada de cada video
             const thumbnail = video.parentElement.querySelector('.video-thumbnail');
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
     
-            // Esperamos a que el video se haya cargado
+            // Aseguramos que el video está completamente cargado
             video.onloadeddata = function() {
                 // Aseguramos que el video está listo para obtener un fotograma
                 if (video.readyState >= 3) {
-                    captureRandomFrame(video, thumbnail, canvas, ctx);
+                    // Esperamos un poco para asegurarnos de que el fotograma está disponible
+                    setTimeout(function() {
+                        captureRandomFrame(video, thumbnail, canvas, ctx);
+                    }, 100);
                 }
             };
         });
@@ -1003,8 +1008,9 @@
             const randomTime = Math.random() * video.duration;
             video.currentTime = randomTime;
     
-            // Usamos el evento timeupdate para asegurarnos de que el video ha alcanzado el fotograma adecuado
-            video.ontimeupdate = function() {
+            // Usamos el evento oncanplaythrough para asegurarnos de que el video ha cargado
+            video.oncanplaythrough = function() {
+                // Aseguramos que hemos llegado al fotograma correcto
                 if (Math.abs(video.currentTime - randomTime) < 0.1) {
                     // Establecemos el tamaño del canvas al tamaño del video
                     canvas.width = video.videoWidth;
@@ -1020,12 +1026,16 @@
                     thumbnail.src = imageUrl;
                     thumbnail.style.display = 'block'; // Hacemos visible la portada
     
-                    // Detenemos el evento once el fotograma se captura
-                    video.ontimeupdate = null;
+                    // Detenemos el video después de capturar el fotograma
+                    video.pause();
                 }
             };
+    
+            // Aseguramos que el video empieza a reproducirse brevemente para capturar el fotograma
+            video.play();
         }
     });
-</script>
+    </script>
+    
 
 @endsection
