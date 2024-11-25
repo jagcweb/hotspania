@@ -146,7 +146,7 @@ class ImageController extends Controller
                 $image = $manager->read($file);
 
                 // Path to the watermark image (the image you want to use as a pattern)
-                $watermarkPath = public_path('images/marca_agua.png');  // Adjust the path as needed
+                $watermarkPath = public_path('images/new_marca_agua.png');  // Adjust the path as needed
 
                 // Read the watermark image
                 $watermark = $manager->read($watermarkPath);
@@ -342,6 +342,12 @@ class ImageController extends Controller
 
     public function getImage($filename) {
         $file = \Storage::disk('images')->get($filename);
+
+        return new Response($file, 200);
+    }
+    
+    public function getGif($filename) {
+        $file = \Storage::disk('videogif')->get($filename);
 
         return new Response($file, 200);
     }

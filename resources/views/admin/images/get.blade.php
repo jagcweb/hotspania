@@ -75,6 +75,12 @@
                                             Your browser does not support the video tag.
                                         </video>
                                     </div>
+
+                                    @if(!is_null($image->route_gif))
+                                    <a href="{{ asset('storage/videogif/'.$image->route_gif) }}" target="_blank">
+                                        <img class="p-2" src="{{ route('admin.images.get_gif', ['filename' => $image->route_gif]) }}" width="200"/>
+                                    </a>
+                                    @endif
                                 @endif
                                 <div style="max-width: 200px; display:flex; flex-direction:row; justify-content:center; align-items:center;">
                                     @if($filter === 'pendientes' || $filter === 'desaprobadas')

@@ -144,9 +144,9 @@ body .footer {
     height: 6.5rem!important;
 }
 
-@media (max-width: 980) {
+@media (max-width: 980px) {
     body .footer {
-       display: none;
+       display: none!important;
     }
 }
 
