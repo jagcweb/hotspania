@@ -38,6 +38,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'images_temp' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/images_temp'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         'videogif' => [
             'driver' => 'local',
             'root' => storage_path('app/public/videogif'),

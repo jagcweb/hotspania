@@ -15,7 +15,7 @@
                     <p class="margin-bottom-0 text-size-16 text-white">más calientes de tu zona</p>
                 </div>
             </div>
-            <div class="container mt-5 container_mobile">
+            <div class=" mt-5 container_mobile">
 
                 <div class="gallery">
                     @foreach ($users as $i=>$user)
@@ -36,14 +36,6 @@
                                     <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
                                         class="gallery-image" alt="">
             
-                                    @if(!is_null($image->frontimage))
-                                    <div class="gallery-item-type">
-            
-                                        <span class="visually-hidden">Portada</span><i class="fa-solid fa-star" aria-hidden="true"></i>
-            
-                                    </div>
-                                    @endif
-            
                                     <div class="gallery-item-info">
             
                                         <ul>
@@ -60,6 +52,111 @@
                             </a>
                         @endif
                     @endforeach
+
+                    @foreach ($users as $i=>$user)
+                    @if(count($user->images) > 0)
+                        @php
+                            $image = \App\Models\Image::where('user_id', $user->id)
+                                ->whereNotNull('frontimage')
+                                ->first();
+                            
+                            if (!is_object($image)) {
+                                $image = \App\Models\Image::where('user_id', $user->id)->orderBy('id', 'asc')->first();
+                            }
+                        @endphp
+                        
+                        <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
+                            <div class="gallery-item image-hover-zoom" tabindex="0">
+        
+                                <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
+                                    class="gallery-image" alt="">
+        
+                                <div class="gallery-item-info">
+        
+                                    <ul>
+                                        <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
+                                                class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                        {{--
+                                        <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
+                                                class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
+                                    </ul>
+        
+                                </div>
+        
+                            </div>
+                        </a>
+                    @endif
+                @endforeach
+
+                @foreach ($users as $i=>$user)
+                @if(count($user->images) > 0)
+                    @php
+                        $image = \App\Models\Image::where('user_id', $user->id)
+                            ->whereNotNull('frontimage')
+                            ->first();
+                        
+                        if (!is_object($image)) {
+                            $image = \App\Models\Image::where('user_id', $user->id)->orderBy('id', 'asc')->first();
+                        }
+                    @endphp
+                    
+                    <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
+                        <div class="gallery-item image-hover-zoom" tabindex="0">
+    
+                            <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
+                                class="gallery-image" alt="">
+    
+                            <div class="gallery-item-info">
+    
+                                <ul>
+                                    <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
+                                            class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                    {{--
+                                    <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
+                                            class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
+                                </ul>
+    
+                            </div>
+    
+                        </div>
+                    </a>
+                @endif
+            @endforeach
+
+            @foreach ($users as $i=>$user)
+            @if(count($user->images) > 0)
+                @php
+                    $image = \App\Models\Image::where('user_id', $user->id)
+                        ->whereNotNull('frontimage')
+                        ->first();
+                    
+                    if (!is_object($image)) {
+                        $image = \App\Models\Image::where('user_id', $user->id)->orderBy('id', 'asc')->first();
+                    }
+                @endphp
+                
+                <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
+                    <div class="gallery-item image-hover-zoom" tabindex="0">
+
+                        <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
+                            class="gallery-image" alt="">
+
+                        <div class="gallery-item-info">
+
+                            <ul>
+                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
+                                        class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                {{--
+                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
+                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
+                            </ul>
+
+                        </div>
+
+                    </div>
+                </a>
+            @endif
+        @endforeach
         
                 </div>
         
@@ -144,6 +241,13 @@
         content: "";
         display: block;
         clear: both;
+    }
+
+    .container_mobile {
+        margin-top: 20px!important;
+        padding:0!important;
+        width:100%!important;
+
     }
 
     .profile-image {
@@ -335,7 +439,6 @@
         }
 
         .container_mobile {
-            margin:0!important;
             margin-top: 20px!important;
             padding:0!important;
             width:100%!important;
@@ -481,7 +584,7 @@
 
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+            grid-template-columns: repeat(10, 1fr);
             grid-gap: 0.2rem;
         }
 
@@ -526,27 +629,32 @@
         }
     }
 
-        /* New media query for max-width < 1280px */
-        @media (max-width: 1280px) {
+        /* Media query for max-width 800px */
+        @media (max-width: 1440px) {
             .gallery {
-                grid-template-columns: repeat(3, 1fr);  /* 3 items per row */
+                grid-template-columns: repeat(8, 1fr);  /* 3 items per row */
             }
         }
-        /* Media query for max-width 900px */
-        @media (max-width: 900px) {
+        @media (max-width: 1280px) {
             .gallery {
-                grid-template-columns: repeat(2, 1fr);  /* 2 items per row */
+                grid-template-columns: repeat(6, 1fr);  /* 3 items per row */
             }
-
+        }
+        /* Media query for max-width 800px */
+        @media (max-width: 800px) {
             main {
                 margin-top: 0px!important;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(4, 1fr);  /* 3 items per row */
             }
         }
 
         /* Media query for max-width 700px */
-        @media (max-width: 700px) {
+        @media (max-width: 600px) {
             .gallery {
-                grid-template-columns: 1fr;  /* 1 item per row */
+                grid-template-columns: repeat(3, 1fr);  /* 3 items per row */
             }
         }
     }
