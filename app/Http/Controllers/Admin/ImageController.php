@@ -146,7 +146,7 @@ class ImageController extends Controller
                 $image = $manager->read($file);
 
                 // Path to the watermark image (the image you want to use as a pattern)
-                $watermarkPath = public_path('images/new_marca_agua.png');  // Adjust the path as needed
+                $watermarkPath = public_path('images/marca_agua.png');  // Adjust the path as needed
 
                 // Read the watermark image
                 $watermark = $manager->read($watermarkPath);
@@ -170,7 +170,12 @@ class ImageController extends Controller
 
                 // Save the image to the storage path (app/public/images)
                 // Save the image with watermark to the storage path
-                $image->toPng()->save(storage_path('app/public/images/' . $imageName));
+
+                if ($extension === 'gif' || strpos($mimeType, 'gif') !== false) {
+                    $image->toGif()->save(storage_path('app/public/images/' . $imageName));
+                } else {
+                    $image->toPng()->save(storage_path('app/public/images/' . $imageName));
+                }
             }
 
 
