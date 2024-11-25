@@ -888,65 +888,52 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Seleccionamos todos los videos de la galería
         const videos = document.querySelectorAll('.gallery-item video');
         videos.forEach((video) => {
-            // Añadimos el atributo crossorigin para evitar problemas con CORS
             video.setAttribute('crossorigin', 'anonymous');
-            video.setAttribute('playsinline', ''); // Hacemos que el video se reproduzca inline en móviles
-            video.muted = true; // Desactivamos el audio del video
+            video.setAttribute('playsinline', '');
+            video.muted = true;
+            video.preload = 'metadata';  // Solo cargar los metadatos para evitar la reproducción automática
     
-            // Seleccionamos el contenedor de la portada de cada video
             const thumbnail = video.parentElement.querySelector('.video-thumbnail');
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
     
-            // Aseguramos que el video está completamente cargado
             video.onloadeddata = function() {
-                // Aseguramos que el video está listo para obtener un fotograma
                 if (video.readyState >= 3) {
-                    // Esperamos un poco para asegurarnos de que el fotograma está disponible
                     setTimeout(function() {
                         captureRandomFrame(video, thumbnail, canvas, ctx);
-                    }, 100);
+                    }, 300); // Aumentar el tiempo de espera para garantizar que el video está listo
                 }
             };
         });
     
-        // Función para capturar un fotograma aleatorio
         function captureRandomFrame(video, thumbnail, canvas, ctx) {
-            // Obtener un tiempo aleatorio dentro del video
             const randomTime = Math.random() * video.duration;
-            video.currentTime = randomTime;
+            video.currentTime = randomTime; // Establecer el tiempo al fotograma deseado
     
-            // Usamos el evento oncanplaythrough para asegurarnos de que el video ha cargado
-            video.oncanplaythrough = function() {
-                // Aseguramos que hemos llegado al fotograma correcto
-                if (Math.abs(video.currentTime - randomTime) < 0.1) {
-                    // Establecemos el tamaño del canvas al tamaño del video
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-    
-                    // Dibujamos el fotograma del video en el canvas
+            video.onseeked = function() {
+                // Solo capturamos el fotograma después de que el video haya cambiado al tiempo deseado
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                // Usamos requestAnimationFrame para una captura más confiable
+                requestAnimationFrame(function() {
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-                    // Convertimos el canvas a una imagen base64
+
                     const imageUrl = canvas.toDataURL('image/png');
-    
-                    // Asignamos la imagen base64 como fuente de la imagen de la portada
                     thumbnail.src = imageUrl;
-                    thumbnail.style.display = 'block'; // Hacemos visible la portada
-    
-                    // Detenemos el video después de capturar el fotograma
+                    thumbnail.style.display = 'block';
+
+                    // No es necesario reproducir el video, lo dejamos pausado
                     video.pause();
-                }
+                });
             };
-    
-            // Aseguramos que el video empieza a reproducirse brevemente para capturar el fotograma
-            video.play();
         }
     });
-    </script>
+</script>
+
+
     
 
 
