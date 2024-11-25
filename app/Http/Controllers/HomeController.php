@@ -33,6 +33,7 @@ class HomeController extends Controller
             ->whereNotNull('completed')
             ->whereNull('banned')
             ->orderBy('created_at', 'desc')
+            ->with('images')
             ->get();
 
         return view('home' , [
