@@ -11,6 +11,7 @@ use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
+use FFMpeg\Format\Video\X264;
 use FFMpeg\Coordinate\TimeCode;
 
 class ImageController extends Controller
@@ -138,44 +139,36 @@ class ImageController extends Controller
                     'ffprobe.binaries' => $ffprobePath,
                 ]);
                 $ffmpegVideo = $ffmpeg->open($videoPath);
-    
+
+                $watermarkPath = public_path('images/new_marca_agua.png');
+
+                $ffmpegVideo->filters()->watermark($watermarkPath, [
+                    'position' => 'relative',  // Position watermark relative to video size
+                    'x' => 10,  // Horizontal position of the watermark (in pixels)
+                    'y' => 10,  // Vertical position of the watermark (in pixels)
+                    'opacity' => 0.5,  // Set opacity of the watermark (0 to 1)
+                ]);
+
+                $ffmpegFormat = new X264('libmp3lame', 'libx264');
+
+                $imageName = 'enconded_' . $videoName;
+                
+                $outputVideoPath = storage_path('app/public/images/' . $imageName);
+
+                // Comando FFmpeg
+                $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10" -c:v libx264 -c:a libmp3lame -y "' . $outputVideoPath . '"';
+
+                // Ejecutar el comando
+                exec($command);
+
                 // Create the GIF (the GIF will have the same duration as the video)
-                $ffmpegVideo->gif(TimeCode::fromSeconds(0), $dimensions, $duration)->save(storage_path('app/public/' . $gifPath));
+                $createdGif = $ffmpegVideo->gif(TimeCode::fromSeconds(0), $dimensions, $duration)->save(storage_path('app/public/' . $gifPath));
+
+                $fullGifPath = storage_path('app/public/' . $gifPath);
+
+                $this->addWaterMark($fullGifPath, $gifName, '.gif', true);
             } else {
-                // Read the uploaded image
-                $image = $manager->read($file);
-
-                // Path to the watermark image (the image you want to use as a pattern)
-                $watermarkPath = public_path('images/marca_agua.png');  // Adjust the path as needed
-
-                // Read the watermark image
-                $watermark = $manager->read($watermarkPath);
-
-                // Resize the watermark image to a smaller size if needed (optional)
-                $watermark->resize(200, 280);  // Example size, adjust as needed
-
-                // Get the dimensions of the original image
-                $imageWidth = $image->width();
-                $imageHeight = $image->height();
-
-                // Now, we need to "tile" the watermark image across the entire background of the original image
-                // Loop through the image to tile the watermark
-
-                for ($y = 0; $y < $imageHeight; $y += $watermark->height()) {
-                    for ($x = 0; $x < $imageWidth; $x += $watermark->width()) {
-                        // Insert the watermark image at every position (tiled pattern)
-                        $image->place($watermark, 'top-left', $x, $y);
-                    }
-                }
-
-                // Save the image to the storage path (app/public/images)
-                // Save the image with watermark to the storage path
-
-                if ($extension === 'gif' || strpos($mimeType, 'gif') !== false) {
-                    $image->toGif()->save(storage_path('app/public/images/' . $imageName));
-                } else {
-                    $image->toPng()->save(storage_path('app/public/images/' . $imageName));
-                }
+                $this->addWaterMark($file, $imageName, $extension, false);
             }
 
 
@@ -191,6 +184,55 @@ class ImageController extends Controller
         }
 
         return back()->with('success', 'Images uploaded with watermark pattern successfully!');
+    }
+
+    public function addWaterMark($file, $imageName, $extension, bool $generatedGif){
+        // Initialize the ImageManager with the GD driver (explicitly using GD)
+        $manager = new ImageManager(new Driver());
+
+        // Read the uploaded image
+        $image = $manager->read($file);
+
+        // Path to the watermark image (the image you want to use as a pattern)
+        $watermarkPath = public_path('images/new_marca_agua.png');  // Adjust the path as needed
+
+        // Read the watermark image
+        $watermark = $manager->read($watermarkPath);
+
+        // Resize the watermark image to a smaller size if needed (optional)
+        $watermark->resize(200, 280);  // Example size, adjust as needed
+
+        // Get the dimensions of the original image
+        $imageWidth = $image->width();
+        $imageHeight = $image->height();
+
+        // Now, we need to "tile" the watermark image across the entire background of the original image
+        // Loop through the image to tile the watermark
+
+        for ($y = 0; $y < $imageHeight; $y += $watermark->height()) {
+            for ($x = 0; $x < $imageWidth; $x += $watermark->width()) {
+                // Insert the watermark image at every position (tiled pattern)
+                $image->place($watermark, 'top-left', $x, $y);
+            }
+        }
+
+        // Save the image to the storage path (app/public/images)
+        // Save the image with watermark to the storage path
+
+        if($generatedGif) {
+            $image->toGif()->save(storage_path('app/public/videogif/' . $imageName));
+        } else {
+            if ($extension === 'gif' || strpos($mimeType, 'gif') !== false) {
+                $image->toGif()->save(storage_path('app/public/images/' . $imageName));
+            } else {
+                $image->toPng()->save(storage_path('app/public/images/' . $imageName));
+            }
+        }
+
+    }
+
+    public function addWaterMarkVideo($file, $videoName) {
+
     }
 
 
