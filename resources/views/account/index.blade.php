@@ -842,20 +842,36 @@
         margin: 0;
     }
 
-    @media (max-width: 40rem) {
+    @media (max-width: 640px) {
         .profile {
-            grid-template-columns: auto 1fr;
-            grid-row-gap: 1.5rem;
+            display: grid;                /* Ensure the parent is using grid layout */
+            grid-template-columns: 1fr;    /* Single column for mobile view */
+            grid-template-rows: auto auto; /* Define two rows */
         }
 
         .profile-image {
-            grid-row: 1 / 2;
+            grid-column: 1 / -1;            /* Make the image span the entire width */
+            grid-row: 1 / 2;                /* Ensure it occupies the first row */
+            width: auto !important;         /* Remove full width if it's stretching the image */
+            max-width: 100% !important;     /* Ensure it fits within the container */
+            margin-left: 0;                 /* Ensure no margin on the left */
+            float: left;
+            display: block;
         }
+
+        .profile-image img {
+            border-radius: 999px !important; /* Set a large border radius to make the image round */
+            object-fit: cover !important; /* Ensure the image covers the area while maintaining aspect ratio */
+            width: 120px;
+            height: 120px;
+        }
+
 
         .profile-user-settings {
             display: grid;
             grid-template-columns: auto 1fr;
             grid-gap: 1rem;
+            margin-top: 15px;
         }
 
         .profile-edit-btn,
