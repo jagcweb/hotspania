@@ -11,6 +11,12 @@ use App\Models\City;
 use App\Models\CityUser;
 use App\Models\Image;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use FFMpeg\FFMpeg;
+use FFMpeg\FFProbe;
+use FFMpeg\Format\Video\X264;
+use FFMpeg\Coordinate\TimeCode;
 
 class RegisterController extends Controller
 {
@@ -124,11 +130,49 @@ class RegisterController extends Controller
                 $user = User::find($id);
                 $files = $request->file('files');
 
+                $videoMimeTypes = [
+                    'video/mp4',
+                    'video/quicktime',  // .mov
+                    'video/x-msvideo',  // .avi
+                    'video/x-ms-wmv',    // .wmv
+                    'video/webm',        // .webm
+                    'video/x-flv'        // .flv
+                ];    
+
                 // Process each file
                 foreach ($files as $file) {
                     // Upload the image
                     $imageName = time() . '-' . $file->getClientOriginalName();
-                    \Storage::disk('images')->put($imageName, \File::get($file));
+                    $mimeType = $file->getMimeType();
+                    $extension = $file->getClientOriginalExtension();
+
+                    if (in_array($mimeType, $videoMimeTypes)) {
+                        \Storage::disk('images')->put($imageName, \File::get($file));
+                    } else {
+                        $manager = new ImageManager(new Driver());
+                        $image = $manager->read($file);
+
+                        $imageWidth = $image->width();
+                        $imageHeight = $image->height();
+
+                        if($imageWidth > $imageHeight) {
+                            $image->resize(400, 300, function ($constraint) {
+                                $constraint->aspectRatio();
+                                $constraint->upsize();
+                            });
+                        } else {
+                            $image->resize(300, 400, function ($constraint) {
+                                $constraint->aspectRatio();
+                                $constraint->upsize();
+                            });
+                        }
+
+                        if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
+                            $image->toGif()->save(storage_path('app/public/images/' . $imageName));
+                        } else {
+                            $image->toPng()->save(storage_path('app/public/images/' . $imageName));
+                        }
+                    }
 
                     // Create an Image model and save it to the database
                     $image = new Image();
@@ -137,6 +181,7 @@ class RegisterController extends Controller
                     $image->size = round($file->getSize() / 1024, 2); // Size in KB
                     $image->type = "images";
                     $image->status = 'pending'; // Set initial status to active
+                    $image->watermarked = NULL;
                     $image->save();
                 }
         

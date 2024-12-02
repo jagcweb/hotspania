@@ -17,7 +17,8 @@ class Image extends Model
         'type',
         'status',
         'visible',
-        'frontimage'
+        'frontimage',
+        'watermarked'
     ];
 
     public function user()

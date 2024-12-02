@@ -72,8 +72,7 @@ class ImageController extends Controller
     }
 
 
-    public function upload(Request $request)
-    {
+    public function upload(Request $request) {
         // Validate the request data
         $request->validate([
             'images' => 'required|array',
@@ -128,6 +127,8 @@ class ImageController extends Controller
                 
                 // Get video dimensions
                 $dimensions = $ffprobe->streams($videoPath)->videos()->first()->getDimensions();
+                $width = $dimensions->getWidth();
+                $height = $dimensions->getHeight();
     
                 // Set path for GIF output
                 $gifName = pathinfo($videoName, PATHINFO_FILENAME) . '.gif';
@@ -154,6 +155,7 @@ class ImageController extends Controller
                 $imageName = 'enconded_' . $videoName;
                 
                 $outputVideoPath = storage_path('app/public/images/' . $imageName);
+                $outputGifPath = storage_path('app/public/videogif/' . $gifName);
 
                 // Comando FFmpeg
                 $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10" -c:v libx264 -c:a libmp3lame -y "' . $outputVideoPath . '"';
@@ -162,11 +164,9 @@ class ImageController extends Controller
                 exec($command);
 
                 // Create the GIF (the GIF will have the same duration as the video)
-                $createdGif = $ffmpegVideo->gif(TimeCode::fromSeconds(0), $dimensions, $duration)->save(storage_path('app/public/' . $gifPath));
-
-                $fullGifPath = storage_path('app/public/' . $gifPath);
-
-                $this->addWaterMark($fullGifPath, $gifName, '.gif', true);
+                $gifCommand = $ffmpegPath . ' -i "' . $outputVideoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=15,scale=' . $width . ':' . $height . '" -t ' . $duration . ' -y "' . $outputGifPath . '"';
+                
+                exec($gifCommand, $output, $status);
             } else {
                 $this->addWaterMark($file, $imageName, $extension, false);
             }
@@ -179,7 +179,8 @@ class ImageController extends Controller
             $imageModel->route_gif = $gifName ?? NULL;
             $imageModel->size = round($file->getSize() / 1024, 2);
             $imageModel->type = "images";
-            $imageModel->status = 'pending'; // Set initial status to pending
+            $imageModel->status = 'approved'; // Set initial status to pending
+            $imageModel->watermarked = 1;
             $imageModel->save();
         }
 
@@ -193,6 +194,25 @@ class ImageController extends Controller
         // Read the uploaded image
         $image = $manager->read($file);
 
+        
+        // Get the dimensions of the original image
+        $imageWidth = $image->width();
+        $imageHeight = $image->height();
+
+        if($imageWidth > $imageHeight) {
+            $image->resize(400, 300, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        } else {
+            $image->resize(300, 400, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        }
+
+
+
         // Path to the watermark image (the image you want to use as a pattern)
         $watermarkPath = public_path('images/new_marca_agua.png');  // Adjust the path as needed
 
@@ -201,10 +221,6 @@ class ImageController extends Controller
 
         // Resize the watermark image to a smaller size if needed (optional)
         $watermark->resize(200, 280);  // Example size, adjust as needed
-
-        // Get the dimensions of the original image
-        $imageWidth = $image->width();
-        $imageHeight = $image->height();
 
         // Now, we need to "tile" the watermark image across the entire background of the original image
         // Loop through the image to tile the watermark
@@ -222,7 +238,7 @@ class ImageController extends Controller
         if($generatedGif) {
             $image->toGif()->save(storage_path('app/public/videogif/' . $imageName));
         } else {
-            if ($extension === 'gif' || strpos($mimeType, 'gif') !== false) {
+            if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
                 $image->toGif()->save(storage_path('app/public/images/' . $imageName));
             } else {
                 $image->toPng()->save(storage_path('app/public/images/' . $imageName));
@@ -231,17 +247,140 @@ class ImageController extends Controller
 
     }
 
-    public function addWaterMarkVideo($file, $videoName) {
+    public function addWaterMarkApprove($imageModel) {
+        $manager = new ImageManager(new Driver());
 
+        $file = storage_path('app/public/images/' . $imageModel->route);
+
+        $image = $manager->read($file);
+
+        $imageWidth = $image->width();
+        $imageHeight = $image->height();
+
+        if($imageWidth > $imageHeight) {
+            $image->resize(400, 300, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        } else {
+            $image->resize(300, 400, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        }
+
+        // Path to the watermark image (the image you want to use as a pattern)
+        $watermarkPath = public_path('images/new_marca_agua.png');  // Adjust the path as needed
+
+        // Read the watermark image
+        $watermark = $manager->read($watermarkPath);
+
+        // Resize the watermark image to a smaller size if needed (optional)
+        $watermark->resize(200, 280);  // Example size, adjust as needed
+
+        // Now, we need to "tile" the watermark image across the entire background of the original image
+        // Loop through the image to tile the watermark
+
+        for ($y = 0; $y < $imageHeight; $y += $watermark->height()) {
+            for ($x = 0; $x < $imageWidth; $x += $watermark->width()) {
+                // Insert the watermark image at every position (tiled pattern)
+                $image->place($watermark, 'top-left', $x, $y);
+            }
+        }
+
+        // Save the image to the storage path (app/public/images)
+        // Save the image with watermark to the storage path
+
+        if (preg_match('/\.gif$/i', $imageModel->route)) {
+            $image->toGif()->save(storage_path('app/public/images/' . $imageModel->route));
+        } else {
+            $image->toPng()->save(storage_path('app/public/images/' . $imageModel->route));
+        }
     }
 
+    public function addWaterMarkVideoApprove($imageModel) {
+        $videoName = $imageModel->route;
+        $videoPath = storage_path('app/public/images/' . $videoName);
 
-    public function approve($id)
-    {
-        $image = Image::findOrFail($id);
-        $image->status = 'approved';
-        $image->updated_at = \Carbon\Carbon::now();
-        $image->update();
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            // Windows system
+            $ffmpegPath = 'C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg/bin/ffmpeg.exe';
+            $ffprobePath = 'C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg/bin/ffprobe.exe';
+        } else {
+            // Linux/Ubuntu system
+            $ffmpegPath = '/usr/bin/ffmpeg';  // Adjust this based on your server
+            $ffprobePath = '/usr/bin/ffprobe'; // Adjust this based on your server
+        }
+
+        // Initialize FFProbe to get video details
+        $ffprobe = FFProbe::create([
+            'ffmpeg.binaries' => $ffmpegPath,
+            'ffprobe.binaries' => $ffprobePath,
+        ]);
+        $duration = (int) $ffprobe->format($videoPath)->get('duration');
+        
+        // Get video dimensions
+        $dimensions = $ffprobe->streams($videoPath)->videos()->first()->getDimensions();
+        $width = $dimensions->getWidth();
+        $height = $dimensions->getHeight();
+
+        // Set path for GIF output
+        $gifName = pathinfo($videoName, PATHINFO_FILENAME) . '.gif';
+        $gifPath = 'videogif/' . $gifName; // Save GIF in 'gifs' folder
+
+        // Initialize FFmpeg to convert video to GIF
+        $ffmpeg = FFMpeg::create([
+            'ffmpeg.binaries' => $ffmpegPath,
+            'ffprobe.binaries' => $ffprobePath,
+        ]);
+        $ffmpegVideo = $ffmpeg->open($videoPath);
+
+        $watermarkPath = public_path('images/new_marca_agua.png');
+
+        
+        $ffmpegVideo->filters()->watermark($watermarkPath, [
+            'position' => 'relative',  // Position watermark relative to video size
+            'x' => 10,  // Horizontal position of the watermark (in pixels)
+            'y' => 10,  // Vertical position of the watermark (in pixels)
+            'opacity' => 0.5,  // Set opacity of the watermark (0 to 1)
+        ]);
+
+        $ffmpegFormat = new X264('libmp3lame', 'libx264');
+
+        $imageName = 'enconded_' . $videoName;
+        
+        $outputVideoPath = storage_path('app/public/images/' . $imageName);
+        $outputGifPath = storage_path('app/public/videogif/' . $gifName);
+
+        // Comando FFmpeg
+        $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10" -c:v libx264 -c:a libmp3lame -y "' . $outputVideoPath . '"';
+
+        // Ejecutar el comando
+        exec($command);
+
+        // Create the GIF (the GIF will have the same duration as the video)
+        $gifCommand = $ffmpegPath . ' -i "' . $outputVideoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=15,scale=' . $width . ':' . $height . '" -t ' . $duration . ' -y "' . $outputGifPath . '"';
+        
+        exec($gifCommand, $output, $status);
+
+        return $gifName;
+    }
+
+    public function approve($id) {
+        $imageModel = Image::findOrFail($id);
+
+        if(is_null($imageModel->watermarked)) {
+            if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $imageModel->route)) {
+                $this->addWaterMarkApprove($imageModel);
+            } else {
+                $imageModel->route_gif = $this->addWaterMarkVideoApprove($imageModel);
+            }
+        }
+        
+        $imageModel->status = 'approved';
+        $imageModel->watermarked = 1;
+        $imageModel->updated_at = \Carbon\Carbon::now();
+        $imageModel->update();
 
         return redirect()->back()->with('exito', 'Imagen aprobada.');
     }
@@ -256,17 +395,25 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen NO aprobada.');
     }
 
-    public function approveAll($id)
-    {
+    public function approveAll($id) {
         $images = Image::
         where('user_id', $id)->where('status', 'pending')
         ->orWhere('user_id', $id)->where('status', 'unapproved')
         ->get();
 
-        foreach($images as $image) {
-            $image->status = 'approved';
-            $image->updated_at = \Carbon\Carbon::now();
-            $image->update();
+        foreach($images as $imageModel) {
+            if(is_null($imageModel->watermarked)) {
+                if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $imageModel->route)) {
+                    $this->addWaterMarkApprove($imageModel);
+                } else {
+                    $imageModel->route_gif = $this->addWaterMarkVideoApprove($imageModel);
+                }
+            }
+
+            $imageModel->status = 'approved';
+            $imageModel->watermarked = 1;
+            $imageModel->updated_at = \Carbon\Carbon::now();
+            $imageModel->update();
         }
 
         return redirect()->back()->with('exito', 'Imagenes aprobadas.');
