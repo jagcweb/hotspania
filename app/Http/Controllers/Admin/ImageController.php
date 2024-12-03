@@ -106,6 +106,7 @@ class ImageController extends Controller
             if (in_array($mimeType, $videoMimeTypes)) {
                 $videoName = time() . '_' . $file->getClientOriginalName();
                 \Storage::disk('images')->put($videoName, \File::get($file));
+
                 $videoPath = storage_path('app/public/images/' . $videoName);
 
                 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -141,7 +142,7 @@ class ImageController extends Controller
                 ]);
                 $ffmpegVideo = $ffmpeg->open($videoPath);
 
-                $watermarkPath = public_path('images/new_marca_agua.png');
+                $watermarkPath = public_path('images/unique_marca_agua.png');
 
                 $ffmpegVideo->filters()->watermark($watermarkPath, [
                     'position' => 'relative',  // Position watermark relative to video size
@@ -158,7 +159,7 @@ class ImageController extends Controller
                 $outputGifPath = storage_path('app/public/videogif/' . $gifName);
 
                 // Comando FFmpeg
-                $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10" -c:v libx264 -c:a libmp3lame -y "' . $outputVideoPath . '"';
+                $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0:v][1:v]overlay=x=(W-w)/2:y=(H-h)/2" -c:v libx264 -c:a aac -strict experimental -y "' . $outputVideoPath . '"';
 
                 // Ejecutar el comando
                 exec($command);
@@ -200,37 +201,27 @@ class ImageController extends Controller
         $imageHeight = $image->height();
 
         if($imageWidth > $imageHeight) {
-            $image->resize(400, 300, function ($constraint) {
+            $image->resize(1500, 1000, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
         } else {
-            $image->resize(300, 400, function ($constraint) {
+            $image->resize(1000, 1500, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
         }
 
-
-
         // Path to the watermark image (the image you want to use as a pattern)
-        $watermarkPath = public_path('images/new_marca_agua.png');  // Adjust the path as needed
+        $watermarkPath = public_path('images/unique_marca_agua.png');  // Adjust the path as needed
 
         // Read the watermark image
         $watermark = $manager->read($watermarkPath);
 
-        // Resize the watermark image to a smaller size if needed (optional)
-        $watermark->resize(200, 280);  // Example size, adjust as needed
-
-        // Now, we need to "tile" the watermark image across the entire background of the original image
-        // Loop through the image to tile the watermark
-
-        for ($y = 0; $y < $imageHeight; $y += $watermark->height()) {
-            for ($x = 0; $x < $imageWidth; $x += $watermark->width()) {
-                // Insert the watermark image at every position (tiled pattern)
-                $image->place($watermark, 'top-left', $x, $y);
-            }
-        }
+        $watermark->resize(234, 166);
+        
+        // Colocar el watermark en el centro
+        $image->place($watermark, 'center');
 
         // Save the image to the storage path (app/public/images)
         // Save the image with watermark to the storage path
@@ -253,40 +244,33 @@ class ImageController extends Controller
         $file = storage_path('app/public/images/' . $imageModel->route);
 
         $image = $manager->read($file);
-
+        // Get the dimensions of the original image
         $imageWidth = $image->width();
         $imageHeight = $image->height();
 
         if($imageWidth > $imageHeight) {
-            $image->resize(400, 300, function ($constraint) {
+            $image->resize(1500, 1000, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
         } else {
-            $image->resize(300, 400, function ($constraint) {
+            $image->resize(1000, 1500, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
         }
 
         // Path to the watermark image (the image you want to use as a pattern)
-        $watermarkPath = public_path('images/new_marca_agua.png');  // Adjust the path as needed
+        $watermarkPath = public_path('images/unique_marca_agua.png');  // Adjust the path as needed
 
         // Read the watermark image
         $watermark = $manager->read($watermarkPath);
 
-        // Resize the watermark image to a smaller size if needed (optional)
-        $watermark->resize(200, 280);  // Example size, adjust as needed
-
-        // Now, we need to "tile" the watermark image across the entire background of the original image
-        // Loop through the image to tile the watermark
-
-        for ($y = 0; $y < $imageHeight; $y += $watermark->height()) {
-            for ($x = 0; $x < $imageWidth; $x += $watermark->width()) {
-                // Insert the watermark image at every position (tiled pattern)
-                $image->place($watermark, 'top-left', $x, $y);
-            }
-        }
+        $watermark->resize(234, 166);
+    
+        
+        // Colocar el watermark en el centro
+        $image->place($watermark, 'center');
 
         // Save the image to the storage path (app/public/images)
         // Save the image with watermark to the storage path
@@ -335,7 +319,7 @@ class ImageController extends Controller
         ]);
         $ffmpegVideo = $ffmpeg->open($videoPath);
 
-        $watermarkPath = public_path('images/new_marca_agua.png');
+        $watermarkPath = public_path('images/unique_marca_agua.png');
 
         
         $ffmpegVideo->filters()->watermark($watermarkPath, [
@@ -353,7 +337,7 @@ class ImageController extends Controller
         $outputGifPath = storage_path('app/public/videogif/' . $gifName);
 
         // Comando FFmpeg
-        $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10" -c:v libx264 -c:a libmp3lame -y "' . $outputVideoPath . '"';
+        $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[1:v]scale=iw:ih[tiled];[0:v][tiled]overlay=0:0" -c:v libx264 -c:a aac -strict experimental -y "' . $outputVideoPath . '"';
 
         // Ejecutar el comando
         exec($command);
