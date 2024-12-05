@@ -65,101 +65,43 @@
     }
 </script>
 <script>
-    const form = document.getElementById('upload-form');
     const uploadButton = document.getElementById('upload-btn');
-    uploadButton.addEventListener('click', () => {
-        form.submit();
-    });
-    /*// Obtener elementos del formulario y el input de archivos
     const form = document.getElementById('upload-form');
     const fileInput = document.getElementById('image');
-    
-    // Cargar el worker de FFmpeg
-    const { createWorker } = FFmpeg;
-    const worker = createWorker({
-            logger: (message) => console.log('logger_message', message),
-            progress: (p) => console.log('progess',p)
-        });
 
-    // Cargar el worker antes de procesar archivos
-    (async () => {
-        await worker.load();
-    })();
-
-    // Procesar imagen con Pica
-    async function processImage(file) {
-        const img = new Image();
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            img.src = e.target.result;
-            img.onload = async () => {
-                const canvas = document.createElement('canvas');
-                const width = img.width / 2;  // Redimensionamos la imagen al 50% del tamaño original
-                const height = img.height / 2;
-                canvas.width = width;
-                canvas.height = height;
-
-                // Usamos Pica para redimensionar la imagen
-                const pica = new Pica();
-                await pica.resize(img, canvas);
-                const resizedImage = canvas.toDataURL(file.type);  // Convertimos a Data URL
-
-                // Creamos un nuevo archivo con la imagen redimensionada
-                const blob = await fetch(resizedImage).then(res => res.blob());
-                const newFile = new File([blob], file.name, { type: file.type });
-
-                // Sustituir el archivo original por el redimensionado
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(newFile);
-                fileInput.files = dataTransfer.files;  // Establecer el nuevo archivo al input
-            };
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // Procesar video con FFmpeg
-    async function processVideo(file) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const videoBlob = e.target.result;
-            const inputPath = 'input_video.mp4';
-            const outputPath = 'output_video.mp4';
-
-            // Escribir el archivo de video en el sistema de archivos de FFmpeg
-            await worker.write(inputPath, videoBlob);
-
-            // Transcodificar video a una resolución más baja (sin recodificación con '-c copy')
-            await worker.transcode(inputPath, outputPath, "-c copy -s 1280x720");
-
-            // Leer el archivo procesado
-            const { data } = await worker.read(outputPath);
-
-            // Crear un nuevo archivo de video con la transcodificación
-            const newBlob = new Blob([data], { type: 'video/mp4' });
-            const newFile = new File([newBlob], file.name, { type: file.type });
-
-            // Sustituir el archivo original por el redimensionado
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(newFile);
-            fileInput.files = dataTransfer.files;  // Establecer el nuevo archivo al input
-        };
-        reader.readAsArrayBuffer(file);
-    }
-
-    // Manejo de eventos para cuando el usuario seleccione archivos
-    fileInput.addEventListener('change', async (e) => {
-        const files = e.target.files;
-
-        // Iteramos sobre los archivos seleccionados y los procesamos
-        for (let file of files) {
-            if (file.type.startsWith('image/')) {
-                await processImage(file);  // Procesar imágenes
-            } else if (file.type.startsWith('video/')) {
-                await processVideo(file);  // Procesar videos
-            }
+    uploadButton.addEventListener('click', async () => {
+        if (fileInput.files.length === 0) {
+            alert('Selecciona al menos un archivo antes de enviar.');
+            return;
         }
-        
-        // Una vez procesados los archivos, enviamos el formulario
-        form.submit();
-    });*/
+
+        // Deshabilitar botón y mostrar mensaje
+        uploadButton.disabled = true;
+        uploadButton.innerText = 'Subiendo archivos, por favor espere...';
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('Archivos subidos exitosamente, se recargará automáticamente la página.');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                alert('Error al subir los archivos. Inténtalo de nuevo.');
+                console.error(await response.text());
+            }
+        } catch (error) {
+            console.error('Error en la subida:', error);
+            alert('Ocurrió un error al procesar la solicitud.');
+        } finally {
+            uploadButton.disabled = false;
+            uploadButton.innerText = 'Subir Archivos';
+        }
+    });
 </script>
