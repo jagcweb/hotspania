@@ -65,6 +65,11 @@
     }
 </script>
 <script>
+    const form = document.getElementById('upload-form');
+    const uploadButton = document.getElementById('upload-btn');
+    uploadButton.addEventListener('click', () => {
+        form.submit();
+    });
     /*// Obtener elementos del formulario y el input de archivos
     const form = document.getElementById('upload-form');
     const fileInput = document.getElementById('image');
