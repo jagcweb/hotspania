@@ -13,6 +13,7 @@ use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use FFMpeg\Format\Video\X264;
 use FFMpeg\Coordinate\TimeCode;
+use Illuminate\Support\Facades\Log;
 
 class ImageController extends Controller
 {
@@ -73,12 +74,13 @@ class ImageController extends Controller
 
 
     public function upload(Request $request) {
+        Log::info('Solicitud de carga recibida:', $request->all());
         // Validate the request data
-        $request->validate([
+        /*$request->validate([
             'images' => 'required|array',
             'images.*' => 'required|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,wmv,avchd,webm,flv|max:10240',
             'user_id' => 'required|integer',
-        ]);
+        ]);*/
 
         // Get the uploaded files
         $files = $request->file('images');
