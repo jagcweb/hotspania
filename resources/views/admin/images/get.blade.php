@@ -156,25 +156,36 @@
 
     inputFile.addEventListener('change', (event) => {
         let files = event.target.files;
-        const maxSizeInBytes = 10 * 1024 * 1024; // 10 MB en bytes
+        const maxSizeInBytes = 2 * 1024 * 1024; // 2 MB in bytes
+        const maxFiles = 5;
 
-        // Filtrar los archivos que cumplen con el límite de tamaño
+        // Filter files based on size limit
         const validFiles = Array.from(files).filter(file => file.size <= maxSizeInBytes);
 
-        // Mostrar un mensaje al usuario si se eliminaron archivos
+        // Notify user about files that exceed size limit
         if (files.length !== validFiles.length) {
             const invalidFiles = Array.from(files).filter(file => file.size > maxSizeInBytes);
             const invalidFileNames = invalidFiles.map(file => file.name).join(', ');
-            alert('Estos ficheros exceden el límite de 10MB y han sido borrados: ' + invalidFileNames);
+            alert('Estos ficheros exceden el límite de 2MB y han sido borrados: ' + invalidFileNames);
         }
 
-        // Crear un DataTransfer para asignar los archivos válidos
-        const dataTransfer = new DataTransfer();
-        validFiles.forEach(file => dataTransfer.items.add(file));
+        // Further filter to ensure maximum 5 files
+        let finalFiles = validFiles.slice(0, maxFiles);
 
-        // Asignar los archivos válidos al input file
+        // Notify user if some files were removed due to exceeding the max file count
+        if (validFiles.length > maxFiles) {
+            const removedFiles = validFiles.slice(maxFiles).map(file => file.name).join(', ');
+            alert('Solo se permiten un máximo de 5 archivos. Estos han sido removidos: ' + removedFiles);
+        }
+
+        // Create a new DataTransfer object to hold the valid files
+        const dataTransfer = new DataTransfer();
+        finalFiles.forEach(file => dataTransfer.items.add(file));
+
+        // Assign valid files back to the input element
         inputFile.files = dataTransfer.files;
     });
 </script>
+
 
 @endsection
