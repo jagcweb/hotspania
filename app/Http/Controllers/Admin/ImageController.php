@@ -161,11 +161,11 @@ class ImageController extends Controller
                 $outputGifPath = storage_path('app/public/videogif/' . $gifName);
 
                 // Comando para procesar el video
-                $command = $this->ffmpegPath . ' -i "' . $this->videoPath . '" -i "' . $this->watermarkPath . '" -filter_complex "[0:v][1:v]overlay=x=(W-w)/2:y=(H-h)/2" -c:v libx264 -preset ultrafast -crf 28 -c:a aac -strict experimental -y "' . $this->outputVideoPath . '"';
+                $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0:v][1:v]overlay=x=(W-w)/2:y=(H-h)/2" -c:v libx264 -preset ultrafast -crf 28 -c:a aac -strict experimental -y "' . $outputVideoPath . '"';
                 exec($command);
 
                 // Comando para generar el GIF
-                $gifCommand = $this->ffmpegPath . ' -i "' . $this->outputVideoPath . '" -i "' . $this->watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=10,scale=320:-1" -t 5 -y "' . $this->outputGifPath . '"';
+                $gifCommand = $ffmpegPath . ' -i "' . $outputVideoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=10,scale=320:-1" -t 5 -y "' . $outputGifPath . '"';
                 exec($gifCommand);
 
                 /*$job = new ProcessVideoUpload($ffmpegPath, $videoPath, $watermarkPath, $outputVideoPath, $outputGifPath);
