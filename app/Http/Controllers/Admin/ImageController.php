@@ -201,12 +201,12 @@ class ImageController extends Controller
         $imageHeight = $image->height();
 
         if($imageWidth > $imageHeight) {
-            $image->resize(1500, 1000, function ($constraint) {
+            $image->resize(533, 355, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
         } else {
-            $image->resize(1000, 1500, function ($constraint) {
+            $image->resize(355, 533, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
@@ -249,12 +249,12 @@ class ImageController extends Controller
         $imageHeight = $image->height();
 
         if($imageWidth > $imageHeight) {
-            $image->resize(1500, 1000, function ($constraint) {
+            $image->resize(533, 355, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
         } else {
-            $image->resize(1000, 1500, function ($constraint) {
+            $image->resize(355, 533, function ($constraint) {
                 $constraint->aspectRatio();  // Maintain the aspect ratio
                 $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
             });
