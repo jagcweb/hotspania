@@ -65,7 +65,7 @@
     }
 </script>
 <script>
-    // Obtener elementos del formulario y el input de archivos
+    /*// Obtener elementos del formulario y el input de archivos
     const form = document.getElementById('upload-form');
     const fileInput = document.getElementById('image');
     
@@ -156,5 +156,5 @@
         
         // Una vez procesados los archivos, enviamos el formulario
         form.submit();
-    });
+    });*/
 </script>
