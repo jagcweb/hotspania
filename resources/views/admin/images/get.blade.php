@@ -37,7 +37,7 @@
                     </p>
 
                     <p class="w-100 text-center">
-                        <a style="color:red; font-size:20px;" href="{{ route('admin.images.approveall', ['user' => $u->id]) }}">
+                        <a style="color:red; font-size:20px;" href="{{ route('admin.images.deleteall', ['user' => $u->id]) }}">
                             Borrar todas
                         </a>
                     </p>
