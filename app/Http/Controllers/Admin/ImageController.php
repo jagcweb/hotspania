@@ -14,12 +14,12 @@ use FFMpeg\FFProbe;
 use FFMpeg\Format\Video\X264;
 use FFMpeg\Coordinate\TimeCode;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\ProcessVideoUpload;
 
 class ImageController extends Controller
 {
 
     public function get($id, $name, $filter) {
-
         switch($filter) {
             case 'pendientes':
                 $images = Image::where('user_id', $id)->where('status', 'pending')->orderBy('id', 'desc')->get();
@@ -160,16 +160,16 @@ class ImageController extends Controller
                 $outputVideoPath = storage_path('app/public/images/' . $imageName);
                 $outputGifPath = storage_path('app/public/videogif/' . $gifName);
 
-                // Comando FFmpeg
-                $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0:v][1:v]overlay=x=(W-w)/2:y=(H-h)/2" -c:v libx264 -c:a aac -strict experimental -y "' . $outputVideoPath . '"';
-
-                // Ejecutar el comando
+                // Comando para procesar el video
+                $command = $this->ffmpegPath . ' -i "' . $this->videoPath . '" -i "' . $this->watermarkPath . '" -filter_complex "[0:v][1:v]overlay=x=(W-w)/2:y=(H-h)/2" -c:v libx264 -preset ultrafast -crf 28 -c:a aac -strict experimental -y "' . $this->outputVideoPath . '"';
                 exec($command);
 
-                // Create the GIF (the GIF will have the same duration as the video)
-                $gifCommand = $ffmpegPath . ' -i "' . $outputVideoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=15,scale=' . $width . ':' . $height . '" -t ' . $duration . ' -y "' . $outputGifPath . '"';
-                
-                exec($gifCommand, $output, $status);
+                // Comando para generar el GIF
+                $gifCommand = $this->ffmpegPath . ' -i "' . $this->outputVideoPath . '" -i "' . $this->watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=10,scale=320:-1" -t 5 -y "' . $this->outputGifPath . '"';
+                exec($gifCommand);
+
+                /*$job = new ProcessVideoUpload($ffmpegPath, $videoPath, $watermarkPath, $outputVideoPath, $outputGifPath);
+                $job->handle();*/
             } else {
                 $this->addWaterMark($file, $imageName, $extension, false);
             }
