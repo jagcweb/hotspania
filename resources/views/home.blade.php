@@ -298,47 +298,52 @@
 
     .gallery-item {
         position: relative;
-        flex: 1 0 22rem; /* Ajusta el tamaño base de cada imagen */
+        flex: 1 0 calc(33.333% - 1rem); /* Ajusta el ancho base del contenedor */
         margin: 1rem;
         color: #fff;
         cursor: pointer;
-        width: 100%; /* Asegura que la imagen ocupe todo el ancho disponible */
-        padding-top: 100%; /* Esto hace que el contenedor sea cuadrado, con una altura igual al ancho */
-        overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
-        display: flex; /* Usamos flexbox para centrar la imagen */
-        justify-content: center; /* Centrado horizontal */
-        align-items: center; /* Centrado vertical */
+        width: 100%; /* La anchura ocupará todo el espacio disponible */
+        padding-top: 177.78%; /* Proporción 16:9 (100 / 9 * 16) */
+        overflow: hidden; /* Oculta el contenido que sobresalga */
+        display: flex;
+        justify-content: center; /* Centra la imagen horizontalmente */
+        align-items: center; /* Centra la imagen verticalmente */
     }
 
     .gallery-image {
-        position: absolute; /* La imagen se posiciona dentro del contenedor */
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100%; /* Hace que la imagen ocupe todo el espacio disponible */
-        height: 100%; /* Asegura que la imagen cubra todo el área cuadrada */
-        object-fit: cover; /* La imagen cubre el contenedor sin distorsionarse */
+        width: 100%; /* Hace que la imagen ocupe todo el ancho del contenedor */
+        height: 100%; /* La altura también ocupa todo el contenedor */
+        object-fit: cover; /* Escala la imagen manteniendo sus proporciones */
         object-position: center; /* Centra la imagen dentro del contenedor */
     }
 
     @media screen and (max-width: 1280px) {
         .gallery-item {
-            flex: 1 0 22rem; /* Ajusta el tamaño base para las imágenes */
+            flex: 1 0 calc(33.333% - 1rem); /* Tres elementos por fila */
+            padding-top: 177.78%; /* Proporción 16:9 (más alargada) */
+            margin: 1rem;
+            position: relative;
+            overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
         }
         
         .gallery-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Mantiene la imagen con la misma proporción */
-            object-position: center; /* Centra la imagen */
+            width: 100%; /* La imagen ocupa todo el ancho del contenedor */
+            height: 100%; /* La imagen cubre todo el área disponible */
+            object-fit: cover; /* Escala la imagen para llenar el contenedor */
+            object-position: center; /* Centra la imagen en el contenedor */
         }
 
         .container_mobile {
-            margin-top: 20px!important;
-            padding:0!important;
-            width:100%!important;
-
+            margin: 0 !important;
+            margin-top: 20px !important;
+            padding: 0 !important;
+            width: 100% !important;
         }
     }
+
 
     @media screen and (max-width: 720px) {
         .container_mobile {
@@ -479,7 +484,7 @@
         .gallery {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
-            grid-gap: 0.2rem;
+            
         }
 
     .profile-image,

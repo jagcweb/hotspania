@@ -50,10 +50,21 @@ nav.mask-pattern {
     -webkit-mask-repeat: repeat-x, no-repeat;
     -webkit-mask-position: left bottom, top left;
 }
-@media (min-width: 640px) {
+@media screen and (max-width: 640px) {
     nav {
         padding: 16px 50px 30px 50px;
-   }
+        height: 50px;
+    }
+
+    nav a {
+        width: 50px;
+        margin-top: 12px;
+    }
+
+    .img_logo2 {
+        width: 30px!important;
+        margin-top: 8px;
+    }
 }
 nav.is-hidden {
     transform: translateY(-100%);

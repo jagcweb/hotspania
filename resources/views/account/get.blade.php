@@ -660,48 +660,53 @@
     }
 
     .gallery-item {
-    position: relative;
-    flex: 1 0 22rem; /* Ajusta el tamaño base de cada imagen */
-    margin: 1rem;
-    color: #fff;
-    cursor: pointer;
-    width: 100%; /* Asegura que la imagen ocupe todo el ancho disponible */
-    padding-top: 100%; /* Esto hace que el contenedor sea cuadrado, con una altura igual al ancho */
-    overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
-    display: flex; /* Usamos flexbox para centrar la imagen */
-    justify-content: center; /* Centrado horizontal */
-    align-items: center; /* Centrado vertical */
+        position: relative;
+        flex: 1 0 calc(33.333% - 1rem); /* Ajusta el ancho base del contenedor */
+        margin: 1rem;
+        color: #fff;
+        cursor: pointer;
+        width: 100%; /* La anchura ocupará todo el espacio disponible */
+        padding-top: 177.78%; /* Proporción 16:9 (100 / 9 * 16) */
+        overflow: hidden; /* Oculta el contenido que sobresalga */
+        display: flex;
+        justify-content: center; /* Centra la imagen horizontalmente */
+        align-items: center; /* Centra la imagen verticalmente */
     }
 
     .gallery-image {
-        position: absolute; /* La imagen se posiciona dentro del contenedor */
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100%; /* Hace que la imagen ocupe todo el espacio disponible */
-        height: 100%; /* Asegura que la imagen cubra todo el área cuadrada */
-        object-fit: cover; /* La imagen cubre el contenedor sin distorsionarse */
+        width: 100%; /* Hace que la imagen ocupe todo el ancho del contenedor */
+        height: 100%; /* La altura también ocupa todo el contenedor */
+        object-fit: cover; /* Escala la imagen manteniendo sus proporciones */
         object-position: center; /* Centra la imagen dentro del contenedor */
     }
 
     @media screen and (max-width: 1280px) {
         .gallery-item {
-            flex: 1 0 22rem; /* Ajusta el tamaño base para las imágenes */
+            flex: 1 0 calc(33.333% - 1rem); /* Tres elementos por fila */
+            padding-top: 177.78%; /* Proporción 16:9 (más alargada) */
+            margin: 1rem;
+            position: relative;
+            overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
         }
         
         .gallery-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Mantiene la imagen con la misma proporción */
-            object-position: center; /* Centra la imagen */
+            width: 100%; /* La imagen ocupa todo el ancho del contenedor */
+            height: 100%; /* La imagen cubre todo el área disponible */
+            object-fit: cover; /* Escala la imagen para llenar el contenedor */
+            object-position: center; /* Centra la imagen en el contenedor */
         }
 
         .container_mobile {
-            margin:0!important;
-            margin-top: 20px!important;
-            padding:0!important;
-            width:100%!important;
+            margin: 0 !important;
+            margin-top: 20px !important;
+            padding: 0 !important;
+            width: 100% !important;
         }
     }
+
 
 
 
@@ -776,7 +781,7 @@
             flex-basis: 100%;
         }
 
-        .profile-stats {
+        /*.profile-stats {
             order: 1;
             margin-top: 1.5rem;
         }
@@ -793,7 +798,7 @@
             font-size: 1.4rem;
             flex: 1;
             margin: 0;
-        }
+        }*/
 
         .profile-stat-count {
             display: block;
@@ -832,7 +837,7 @@
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
-            grid-gap: 0.2rem;
+            
         }
 
     .profile-image,
@@ -845,52 +850,189 @@
         margin: 0;
     }
 
-    @media (max-width: 640px) {
-        .profile {
-            display: grid;                /* Ensure the parent is using grid layout */
-            grid-template-columns: 1fr;    /* Single column for mobile view */
-            grid-template-rows: auto auto; /* Define two rows */
-        }
+    @media screen and (max-width: 640px) {
+        /*.profile {
+            display: flex;                     
+            justify-content: flex-start;      
+            align-items: center;               
+            flex-wrap: wrap;                   
+        }*/
 
         .profile-image {
-            grid-column: 1 / -1;            /* Make the image span the entire width */
-            grid-row: 1 / 2;                /* Ensure it occupies the first row */
-            width: auto !important;         /* Remove full width if it's stretching the image */
-            max-width: 100% !important;     /* Ensure it fits within the container */
-            margin-left: 0;                 /* Ensure no margin on the left */
-            float: left;
-            display: block;
+            width: 70px;                      /* Fijamos el tamaño de la imagen */
+            height: 70px;                     /* Mantenemos la altura fija */
+            margin-left: 70px;               /* Espacio a la derecha de la imagen */
+            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
+            margin-top: -150px;
+        }
+
+        .profile-stats li {
+            display: inline-block;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            margin-right: 2rem;
+        }
+
+        .profile-user-name {
+            font-size: 1.4rem;
+        }
+
+        .profile-bio p {
+            font-size: 1.4rem!important;
         }
 
         .profile-image img {
-            border-radius: 999px !important; /* Set a large border radius to make the image round */
-            object-fit: cover !important; /* Ensure the image covers the area while maintaining aspect ratio */
-            width: 120px;
-            height: 120px;
-        }
-
-
-        .profile-user-settings {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            grid-gap: 1rem;
-            margin-top: 15px;
-        }
-
-        .profile-edit-btn,
-        .profile-stats,
-        .profile-bio {
-            grid-column: 1 / -1;
+            width: 100%;                       /* La imagen ocupa el 100% del contenedor */
+            height: 100%;                      /* Asegura que la imagen sea cuadrada */
+            border-radius: 999px;              /* Redondeamos la imagen */
+            object-fit: cover;                 /* La imagen cubre el área sin distorsionarse */
         }
 
         .profile-user-settings,
-        .profile-edit-btn,
-        .profile-settings-btn,
-        .profile-bio,
+        .profile-bio {
+            margin-left: 1rem;                 /* Espaciado a la izquierda de los otros divs */
+            flex-grow: 1;                      /* Los otros divs ocupan el espacio restante */
+        }
+
         .profile-stats {
-            margin: 0;
+            margin-left: 1rem;                 /* Espaciado a la izquierda de los otros divs */
+            flex-grow: 1;                      /* Los otros divs ocupan el espacio restante */
+        }
+
+        .profile-user-settings {
+            display: flex;
+            flex-wrap: wrap;                   /* Permitimos que los elementos dentro de profile-user-settings se ajusten */
+            margin-top: 0;                     /* Eliminamos el margen superior innecesario */
+        }
+
+        .profile-user-name {
+            font-size: 2.2rem;
+        }
+
+        .profile-edit-btn {
+            order: 1;                          /* Los botones se ponen debajo del nombre */
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .profile-bio {
+            margin-top: 1rem;                  /* Añadimos un margen superior para la bio */
         }
     }
+
+    @media screen and (max-width: 540px) {
+        /*.profile {
+            display: flex;                     
+            justify-content: flex-start;      
+            align-items: center;               
+            flex-wrap: wrap;                   
+        }*/
+
+        .profile {
+            grid-column-gap: 0rem;
+        }
+
+        .profile-image {
+            width: 70px;                      /* Fijamos el tamaño de la imagen */
+            height: 70px;                     /* Mantenemos la altura fija */
+            margin-left: 20px;               /* Espacio a la derecha de la imagen */
+            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
+        }
+
+        .profile-image img {
+            width: 100%;                       /* La imagen ocupa el 100% del contenedor */
+            height: 100%;                      /* Asegura que la imagen sea cuadrada */
+            border-radius: 999px;              /* Redondeamos la imagen */
+            object-fit: cover;                 /* La imagen cubre el área sin distorsionarse */
+        }
+
+        .profile-user-settings,
+        .profile-bio {
+            margin-left: 1rem;                 /* Espaciado a la izquierda de los otros divs */
+            flex-grow: 1;                      /* Los otros divs ocupan el espacio restante */
+        }
+
+        .profile-stats {
+            margin-left: 1rem;                 /* Espaciado a la izquierda de los otros divs */
+            flex-grow: 1;                      /* Los otros divs ocupan el espacio restante */
+        }
+
+        .profile-user-settings {
+            display: flex;
+            flex-wrap: wrap;                   /* Permitimos que los elementos dentro de profile-user-settings se ajusten */
+            margin-top: 0;                     /* Eliminamos el margen superior innecesario */
+        }
+
+        .profile-user-name {
+            font-size: 2.2rem;
+        }
+
+        .profile-edit-btn {
+            order: 1;                          /* Los botones se ponen debajo del nombre */
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .profile-bio {
+            margin-top: 1rem;                  /* Añadimos un margen superior para la bio */
+        }
+    }
+
+    @media screen and (max-width: 420px) {
+        
+        .profile-image {
+            width: 50px;                      /* Fijamos el tamaño de la imagen */
+            height: 50px;                     /* Mantenemos la altura fija */
+            margin-left: 30px;               /* Espacio a la derecha de la imagen */
+            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
+        }
+
+        .profile-stats li {
+            display: inline-block;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-right: 1rem;
+        }
+
+        .profile-user-name {
+            font-size: 1.2rem;
+        }
+
+        .profile-bio p {
+            font-size: 1.2rem!important;
+        }
+    }
+
+    @media screen and (max-width: 350px) {
+        
+        .profile-image {
+            width: 40px;                      /* Fijamos el tamaño de la imagen */
+            height: 40px;                     /* Mantenemos la altura fija */
+            margin-left: 10px;               /* Espacio a la derecha de la imagen */
+            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
+            margin-top: -130px;
+        }
+
+        .profile-stats li {
+            display: inline-block;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-right: 0.7rem;
+        }
+
+        .profile-user-name {
+            font-size: 1.1rem;
+        }
+
+        .profile-bio p {
+            font-size: 1.1rem!important;
+        }
+    }
+
+
+
+
+
 
     /* New media query for max-width < 1280px */
     @media (max-width: 1280px) {

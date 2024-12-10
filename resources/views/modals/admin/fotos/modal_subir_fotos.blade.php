@@ -66,7 +66,7 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     // Función que maneja la subida de cada archivo
-    async function uploadFile(file, userId) {
+    async function uploadFile(file, userId, currentIndex, totalFiles) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             const uploadUrl = "{{ route('admin.images.upload') }}";
@@ -79,10 +79,10 @@
             const progressBarWrapper = document.createElement('div');
             const progressBar = document.createElement('progress');
             progressBar.setAttribute('max', '100');
-            progressBar.setAttribute('value', '0');
-            progressBarWrapper.innerText = `Subiendo ${file.name}...`;
-            progressBarWrapper.appendChild(progressBar);
-            progressContainer.appendChild(progressBarWrapper);
+        progressBar.setAttribute('value', '0');
+        progressBarWrapper.innerText = `Subiendo (${currentIndex}/${totalFiles})...`;
+        progressBarWrapper.appendChild(progressBar);
+        progressContainer.appendChild(progressBarWrapper);
 
             // Actualizar progreso de la subida
             xhr.upload.onprogress = (event) => {
@@ -97,7 +97,7 @@
                 if (xhr.status === 200) {
                     console.log('200', xhr.responseText);
                     resolve(xhr.responseText);
-                    progressBarWrapper.innerText = `${file.name} subido exitosamente.`;
+                    progressBarWrapper.innerText = '';
                 } else {
                     console.log('err', xhr.responseText);
                     reject(new Error(xhr.responseText));
@@ -120,34 +120,46 @@
 
     // Evento para manejar el clic del botón y subir los archivos
     uploadButton.addEventListener('click', async () => {
-        if (fileInput.files.length === 0) {
-            alert('Selecciona al menos un archivo antes de enviar.');
-            return;
+    if (fileInput.files.length === 0) {
+        alert('Selecciona al menos un archivo antes de enviar.');
+        return;
+    }
+
+    // Deshabilitar el botón y actualizar el mensaje
+    uploadButton.disabled = true;
+    uploadButton.innerText = `Subiendo ${fileInput.files.length} archivos, por favor espere...`;
+
+    // Crear o reutilizar el mensaje dinámico
+    let messageElement = document.getElementById('upload-message');
+    if (!messageElement) {
+        messageElement = document.createElement('p');
+        messageElement.id = 'upload-message';
+        messageElement.style.color = 'green';
+        messageElement.style.fontSize = '15px';
+        progressContainer.parentNode.insertBefore(messageElement, progressContainer);
+    }
+
+    // Iterar sobre los archivos seleccionados y subirlos
+    const files = fileInput.files;
+    try {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            await uploadFile(file, userId, i + 1, files.length); // Subir cada archivo de forma individual
         }
 
-        // Deshabilitar el botón y actualizar el mensaje
+        // Mensaje de éxito
+        messageElement.innerText = 'Todos los archivos fueron subidos exitosamente. Recargando la página...';
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    } catch (error) {
+        // Mensaje de error
+        messageElement.innerText = 'Error al subir los archivos. Por favor, inténtalo de nuevo.';
+        console.error(error);
+    } finally {
         uploadButton.disabled = true;
-        uploadButton.innerText = `Subiendo ${fileInput.files.length} archivos, por favor espere...`;
+        uploadButton.innerText = 'Archivos subidos';
+    }
+});
 
-        // Iterar sobre los archivos seleccionados y subirlos
-        const files = fileInput.files;
-        try {
-            for (let file of files) {
-                await uploadFile(file, userId); // Subir cada archivo de forma individual
-            }
-
-            // Si todos los archivos se suben correctamente
-            alert('Archivos subidos exitosamente, se recargará automáticamente la página.');
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } catch (error) {
-            // Manejar errores en caso de fallo en alguno de los archivos
-            alert('Error al subir los archivos. Inténtalo de nuevo.');
-            console.error(error);
-        } finally {
-            uploadButton.disabled = true;
-            uploadButton.innerText = 'Archivos subidos';
-        }
-    });
 </script>
