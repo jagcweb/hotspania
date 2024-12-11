@@ -62,7 +62,7 @@
                 </p>
                 <p style="font-size:16px; color:#fff;">
                     Horario: 
-                    @if(\Auth::user()->start_time == 0 && \Auth::user()->end_time == 0)
+                    @if(\Auth::user()->start_time == 0 && \Auth::user()->end_time == 0 || \Auth::user()->start_time == "fulltime" && \Auth::user()->end_time == "fulltime")
                     Todo el día
                     @else
                         @if(\Auth::user()->start_time == 0)
@@ -80,7 +80,6 @@
                         @endif 
                     @endif 
                 </p>
-
                 <p class="mt-4 w-100 text-center">
                     <i class="fa-solid fa-link mr-1" style="font-size:18px;"></i><a href="{{ \Auth::user()->link }}" target="_blank" style="color:#f65807; font-size:16px; text-decoration:underline!important;">{{ \Auth::user()->link }}</a>
                 </p>
@@ -668,7 +667,7 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        margin-top: 2rem;
+        
     }
 
     .buttons button {
@@ -755,7 +754,7 @@
         .profile {
             display: flex;
             flex-wrap: wrap;
-            padding: 4rem 0;
+            padding: 0;
         }
 
         .profile::after {
@@ -885,11 +884,18 @@
         }*/
 
         .profile-image {
-            width: 70px;                      /* Fijamos el tamaño de la imagen */
-            height: 70px;                     /* Mantenemos la altura fija */
-            margin-left: 70px;               /* Espacio a la derecha de la imagen */
-            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
-            margin-top: -150px;
+            width: 100%; /* Ajusta el ancho según el contenedor */
+            aspect-ratio: 2 / 3; /* Proporción 2 de ancho por 3 de alto */
+            margin-left: auto; /* Centra el elemento horizontalmente si es necesario */
+            margin-right: auto;
+            margin-top: 0; /* Ajusta según tu diseño */
+        }
+
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Mantiene el contenido visible sin distorsión */
+            border-radius: 0; /* Quita el redondeo */
         }
 
         .profile-stats li {
@@ -905,13 +911,6 @@
 
         .profile-bio p {
             font-size: 1.4rem!important;
-        }
-
-        .profile-image img {
-            width: 100%;                       /* La imagen ocupa el 100% del contenedor */
-            height: 100%;                      /* Asegura que la imagen sea cuadrada */
-            border-radius: 999px;              /* Redondeamos la imagen */
-            object-fit: cover;                 /* La imagen cubre el área sin distorsionarse */
         }
 
         .profile-user-settings,
@@ -957,21 +956,6 @@
         .profile {
             grid-column-gap: 0rem;
         }
-
-        .profile-image {
-            width: 70px;                      /* Fijamos el tamaño de la imagen */
-            height: 70px;                     /* Mantenemos la altura fija */
-            margin-left: 20px;               /* Espacio a la derecha de la imagen */
-            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
-        }
-
-        .profile-image img {
-            width: 100%;                       /* La imagen ocupa el 100% del contenedor */
-            height: 100%;                      /* Asegura que la imagen sea cuadrada */
-            border-radius: 999px;              /* Redondeamos la imagen */
-            object-fit: cover;                 /* La imagen cubre el área sin distorsionarse */
-        }
-
         .profile-user-settings,
         .profile-bio {
             margin-left: 1rem;                 /* Espaciado a la izquierda de los otros divs */
@@ -1005,14 +989,6 @@
     }
 
     @media screen and (max-width: 420px) {
-        
-        .profile-image {
-            width: 50px;                      /* Fijamos el tamaño de la imagen */
-            height: 50px;                     /* Mantenemos la altura fija */
-            margin-left: 30px;               /* Espacio a la derecha de la imagen */
-            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
-        }
-
         .profile-stats li {
             display: inline-block;
             font-size: 1.2rem;
@@ -1030,15 +1006,6 @@
     }
 
     @media screen and (max-width: 350px) {
-        
-        .profile-image {
-            width: 40px;                      /* Fijamos el tamaño de la imagen */
-            height: 40px;                     /* Mantenemos la altura fija */
-            margin-left: 10px;               /* Espacio a la derecha de la imagen */
-            flex-shrink: 0;                    /* Evitamos que la imagen se encoja */
-            margin-top: -130px;
-        }
-
         .profile-stats li {
             display: inline-block;
             font-size: 1.1rem;

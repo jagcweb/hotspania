@@ -273,7 +273,7 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        margin-top: 2rem;
+        
     }
 
     .buttons button {
@@ -303,7 +303,7 @@
         color: #fff;
         cursor: pointer;
         width: 100%; /* La anchura ocupará todo el espacio disponible */
-        padding-top: 177.78%; /* Proporción 16:9 (100 / 9 * 16) */
+        aspect-ratio: 2 / 3; /* Proporción 2:3 */
         overflow: hidden; /* Oculta el contenido que sobresalga */
         display: flex;
         justify-content: center; /* Centra la imagen horizontalmente */
@@ -319,6 +319,7 @@
         object-fit: cover; /* Escala la imagen manteniendo sus proporciones */
         object-position: center; /* Centra la imagen dentro del contenedor */
     }
+
 
     @media screen and (max-width: 1280px) {
         .gallery-item {
@@ -376,7 +377,7 @@
         .profile {
             display: flex;
             flex-wrap: wrap;
-            padding: 4rem 0;
+            padding: 0;
         }
 
         .profile::after {
