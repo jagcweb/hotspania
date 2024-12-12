@@ -35,6 +35,9 @@
             
                                     <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
                                         class="gallery-image" alt="">
+                                    <div class="franja">
+                                        <p>{{ $user->nickname }}</p>
+                                    </div>
             
                                     <div class="gallery-item-info">
             
@@ -320,11 +323,28 @@
         object-position: center; /* Centra la imagen dentro del contenedor */
     }
 
+    .franja {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(40, 40, 40, 0.5); /* Gris semi-transparente */
+        color: white; /* Color del texto */
+        text-align: center;
+        padding: 10px 0; /* Espaciado dentro de la franja */
+    }
+
+    .franja p {
+        margin: 0;
+        font-size: 20px; /* Tamaño del texto */
+        color: white; /* Color del texto */
+    }
+
 
     @media screen and (max-width: 1280px) {
         .gallery-item {
             flex: 1 0 calc(33.333% - 1rem); /* Tres elementos por fila */
-            padding-top: 177.78%; /* Proporción 16:9 (más alargada) */
+            aspect-ratio: 2 / 3;
             margin: 1rem;
             position: relative;
             overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
@@ -542,9 +562,6 @@
         }
         /* Media query for max-width 800px */
         @media (max-width: 800px) {
-            main {
-                margin-top: 0px!important;
-            }
 
             .gallery {
                 grid-template-columns: repeat(4, 1fr);  /* 3 items per row */

@@ -668,7 +668,7 @@
         color: #fff;
         cursor: pointer;
         width: 100%; /* La anchura ocupará todo el espacio disponible */
-        padding-top: 177.78%; /* Proporción 16:9 (100 / 9 * 16) */
+        
         overflow: hidden; /* Oculta el contenido que sobresalga */
         display: flex;
         justify-content: center; /* Centra la imagen horizontalmente */
@@ -688,7 +688,7 @@
     @media screen and (max-width: 1280px) {
         .gallery-item {
             flex: 1 0 calc(33.333% - 1rem); /* Tres elementos por fila */
-            padding-top: 177.78%; /* Proporción 16:9 (más alargada) */
+            
             margin: 1rem;
             position: relative;
             overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga */
@@ -866,6 +866,7 @@
             margin-left: auto; /* Centra el elemento horizontalmente si es necesario */
             margin-right: auto;
             margin-top: 0; /* Ajusta según tu diseño */
+            height: 100%;
         }
 
         .profile-image img {
