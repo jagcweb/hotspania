@@ -59,8 +59,8 @@
                         
                             @php
                                 $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
-                                $width = \App\Helpers\StorageHelper::getDisk($image, 'images')["width"];
-                                $height = \App\Helpers\StorageHelper::getDisk($image, 'images')["height"];
+                                $width = \App\Helpers\StorageHelper::getSize($image, 'images')["width"];
+                                $height = \App\Helpers\StorageHelper::getSize($image, 'images')["height"];
                             @endphp
                             
                             <div @if($i > 0) class="mt-4" @endif style="max-width: 100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">

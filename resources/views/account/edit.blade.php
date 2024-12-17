@@ -99,8 +99,8 @@
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
                     @php
-                        $width = \App\Helpers\StorageHelper::getDisk($image, 'images')["width"];
-                        $height = \App\Helpers\StorageHelper::getDisk($image, 'images')["height"];
+                        $width = \App\Helpers\StorageHelper::getSize($image, 'images')["width"];
+                        $height = \App\Helpers\StorageHelper::getSize($image, 'images')["height"];
                     @endphp
                     <div class="gallery-item-container">
                         <div class="gallery-item image-hover-zoom" tabindex="0">

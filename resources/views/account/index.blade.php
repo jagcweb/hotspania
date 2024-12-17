@@ -98,8 +98,8 @@
             @foreach ($images as $i=>$image)
                 @php
                     $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
-                    $width = \App\Helpers\StorageHelper::getDisk($image, 'images')["width"];
-                    $height = \App\Helpers\StorageHelper::getDisk($image, 'images')["height"];
+                    $width = \App\Helpers\StorageHelper::getSize($image, 'images')["width"];
+                    $height = \App\Helpers\StorageHelper::getSize($image, 'images')["height"];
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
                     <div class="gallery-item image-hover-zoom" tabindex="0">
