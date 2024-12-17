@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Image;  
+use App\Helpers\StorageHelper;
 use App\Models\User;  
 use Illuminate\Http\Response;
 use Intervention\Image\ImageManager;
@@ -106,8 +107,8 @@ class ImageController extends Controller
             $manager = new ImageManager(new Driver());
 
             if (in_array($mimeType, $videoMimeTypes)) {
-                $videoName = time() . '_' . $file->getClientOriginalName();
-                \Storage::disk('images')->put($videoName, \File::get($file));
+                /*$videoName = time() . '_' . $file->getClientOriginalName();
+               \Storage::disk(StorageHelper::getDisk('images'))->put($videoName, \File::get($file));
 
                 $videoPath = storage_path('app/public/images/' . $videoName);
 
@@ -168,8 +169,9 @@ class ImageController extends Controller
                 $gifCommand = $ffmpegPath . ' -i "' . $outputVideoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=10,scale=320:-1" -t 5 -y "' . $outputGifPath . '"';
                 exec($gifCommand);
 
-                /*$job = new ProcessVideoUpload($ffmpegPath, $videoPath, $watermarkPath, $outputVideoPath, $outputGifPath);
+                $job = new ProcessVideoUpload($ffmpegPath, $videoPath, $watermarkPath, $outputVideoPath, $outputGifPath);
                 $job->handle();*/
+                return back()->with('error', 'Video not allowed.');
             } else {
                 $this->addWaterMark($file, $imageName, $extension, false);
             }
@@ -229,12 +231,24 @@ class ImageController extends Controller
         // Save the image with watermark to the storage path
 
         if($generatedGif) {
-            $image->toGif()->save(storage_path('app/public/videogif/' . $imageName));
+            $disk = StorageHelper::getDisk('videogif');
+            $imageContent = $image->toGif();
+            $filePath = 'videogif/' . $imageName;
+            \Storage::disk($disk)->put($imageName, $imageContent);
+            //$image->toGif()->save(storage_path('app/public/videogif/' . $imageName));
         } else {
             if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
-                $image->toGif()->save(storage_path('app/public/images/' . $imageName));
+                $disk = StorageHelper::getDisk('images');
+                $imageContent = $image->toGif();
+                $filePath = 'images/' . $imageName;
+                \Storage::disk($disk)->put($imageName, $imageContent);
+                //$image->toGif()->save(storage_path('app/public/images/' . $imageName));
             } else {
-                $image->toPng()->save(storage_path('app/public/images/' . $imageName));
+                $disk = StorageHelper::getDisk('images');
+                $imageContent = $image->toPng();
+                $filePath = 'images/' . $imageName;
+                \Storage::disk($disk)->put($imageName, $imageContent);
+                //$image->toPng()->save(storage_path('app/public/images/' . $imageName));
             }
         }
 
@@ -278,9 +292,17 @@ class ImageController extends Controller
         // Save the image with watermark to the storage path
 
         if (preg_match('/\.gif$/i', $imageModel->route)) {
-            $image->toGif()->save(storage_path('app/public/images/' . $imageModel->route));
+            $disk = StorageHelper::getDisk('images');
+            $imageContent = $image->toGif();
+            $filePath = 'images/' . $imageName;
+            \Storage::disk($disk)->put($imageModel->route, $imageContent);
+            //$image->toGif()->save(storage_path('app/public/images/' . $imageModel->route));
         } else {
-            $image->toPng()->save(storage_path('app/public/images/' . $imageModel->route));
+            $disk = StorageHelper::getDisk('images');
+            $imageContent = $image->toPng();
+            $filePath = 'images/' . $imageName;
+            \Storage::disk($disk)->put($imageModel->route, $imageContent);
+            //$image->toPng()->save(storage_path('app/public/images/' . $imageModel->route));
         }
     }
 
@@ -482,13 +504,13 @@ class ImageController extends Controller
         $user = User::find($request->get('user_id'));
 
         if(!is_null($user->profile_image)){
-            \Storage::disk('images')->delete($user->profile_image);
+           \Storage::disk(StorageHelper::getDisk('images'))->delete($user->profile_image);
         }
 
         // Upload the profile image
         $file = $request->file('image');
         $imageName = time() . $file->getClientOriginalName();
-        \Storage::disk('images')->put($imageName, \File::get($file));
+       \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
 
         // Update the user's profile image
         $user->profile_image = $imageName;
@@ -501,7 +523,7 @@ class ImageController extends Controller
     public function delete($id)
     {
         $image = Image::findOrFail($id);
-        \Storage::disk('images')->delete($image->route);
+       \Storage::disk(StorageHelper::getDisk('images'))->delete($image->route);
         $image->delete();
 
         return redirect()->back()->with('exito', 'Imagen borrada!');
@@ -512,7 +534,7 @@ class ImageController extends Controller
         $images = Image::where('user_id', $id)->get();
 
         foreach($images as $image) {
-            \Storage::disk('images')->delete($image->route);
+           \Storage::disk(StorageHelper::getDisk('images'))->delete($image->route);
             $image->delete();
         }
 
@@ -521,13 +543,13 @@ class ImageController extends Controller
 
 
     public function getImage($filename) {
-        $file = \Storage::disk('images')->get($filename);
+        $file =\Storage::disk(StorageHelper::getDisk('images'))->get($filename);
 
         return new Response($file, 200);
     }
     
     public function getGif($filename) {
-        $file = \Storage::disk('videogif')->get($filename);
+        $file = \Storage::disk(StorageHelper::getDisk('videogif'))->get($filename);
 
         return new Response($file, 200);
     }

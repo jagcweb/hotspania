@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\StorageHelper;
 use App\Models\City;
 use App\Models\CityUser;
 use App\Models\Image;
@@ -147,7 +148,7 @@ class RegisterController extends Controller
                     $extension = $file->getClientOriginalExtension();
 
                     if (in_array($mimeType, $videoMimeTypes)) {
-                        \Storage::disk('images')->put($imageName, \File::get($file));
+                        \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
                     } else {
                         $manager = new ImageManager(new Driver());
                         $image = $manager->read($file);
@@ -201,7 +202,7 @@ class RegisterController extends Controller
                 $file = $request->file('dni_file');
 
                 $imageName = time() . $file->getClientOriginalName();
-                \Storage::disk('images')->put($imageName, \File::get($file));
+                \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
 
                 $user->full_name = $request->get('full_name');
                 $user->dni = $request->dni;
@@ -276,12 +277,12 @@ class RegisterController extends Controller
         $user = User::find($id);
 
         if(!is_null($request->file('dni_file'))) {
-            \Storage::disk('images')->delete($user->dni_file);
+            \Storage::disk(StorageHelper::getDisk('images'))->delete($user->dni_file);
 
             $file = $request->file('dni_file');
 
             $imageName = time() . $file->getClientOriginalName();
-            \Storage::disk('images')->put($imageName, \File::get($file));
+            \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
         }
 
         $cities = \App\Models\CityUser::where('user_id', $user->id)->get();

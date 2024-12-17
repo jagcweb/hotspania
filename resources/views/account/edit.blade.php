@@ -95,10 +95,10 @@
         <div class="gallery">
             @foreach ($images as $i=>$image)
                 @php
-                    $mimeType = \Storage::disk('images')->mimeType($image->route);
+                    $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    @php list($width, $height) = getimagesize(\Storage::disk('images')->path($image->route)); @endphp
+                    @php list($width, $height) = getimagesize(\Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->path($image->route)); @endphp
                     <div class="gallery-item-container">
                         <div class="gallery-item image-hover-zoom" tabindex="0">
 
@@ -141,7 +141,7 @@
                     </div>
                 @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
                     @if(!is_null($image->route_gif))
-                        @php list($width, $height) = getimagesize(\Storage::disk('videogif')->path($image->route_gif)); @endphp
+                        @php list($width, $height) = getimagesize(\Storage::disk(\App\Helpers\StorageHelper::getDisk('videogif'))->path($image->route_gif)); @endphp
                         <div class="gallery-item-container">
                             <div class="gallery-item image-hover-zoom" tabindex="0">
 

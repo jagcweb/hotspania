@@ -12,7 +12,7 @@
                  <p class="w-100 text-center"><a style="color:green; font-size:20px;" href="{{ route('admin.images.approveall', ['user' => $u->id]) }}">Aprobar todas</a></p>
                    @foreach ($images_pending as $i=>$image)
                     @php
-                        $mimeType = \Storage::disk('images')->mimeType($image->route);
+                        $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
                     @endphp
                     <div @if($i > 0) class="mt-4" @endif style="max-width: 100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
                         

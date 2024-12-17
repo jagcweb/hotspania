@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\User;
+use App\Helpers\StorageHelper;
 
 class HomeController extends Controller
 {
@@ -47,13 +48,13 @@ class HomeController extends Controller
     }
 
     public function getImage($filename) {
-        $file = \Storage::disk('images')->get($filename);
+        $file = \Storage::disk(StorageHelper::getDisk('images'))->get($filename);
 
         return new Response($file, 200);
     }
 
     public function getGif($filename) {
-        $file = \Storage::disk('videogif')->get($filename);
+        $file = \Storage::disk(StorageHelper::getDisk('videogif'))->get($filename);
 
         return new Response($file, 200);
     }

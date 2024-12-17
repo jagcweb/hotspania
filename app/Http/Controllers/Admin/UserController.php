@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use App\Helpers\StorageHelper;
 use Illuminate\Support\Facades\Hash;
 use App\Models\City;
 use App\Models\CityUser;
@@ -80,7 +81,7 @@ class UserController extends Controller
         $file = $request->file('dni_file');
 
         $imageName = time() . $file->getClientOriginalName();
-        \Storage::disk('images')->put($imageName, \File::get($file));
+        \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
 
         $create = User::create([
             'full_name' => $request->full_name,
@@ -187,12 +188,12 @@ class UserController extends Controller
         $user = User::find($id);
 
         if(!is_null($request->file('dni_file'))) {
-            \Storage::disk('images')->delete($user->dni_file);
+            \Storage::disk(StorageHelper::getDisk('images'))->delete($user->dni_file);
 
             $file = $request->file('dni_file');
 
             $imageName = time() . $file->getClientOriginalName();
-            \Storage::disk('images')->put($imageName, \File::get($file));
+            \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
         }
 
         $cities = \App\Models\CityUser::where('user_id', $user->id)->get();
