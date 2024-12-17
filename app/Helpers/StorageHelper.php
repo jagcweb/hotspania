@@ -26,7 +26,7 @@ class StorageHelper
         // Si estamos en producción, usamos GCS; de lo contrario, 'images' (local)
         if (App::environment('production')) {
             // Obtener el contenido de la imagen desde GCS
-            $imageContent = Storage::disk('gcs')->get($image->route);
+            $imageContent = \Storage::disk('gcs')->get($image->route);
     
             // Analizar el contenido de la imagen
             $fileInfo = $getID3->analyzeFromString($imageContent);
@@ -36,7 +36,7 @@ class StorageHelper
             $height = $fileInfo['image_height'] ?? null;
         } else {
             // Obtener la ruta local de la imagen
-            $imagePath = Storage::disk($name)->path($image->route);
+            $imagePath = \Storage::disk($name)->path($image->route);
     
             // Obtener las dimensiones de la imagen localmente
             list($width, $height) = getimagesize($imagePath);
