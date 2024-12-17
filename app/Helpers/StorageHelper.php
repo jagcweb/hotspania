@@ -29,7 +29,7 @@ class StorageHelper
             $imageContent = \Storage::disk('gcs')->get($image->route);
     
             // Analizar el contenido de la imagen
-            $fileInfo = $getID3->analyzeFromString($imageContent);
+            $fileInfo = $getID3->analyze($imageContent);
     
             // Obtener las dimensiones
             $width = $fileInfo['image_width'] ?? null;
