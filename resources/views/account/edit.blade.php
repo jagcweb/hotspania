@@ -98,7 +98,10 @@
                     $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    @php list($width, $height) = getimagesize(\Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->path($image->route)); @endphp
+                    @php
+                        $width = \App\Helpers\StorageHelper::getDisk($image, 'images')["width"];
+                        $height = \App\Helpers\StorageHelper::getDisk($image, 'images')["height"];
+                    @endphp
                     <div class="gallery-item-container">
                         <div class="gallery-item image-hover-zoom" tabindex="0">
 
