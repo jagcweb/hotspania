@@ -689,26 +689,23 @@
 
     .gallery-item {
         position: relative;
-        flex: 1 0 calc(33.333% - 1rem); /* Ajusta el ancho base del contenedor */
-        margin: 1rem;
-        color: #fff;
-        cursor: pointer;
-        width: 100%; /* La anchura ocupará todo el espacio disponible */
-        
-        overflow: hidden; /* Oculta el contenido que sobresalga */
+        aspect-ratio: 2 / 3; /* Mantiene proporción 3:2 */
+        overflow: hidden; /* Oculta contenido excedente */
         display: flex;
-        justify-content: center; /* Centra la imagen horizontalmente */
-        align-items: center; /* Centra la imagen verticalmente */
+        justify-content: center; /* Centra el contenido horizontalmente */
+        align-items: center; /* Centra el contenido verticalmente */
+        background-color: #000; /* Fondo visible mientras carga la imagen */
+        cursor: pointer;
     }
 
     .gallery-image {
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%; /* Hace que la imagen ocupe todo el ancho del contenedor */
-        height: 100%; /* La altura también ocupa todo el contenedor */
-        object-fit: cover; /* Escala la imagen manteniendo sus proporciones */
-        object-position: center; /* Centra la imagen dentro del contenedor */
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Escala la imagen para cubrir completamente */
+        object-position: center; /* Centra la imagen en su contenedor */
     }
 
     @media screen and (max-width: 1280px) {
@@ -865,6 +862,7 @@
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+            height: auto;
             
         }
 
