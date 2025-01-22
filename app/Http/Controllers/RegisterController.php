@@ -143,7 +143,7 @@ class RegisterController extends Controller
                 // Process each file
                 foreach ($files as $file) {
                     // Upload the image
-                    $imageName = time() . '-' . $file->getClientOriginalName();
+                    $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
                     $mimeType = $file->getMimeType();
                     $extension = $file->getClientOriginalExtension();
 
@@ -201,7 +201,7 @@ class RegisterController extends Controller
 
                 $file = $request->file('dni_file');
 
-                $imageName = time() . $file->getClientOriginalName();
+                $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
                 \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
 
                 $user->full_name = $request->get('full_name');
@@ -281,7 +281,7 @@ class RegisterController extends Controller
 
             $file = $request->file('dni_file');
 
-            $imageName = time() . $file->getClientOriginalName();
+            $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
             \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
         }
 

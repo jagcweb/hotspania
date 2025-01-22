@@ -38,6 +38,13 @@ return [
             'path_prefix' => null, // Opcional
         ],
 
+        'temp_img_ia' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/temp_img_ia'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         'images' => [
             'driver' => 'local',
             'root' => storage_path('app/public/images'),

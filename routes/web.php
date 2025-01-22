@@ -19,7 +19,11 @@ Route::get('/', function () {
     if(!Auth::check()){
         return redirect()->route('login');
     } else {
-        return redirect()->route('home');
+        if (\Auth::user()->getRoleNames()[0] == 'admin') {
+            return redirect()->route('admin.citychanges');
+        } else {
+            return redirect()->route('home');
+        }
     }
 });
 

@@ -15,7 +15,15 @@ use FFMpeg\FFProbe;
 use FFMpeg\Format\Video\X264;
 use FFMpeg\Coordinate\TimeCode;
 use Illuminate\Support\Facades\Log;
+use Google\Cloud\Vision\V1\Image as GoogleImage;
+use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Feature;
+use Google\Cloud\Vision\V1\Feature\Type;
 use App\Jobs\ProcessVideoUpload;
+use CV\Mat;
+use CV\Imgcodecs;
+use CV\Size;
+use CV\Opencv;
 
 class ImageController extends Controller
 {
@@ -73,17 +81,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen como portada.');
     }
 
-
     public function upload(Request $request) {
-        Log::info('Solicitud de carga recibida:', $request->all());
-        // Validate the request data
-        /*$request->validate([
-            'images' => 'required|array',
-            'images.*' => 'required|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,wmv,avchd,webm,flv|max:10240',
-            'user_id' => 'required|integer',
-        ]);*/
-
-        // Get the uploaded files
         $files = $request->file('images');
 
         $videoMimeTypes = [
@@ -98,86 +96,33 @@ class ImageController extends Controller
         // Process each file
         foreach ($files as $file) {
             // Generate a unique name for the image
-            $imageName = time() . '_' . $file->getClientOriginalName();
+            $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
+
 
             $mimeType = $file->getMimeType();
             $extension = $file->getClientOriginalExtension();
 
+            \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
+
+            $imageData = \Storage::disk('temp_img_ia')->get($imageName);
+
+            $visionResult = $this->analyzeImageWithVisionAI($imageData);
+            //$vertexAIResult = $this->analyzeImageWithVertexAI($imageData);
+            //$opencvResult = $this->processImageWithOpenCV($imageData);
+
+            $combinedResult = [
+                'vision' => $visionResult,
+                'vertex' => $vertexAIResult,
+                'opencv' => $opencvResult,
+            ];
+
+            \Storage::disk('temp_img_ia')->delete($imageName);
+
             // Initialize the ImageManager with the GD driver (explicitly using GD)
             $manager = new ImageManager(new Driver());
 
-            if (in_array($mimeType, $videoMimeTypes)) {
-                /*$videoName = time() . '_' . $file->getClientOriginalName();
-               \Storage::disk(StorageHelper::getDisk('images'))->put($videoName, \File::get($file));
+            $this->addWaterMark($file, $imageName, $extension, false);
 
-                $videoPath = storage_path('app/public/images/' . $videoName);
-
-                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                    // Windows system
-                    $ffmpegPath = 'C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg/bin/ffmpeg.exe';
-                    $ffprobePath = 'C:/ProgramData/chocolatey/lib/ffmpeg/tools/ffmpeg/bin/ffprobe.exe';
-                } else {
-                    // Linux/Ubuntu system
-                    $ffmpegPath = '/usr/bin/ffmpeg';  // Adjust this based on your server
-                    $ffprobePath = '/usr/bin/ffprobe'; // Adjust this based on your server
-                }
-
-                // Initialize FFProbe to get video details
-                $ffprobe = FFProbe::create([
-                    'ffmpeg.binaries' => $ffmpegPath,
-                    'ffprobe.binaries' => $ffprobePath,
-                ]);
-                $duration = (int) $ffprobe->format($videoPath)->get('duration');
-                
-                // Get video dimensions
-                $dimensions = $ffprobe->streams($videoPath)->videos()->first()->getDimensions();
-                $width = $dimensions->getWidth();
-                $height = $dimensions->getHeight();
-    
-                // Set path for GIF output
-                $gifName = pathinfo($videoName, PATHINFO_FILENAME) . '.gif';
-                $gifPath = 'videogif/' . $gifName; // Save GIF in 'gifs' folder
-    
-                // Initialize FFmpeg to convert video to GIF
-                $ffmpeg = FFMpeg::create([
-                    'ffmpeg.binaries' => $ffmpegPath,
-                    'ffprobe.binaries' => $ffprobePath,
-                ]);
-                $ffmpegVideo = $ffmpeg->open($videoPath);
-
-                $watermarkPath = public_path('images/unique_marca_agua.png');
-
-                $ffmpegVideo->filters()->watermark($watermarkPath, [
-                    'position' => 'relative',  // Position watermark relative to video size
-                    'x' => 10,  // Horizontal position of the watermark (in pixels)
-                    'y' => 10,  // Vertical position of the watermark (in pixels)
-                    'opacity' => 0.5,  // Set opacity of the watermark (0 to 1)
-                ]);
-
-                $ffmpegFormat = new X264('libmp3lame', 'libx264');
-
-                $imageName = 'enconded_' . $videoName;
-                
-                $outputVideoPath = storage_path('app/public/images/' . $imageName);
-                $outputGifPath = storage_path('app/public/videogif/' . $gifName);
-
-                // Comando para procesar el video
-                $command = $ffmpegPath . ' -i "' . $videoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0:v][1:v]overlay=x=(W-w)/2:y=(H-h)/2" -c:v libx264 -preset ultrafast -crf 28 -c:a aac -strict experimental -y "' . $outputVideoPath . '"';
-                exec($command);
-
-                // Comando para generar el GIF
-                $gifCommand = $ffmpegPath . ' -i "' . $outputVideoPath . '" -i "' . $watermarkPath . '" -filter_complex "[0][1]overlay=10:10,fps=10,scale=320:-1" -t 5 -y "' . $outputGifPath . '"';
-                exec($gifCommand);
-
-                $job = new ProcessVideoUpload($ffmpegPath, $videoPath, $watermarkPath, $outputVideoPath, $outputGifPath);
-                $job->handle();*/
-                return back()->with('error', 'Video not allowed.');
-            } else {
-                $this->addWaterMark($file, $imageName, $extension, false);
-            }
-
-
-            // Assuming you have an Image model to store this image information in the database
             $imageModel = new Image(); // Assuming you have an Image model
             $imageModel->user_id = $request->input('user_id');
             $imageModel->route = $imageName;
@@ -186,12 +131,203 @@ class ImageController extends Controller
             $imageModel->type = "images";
             $imageModel->status = 'approved'; // Set initial status to pending
             $imageModel->watermarked = 1;
+            $imageModel->vision_data = json_encode($combinedResult);
             $imageModel->save();
         }
 
         return back()->with('success', 'Images uploaded with watermark pattern successfully!');
     }
 
+    private function analyzeImageWithVisionAI($imageData) {
+        try {
+            // Inicializar el cliente de Google Vision AI
+            $imageAnnotator = new ImageAnnotatorClient([
+                'credentials' => storage_path('keys/hotspania-41a196f738f2.json'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al inicializar el cliente ImageAnnotator: ' . $e->getMessage());
+        }
+    
+        // Configuramos las características que queremos obtener de la imagen
+        $features = [
+            (new Feature())->setType(Type::LABEL_DETECTION)->setMaxResults(10),
+            (new Feature())->setType(Type::TEXT_DETECTION),
+            (new Feature())->setType(Type::SAFE_SEARCH_DETECTION),
+            (new Feature())->setType(Type::IMAGE_PROPERTIES),
+            (new Feature())->setType(Type::FACE_DETECTION),
+            (new Feature())->setType(Type::OBJECT_LOCALIZATION),
+            (new Feature())->setType(Type::LANDMARK_DETECTION),
+            (new Feature())->setType(Type::LOGO_DETECTION),
+        ];
+    
+        try {
+            // Crear un objeto GoogleImage desde los datos de la imagen
+            $image = new GoogleImage();
+            $image->setContent($imageData);
+    
+            // Llamamos a la API de Vision
+            $response = $imageAnnotator->annotateImage(
+                $imageData,
+                $features
+            );
+    
+            Log::info("Respuesta completa de Google Vision AI: " . $response->serializeToJsonString());
+    
+            // Verifica si la respuesta contiene algún error
+            $status = $response->getError();
+            if ($status) {
+                Log::error("Error en la respuesta de la API: " . json_encode($status));
+            }
+    
+            // Obtener las distintas anotaciones
+            $labels = $response->getLabelAnnotations();  // Etiquetas detectadas
+            $textAnnotations = $response->getTextAnnotations();  // Texto detectado
+            $safeSearch = $response->getSafeSearchAnnotation();  // Detección de contenido seguro
+            $imageProperties = $response->getImagePropertiesAnnotation();  // Propiedades de imagen
+            $faces = $response->getFaceAnnotations();  // Rostros detectados
+            $objects = $response->getLocalizedObjectAnnotations();  // Objetos detectados
+            $landmarks = $response->getLandmarkAnnotations();  // Lugares o monumentos detectados
+            $logos = $response->getLogoAnnotations();  // Logotipos detectados
+    
+            // Procesar las diferentes anotaciones
+    
+            // Etiquetas
+            $labelsArray = [];
+            foreach ($labels as $label) {
+                $labelsArray[] = $label->getDescription();
+            }
+    
+            // Texto detectado
+            $textArray = [];
+            foreach ($textAnnotations as $textAnnotation) {
+                $textArray[] = $textAnnotation->getDescription();
+            }
+    
+            // Análisis de seguridad
+            $safeSearchArray = [
+                'adult' => $safeSearch->getAdult(),
+                'spoof' => $safeSearch->getSpoof(),
+                'medical' => $safeSearch->getMedical(),
+                'violence' => $safeSearch->getViolence(),
+                'racy' => $safeSearch->getRacy()
+            ];
+    
+            // Propiedades de la imagen (colores dominantes)
+            $imagePropertiesArray = [];
+            foreach ($imageProperties->getDominantColors()->getColors() as $color) {
+                $imagePropertiesArray[] = [
+                    'rgb' => $color->getColor(),
+                    'score' => $color->getScore(),
+                    'pixelFraction' => $color->getPixelFraction()
+                ];
+            }
+    
+            // Rostros detectados (si quieres procesar las coordenadas de los rostros)
+            $facesArray = [];
+            foreach ($faces as $face) {
+                $facesArray[] = [
+                    'boundingBox' => $face->getBoundingPoly()->getNormalizedVertices(),
+                    'joyLikelihood' => $face->getJoyLikelihood(),
+                    'sorrowLikelihood' => $face->getSorrowLikelihood(),
+                    'angerLikelihood' => $face->getAngerLikelihood(),
+                    'surpriseLikelihood' => $face->getSurpriseLikelihood()
+                ];
+            }
+    
+            // Objetos detectados
+            $objectsArray = [];
+            foreach ($objects as $object) {
+                $objectsArray[] = $object->getName();
+            }
+    
+            // Lugares detectados (monumentos)
+            $landmarksArray = [];
+            foreach ($landmarks as $landmark) {
+                $landmarksArray[] = $landmark->getDescription();
+            }
+    
+            // Logotipos detectados
+            $logosArray = [];
+            foreach ($logos as $logo) {
+                $logosArray[] = $logo->getDescription();
+            }
+    
+            // Regresar los datos procesados
+            return [
+                'labels' => $labelsArray,
+                'text' => $textArray,
+                'safeSearch' => $safeSearchArray,
+                'imageProperties' => $imagePropertiesArray,
+                'faces' => $facesArray,
+                'objects' => $objectsArray,
+                'landmarks' => $landmarksArray,
+                'logos' => $logosArray,
+            ];
+        } catch (\Exception $e) {
+            Log::error("Error al analizar la imagen con Google Vision AI: " . $e->getMessage());
+            return null;
+        } finally {
+            // Cerramos el cliente para liberar recursos
+            $imageAnnotator->close();
+        }
+    }
+
+    /*private function analyzeImageWithVertexAI($imageData) {
+        try {
+            $client = new PredictionServiceClient([
+                'credentials' => storage_path('keys/hotspania-41a196f738f2.json'),
+            ]);
+
+            $endpointId = 'tu-id-de-endpoint';  // ID del endpoint de Vertex AI
+            $project = env('GOOGLE_PROJECT_ID');
+            $location = env('GOOGLE_LOCATION');
+            $endpointName = PredictionServiceClient::endpointName($project, $location, $endpointId);
+
+            // Envía la imagen como base64 a Vertex AI
+            $instances = [
+                [
+                    'image_bytes' => ['b64' => base64_encode($imageData)],
+                    'key' => '0',
+                ]
+            ];
+
+            // Realizar predicción
+            $response = $client->predict($endpointName, $instances);
+
+            $predictions = [];
+            foreach ($response->getPredictions() as $prediction) {
+                $predictions[] = $prediction->getValue();
+            }
+
+            return $predictions;
+        } catch (\Exception $e) {
+            Log::error("Error en Vertex AI: " . $e->getMessage());
+            return null;
+        }
+    }*/
+
+    /*private function processImageWithOpenCV($imageData) {
+        // Create a Mat (matrix) from the image data
+        $mat = Imgcodecs::imdecode(np_frombuffer($imageData), Imgcodecs::IMREAD_COLOR);
+        
+        // Convert to grayscale (example of processing)
+        $grayMat = new Mat();
+        cvtColor($mat, $grayMat, CV::COLOR_BGR2GRAY);
+    
+        // You can save the processed image as PNG/JPG for further use (optional)
+        $processedImagePath = 'processed_image.jpg';
+        Imgcodecs::imwrite($processedImagePath, $grayMat);
+    
+        // You can return specific data you need after processing, like basic image info
+        return [
+            'processed_image' => $processedImagePath,  // Path to the processed image
+            'image_size' => $grayMat->size()  // You can return other relevant image info
+        ];
+    }*/
+
+    
+    
+    
     public function addWaterMark($file, $imageName, $extension, bool $generatedGif){
         // Initialize the ImageManager with the GD driver (explicitly using GD)
         $manager = new ImageManager(new Driver());
@@ -509,7 +645,8 @@ class ImageController extends Controller
 
         // Upload the profile image
         $file = $request->file('image');
-        $imageName = time() . $file->getClientOriginalName();
+        $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
+
        \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
 
         // Update the user's profile image
