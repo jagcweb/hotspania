@@ -278,7 +278,7 @@ class ImageController extends Controller
                 'credentials' => storage_path('keys/hotspania-41a196f738f2.json'),
             ]);
 
-            $endpointId = 'https://vision.googleapis.com/v1/images:annotate';  // ID del endpoint de Vertex AI
+            $endpointId = 'https://vision.googleapis.com/v1/images:annotate';  // ID del endpoint VisionAI
             $project = "hotspania";
             $location = "global";
             $endpointName = PredictionServiceClient::endpointName($project, $location, $endpointId);
