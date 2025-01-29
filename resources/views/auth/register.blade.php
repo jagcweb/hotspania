@@ -390,23 +390,24 @@
     };
     
     // Si el paso 1 está completado pero el usuario está en paso-1, redirige al paso-2
-    if (pasoCompletado['paso-1'] && pasoActual === 'paso-1') {
-        window.location.href = "{{ route('user.register', ['step' => '2', 'user' => \Crypt::encryptString($user->id)]) }}";
+    const encryptedUserId = "{{ isset($user) ? \Crypt::encryptString($user->id) : '' }}";
+    if (pasoCompletado['paso-1'] && pasoActual === 'paso-1' && encryptedUserId) {
+        window.location.href = "{{ route('user.register', ['step' => '2', 'user' => '']) }}" + encryptedUserId;
     }
     
     // Si el paso 2 está completado pero el usuario está en paso-2, redirige al paso-3
-    if (pasoCompletado['paso-2'] && pasoActual === 'paso-2') {
-        window.location.href = "{{ route('user.register', ['step' => '3', 'user' => \Crypt::encryptString($user->id)]) }}";
+    if (pasoCompletado['paso-2'] && pasoActual === 'paso-2' && encryptedUserId) {
+        window.location.href = "{{ route('user.register', ['step' => '3', 'user' => '']) }}" + encryptedUserId;
     }
     
     // Evita que el usuario pueda ir hacia atrás al paso anterior en el navegador
     window.history.pushState(null, null, window.location.href); // Agrega un nuevo estado en el historial
     window.onpopstate = function () {
         // Si el usuario presiona "Atrás", redirige al paso siguiente
-        if (pasoActual === 'paso-1' && pasoCompletado['paso-1']) {
-            window.location.href = "{{ route('user.register', ['step' => '2', 'user' => \Crypt::encryptString($user->id)]) }}";
-        } else if (pasoActual === 'paso-2' && pasoCompletado['paso-2']) {
-            window.location.href = "{{ route('user.register', ['step' => '3', 'user' => \Crypt::encryptString($user->id)]) }}";
+        if (pasoActual === 'paso-1' && pasoCompletado['paso-1'] && encryptedUserId) {
+            window.location.href = "{{ route('user.register', ['step' => '2', 'user' => '']) }}" + encryptedUserId;
+        } else if (pasoActual === 'paso-2' && pasoCompletado['paso-2'] && encryptedUserId) {
+            window.location.href = "{{ route('user.register', ['step' => '3', 'user' => '']) }}" + encryptedUserId;
         }
     };
 </script>

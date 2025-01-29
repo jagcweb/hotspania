@@ -30,6 +30,22 @@
 
                 <button class="btn profile-edit-btn" id="profile-edit-btn">Editar perfil</button>
 
+
+
+                <button class="btn profile-edit-btn" id="logout-edit-btn">Cerrar sesión</button>
+
+                <form class="d-none" id="logout-form" action="{{ url('logout') }}" method="POST">
+                    {{ csrf_field() }}
+                    <!-- Botón oculto (opcional) para mantener el formulario limpio -->
+                </form>
+
+                <script>
+                    // Vincular el clic del botón al envío del formulario
+                    document.getElementById('logout-edit-btn').addEventListener('click', function () {
+                        document.getElementById('logout-form').submit();
+                    });
+                </script>
+
                 <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog"
                         aria-hidden="true"></i></button>
 

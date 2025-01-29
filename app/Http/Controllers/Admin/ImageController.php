@@ -272,15 +272,15 @@ class ImageController extends Controller
         }
     }
 
-    /*private function analyzeImageWithVertexAI($imageData) {
+    private function analyzeImageWithVertexAI($imageData) {
         try {
             $client = new PredictionServiceClient([
                 'credentials' => storage_path('keys/hotspania-41a196f738f2.json'),
             ]);
 
-            $endpointId = 'tu-id-de-endpoint';  // ID del endpoint de Vertex AI
-            $project = env('GOOGLE_PROJECT_ID');
-            $location = env('GOOGLE_LOCATION');
+            $endpointId = 'https://vision.googleapis.com/v1/images:annotate';  // ID del endpoint de Vertex AI
+            $project = "hotspania";
+            $location = "global";
             $endpointName = PredictionServiceClient::endpointName($project, $location, $endpointId);
 
             // Envía la imagen como base64 a Vertex AI
@@ -304,7 +304,7 @@ class ImageController extends Controller
             Log::error("Error en Vertex AI: " . $e->getMessage());
             return null;
         }
-    }*/
+    }
 
     /*private function processImageWithOpenCV($imageData) {
         // Create a Mat (matrix) from the image data

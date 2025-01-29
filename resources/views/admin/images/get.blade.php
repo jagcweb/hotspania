@@ -122,6 +122,13 @@
                                         <i class="fa-regular fa-image"></i>
                                     </a>
                                     @endif
+
+                                    @if(!is_null($image->vision_data))
+                                    <a title="Ver datos Vision IA" href="javascript:void(0);" data-toggle="modal" data-target="#datos-vision-ia-{{ $image->id }}" class="p-2" style="margin-left:10px; color: white; font-size: 22px; border-radius: 9999px; display: block; width: 50px; text-align: center; background: #555;">
+                                        <i class="fa-solid fa-database"></i>
+                                    </a>
+                                    @include('modals.admin.fotos.modal_ver_datos_vision_ia')
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
