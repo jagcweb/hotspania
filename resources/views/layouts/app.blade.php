@@ -63,33 +63,37 @@
             <img class="img_logo" src="{{ asset('images/logo.png') }}" alt="Logo"/>
         </a>
         <ul class="list">
-          {{--<li><a class="text-white" href="#">Inicio</a></li>
-          <li><a class="text-white" href="#">Mi cuenta</a></li>
-          <li>
-          <form id="logout-form" action="{{ url('logout') }}" method="POST">
-            {{ csrf_field() }}
-            <a href="javascript:{}" onclick="document.getElementById('logout-form').submit();" class="text-white">
-                <span>Cerrar sesión</span>
-            </a>
-          </li>--}}
-          <li>
-            @if(\Auth::user())
-              <a href="{{ route('account.index') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
-                @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
-                @if(is_object($frontimage))
-                  @if(!is_null($frontimage->route_gif))
-                    <img class="img_logo2 rounded-circle"  src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
-                  @else
-                    <img class="img_logo2 rounded-circle"  src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
-                  @endif
-                @else
-                  <img src="{{ asset('images/user.jpg') }}" class="img_logo2 rounded-circle" />
-                @endif
-                <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
+            {{--<li><a class="text-white" href="#">Inicio</a></li>
+            <li><a class="text-white" href="#">Mi cuenta</a></li>
+            <li>
+            <form id="logout-form" action="{{ url('logout') }}" method="POST">
+              {{ csrf_field() }}
+              <a href="javascript:{}" onclick="document.getElementById('logout-form').submit();" class="text-white">
+                  <span>Cerrar sesión</span>
               </a>
-            @endif
-          </li>
-        </form>
+            </li>--}}
+            <li>
+              @if(\Auth::user())
+                @if(\Auth::user()->getRoleNames()[0] == "admin")
+                  <a href="{{ route('admin.citychanges') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
+                @else
+                  <a href="{{ route('account.index') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
+                @endif
+                  @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
+                  @if(is_object($frontimage))
+                    @if(!is_null($frontimage->route_gif))
+                      <img class="img_logo2 rounded-circle"  src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                    @else
+                      <img class="img_logo2 rounded-circle"  src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                    @endif
+                  @else
+                    <img src="{{ asset('images/user.jpg') }}" class="img_logo2 rounded-circle" />
+                  @endif
+                  <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
+                </a>
+              @endif
+            </li>
+          </form>
         </ul>
       </nav>
 

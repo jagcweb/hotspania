@@ -24,6 +24,9 @@ use CV\Mat;
 use CV\Imgcodecs;
 use CV\Size;
 use CV\Opencv;
+use Google\Cloud\AIPlatform\V1\PredictionServiceClient;
+use GuzzleHttp\Client;
+use Google\Auth\Credentials\ServiceAccountCredentials;
 
 class ImageController extends Controller
 {
@@ -107,13 +110,14 @@ class ImageController extends Controller
             $imageData = \Storage::disk('temp_img_ia')->get($imageName);
 
             $visionResult = $this->analyzeImageWithVisionAI($imageData);
-            //$vertexAIResult = $this->analyzeImageWithVertexAI($imageData);
+            $vertexAIResult = $this->analyzeImageWithVertexAI($imageData);
             //$opencvResult = $this->processImageWithOpenCV($imageData);
+            
 
             $combinedResult = [
                 'vision' => $visionResult,
                 'vertex' => $vertexAIResult,
-                'opencv' => $opencvResult,
+                //'opencv' => $opencvResult,
             ];
 
             \Storage::disk('temp_img_ia')->delete($imageName);
@@ -135,7 +139,7 @@ class ImageController extends Controller
             $imageModel->save();
         }
 
-        return back()->with('success', 'Images uploaded with watermark pattern successfully!');
+        //return back()->with('success', 'Images uploaded with watermark pattern successfully!');
     }
 
     private function analyzeImageWithVisionAI($imageData) {
@@ -170,8 +174,6 @@ class ImageController extends Controller
                 $imageData,
                 $features
             );
-    
-            Log::info("Respuesta completa de Google Vision AI: " . $response->serializeToJsonString());
     
             // Verifica si la respuesta contiene algún error
             $status = $response->getError();
@@ -272,38 +274,92 @@ class ImageController extends Controller
         }
     }
 
+
+
     private function analyzeImageWithVertexAI($imageData) {
         try {
-            $client = new PredictionServiceClient([
-                'credentials' => storage_path('keys/hotspania-41a196f738f2.json'),
-            ]);
-
+            // Obtener el token de acceso para autenticación
+            $accessToken = $this->getGoogleAccessToken(); // Método para obtener el token
+        
+            // Crear el cliente HTTP (Guzzle)
+            $client = new Client();
+            
+            // URL del endpoint de Vertex AI Vision (ajusta esto según tu proyecto y endpoint)
             $endpointId = 'https://vision.googleapis.com/v1/images:annotate';  // ID del endpoint VisionAI
             $project = "hotspania";
             $location = "global";
-            $endpointName = PredictionServiceClient::endpointName($project, $location, $endpointId);
-
-            // Envía la imagen como base64 a Vertex AI
-            $instances = [
-                [
-                    'image_bytes' => ['b64' => base64_encode($imageData)],
-                    'key' => '0',
+            $url = "https://$location-aiplatform.googleapis.com/v1/projects/$project/locations/$location/endpoints/$endpointId:predict";
+            
+            // Configura las cabeceras necesarias para la solicitud
+            $headers = [
+                'Authorization' => 'Bearer ' . $accessToken,
+                'Content-Type'  => 'application/json',
+            ];
+    
+            // Prepara el cuerpo de la solicitud con la imagen codificada en base64
+            $body = [
+                "instances" => [
+                    [
+                        "image_bytes" => [
+                            "b64" => base64_encode($imageData),
+                        ]
+                    ]
                 ]
             ];
+            
+            // Realiza la solicitud de predicción
+            $response = $client->post($url, [
+                'json' => $body,
+                'headers' => $headers
+            ]);
 
-            // Realizar predicción
-            $response = $client->predict($endpointName, $instances);
+            Log::info("Código de estado HTTP de la respuesta: " . $response->getStatusCode());
 
-            $predictions = [];
-            foreach ($response->getPredictions() as $prediction) {
-                $predictions[] = $prediction->getValue();
+            Log::info("Respuesta completa de Vertex AI: " . $response->getBody());
+            
+            // Procesa la respuesta
+            $responseBody = json_decode($response->getBody(), true);
+
+            //Log::info("Respuesta completa de Vertex AI Body: " . $response->getBody());
+    
+            // Verifica si hubo un error en la respuesta
+            if (isset($responseBody['error'])) {
+                Log::error("Error en la respuesta de Vertex AI: " . json_encode($responseBody['error']));
+                return null;
             }
-
+    
+            // Extrae las predicciones de la respuesta
+            $predictions = [];
+            if (isset($responseBody['predictions'])) {
+                foreach ($responseBody['predictions'] as $prediction) {
+                    $predictions[] = $prediction; // Procesa según sea necesario
+                }
+            }
+    
+            // Devuelve las predicciones
             return $predictions;
+        
         } catch (\Exception $e) {
-            Log::error("Error en Vertex AI: " . $e->getMessage());
+            // Manejo de errores
+            Log::error("Error en la predicción de Vertex AI: " . $e->getMessage());
             return null;
         }
+    }
+    
+    private function getGoogleAccessToken() {
+        // Ruta al archivo de las credenciales de servicio de Google
+        $keyFile = storage_path('keys/hotspania-41a196f738f2.json');
+        
+        // Obtener las credenciales de servicio
+        $credentials = new ServiceAccountCredentials(
+            null,
+            $keyFile
+        );
+        
+        // Recuperar el token de acceso
+        $token = $credentials->fetchAuthToken();
+        
+        return $token['access_token']; // Devuelve el token de acceso
     }
 
     /*private function processImageWithOpenCV($imageData) {

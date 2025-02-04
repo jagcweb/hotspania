@@ -36,7 +36,7 @@
                                     <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
                                         class="gallery-image" alt="">
                                     <div class="franja">
-                                        <p>{{ $user->nickname }}</p>
+                                        <p>{{ Str::limit(explode(' ', trim($user->nickname))[0], 8, '') }}</p>
                                     </div>
             
                                     <div class="gallery-item-info">
@@ -332,10 +332,13 @@
         color: white; /* Color del texto */
         text-align: center;
         padding: 10px 0; /* Espaciado dentro de la franja */
+        height: 40px;
+
     }
 
     .franja p {
         margin: 0;
+        line-height: 20px;
         font-size: 20px; /* Tamaño del texto */
         color: white; /* Color del texto */
     }

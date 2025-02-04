@@ -26,8 +26,7 @@ class RegisterController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create($step, $user = null)
-    {
+    public function create($step, $user = null) {
 
         if (!is_null($user)) {
             $id = \Crypt::decryptString($user);
@@ -63,8 +62,7 @@ class RegisterController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function save(Request $request, $step, $id = null)
-    {
+    public function save(Request $request, $step, $id = null) {
         switch($step) {
             case 'step-1':
                 $create = User::create([
@@ -229,8 +227,7 @@ class RegisterController extends Controller
         ]);
     }
 
-    public function update(Request $request)
-    {
+    public function update(Request $request) {
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:255',
             'dni' => 'required|string|max:20', // Ajusta la longitud según tu país
@@ -341,8 +338,7 @@ class RegisterController extends Controller
         return back()->with('exito', 'Usuario actualizado!');
     }
 
-    public function updatePassword(Request $request, $id)
-    {
+    public function updatePassword(Request $request, $id) {
         $request->validate([  
             'password' => ['required', 'min:8'],
         ]);
@@ -359,8 +355,7 @@ class RegisterController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getPending()
-    {
+    public function getPending() {
         $users = User::whereHas(
             'roles', function($q){
                 $q->where('name', 'user');
@@ -375,8 +370,7 @@ class RegisterController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getActive()
-    {
+    public function getActive() {
         $users = User::whereHas(
             'roles', function($q){
                 $q->where('name', 'user');

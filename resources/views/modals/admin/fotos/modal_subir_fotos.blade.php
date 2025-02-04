@@ -79,10 +79,10 @@
             const progressBarWrapper = document.createElement('div');
             const progressBar = document.createElement('progress');
             progressBar.setAttribute('max', '100');
-        progressBar.setAttribute('value', '0');
-        progressBarWrapper.innerText = `Subiendo (${currentIndex}/${totalFiles})...`;
-        progressBarWrapper.appendChild(progressBar);
-        progressContainer.appendChild(progressBarWrapper);
+            progressBar.setAttribute('value', '0');
+            progressBarWrapper.innerText = `Subiendo (${currentIndex}/${totalFiles})...`;
+            progressBarWrapper.appendChild(progressBar);
+            progressContainer.appendChild(progressBarWrapper);
 
             // Actualizar progreso de la subida
             xhr.upload.onprogress = (event) => {

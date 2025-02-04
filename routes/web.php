@@ -48,7 +48,10 @@ Route::get('/account/images/{image}/visible', [App\Http\Controllers\AccountContr
 Route::get('/account/images/{image}/invisible', [App\Http\Controllers\AccountController::class, 'invisible'])->name('account.images.invisible');
 
 //RegistersController
-Route::get('/register/paso-{step}/{user?}', [App\Http\Controllers\RegisterController::class, 'create'])->name('user.register');
+Route::middleware('guest')->group(function () {
+    Route::get('/register/paso-{step}/{user?}', [App\Http\Controllers\RegisterController::class, 'create'])->name('user.register');
+});
+
 Route::post('/register-user/{step}/{id?}', [App\Http\Controllers\RegisterController::class, 'save'])->name('user.save');
 
 Route::prefix('admin')->middleware('admin')->group(function () {
