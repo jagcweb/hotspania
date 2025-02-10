@@ -34,7 +34,7 @@
                             <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
                                 <div class="gallery-item image-hover-zoom" tabindex="0">
             
-                                    <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage]) }}"
+                                    <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage ?? $image->route]) }}"
                                         class="gallery-image" alt="">
                                     <div class="franja">
                                         <p>{{ Str::limit(explode(' ', trim($user->nickname))[0], 10, '') }}</p>
