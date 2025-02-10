@@ -28,7 +28,7 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->get();
+        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->paginate(10);
 
         $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first();
 
@@ -42,7 +42,7 @@ class AccountController extends Controller
     {
         $cities = City::orderBy('name', 'asc')->get();
 
-        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->get();
+        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->paginate(10);
 
         $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first();
 
@@ -52,11 +52,10 @@ class AccountController extends Controller
         ]);
     }
 
-    public function get($nickname)
-    {
+    public function get($nickname) {
         $user = User::where('nickname', $nickname)->first();
 
-        $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->get();
+        $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->paginate(10);
 
         $frontimage = Image::where('user_id', $user->id)->whereNotNull('frontimage')->first();
 
@@ -68,7 +67,7 @@ class AccountController extends Controller
     }
 
     public function setFront($id) {
-        $id = \Crypt::decryptString($id);
+
         $image = Image::findOrFail($id);
 
         $last_front = Image::where('user_id', $image->user_id)->whereNotNull('frontimage')->first();
@@ -79,8 +78,39 @@ class AccountController extends Controller
             $last_front->update();
         }
 
+        // Initialize the ImageManager with the GD driver (explicitly using GD)
+        $manager = new ImageManager(new Driver());
+
+        $file = \Storage::disk(StorageHelper::getDisk('images'))->get($image->route);
+
+        // Read the uploaded image
+        $imageReader = $manager->read($file);
+
+        
+        // Get the dimensions of the original image
+        $imageWidth = $imageReader->width();
+        $imageHeight = $imageReader->height();
+
+        if($imageWidth > $imageHeight) {
+            $imageReader->resize(250, 166, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        } else {
+            $imageReader->resize(166, 250, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        }
+
+        $imageContent = $imageReader->toPng();
+
+        $newFileName = 'front-'.$image->route;
+
+        \Storage::disk(StorageHelper::getDisk('images'))->put($newFileName, $imageContent);
        
         $image->frontimage = 1;
+        $image->route_frontimage = $newFileName;
         $image->updated_at = \Carbon\Carbon::now();
         $image->update();
         

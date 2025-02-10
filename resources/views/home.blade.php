@@ -33,10 +33,10 @@
                             <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
                                 <div class="gallery-item image-hover-zoom" tabindex="0">
             
-                                    <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
+                                    <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage]) }}"
                                         class="gallery-image" alt="">
                                     <div class="franja">
-                                        <p>{{ Str::limit(explode(' ', trim($user->nickname))[0], 8, '') }}</p>
+                                        <p>{{ Str::limit(explode(' ', trim($user->nickname))[0], 10, '') }}</p>
                                     </div>
             
                                     <div class="gallery-item-info">
@@ -332,13 +332,12 @@
         color: white; /* Color del texto */
         text-align: center;
         padding: 10px 0; /* Espaciado dentro de la franja */
-        height: 40px;
-
+        height: 38px;
     }
 
     .franja p {
         margin: 0;
-        line-height: 20px;
+        line-height: 19px;
         font-size: 20px; /* Tamaño del texto */
         color: white; /* Color del texto */
     }

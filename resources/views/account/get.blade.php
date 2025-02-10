@@ -16,7 +16,7 @@
                     @if(!is_null($frontimage->route_gif))
                     <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
                 @else
-                    <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                    <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->front_image]) }}" />
                 @endif
                 @else
                     <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
@@ -162,9 +162,13 @@
                 @endif
 
             @endforeach
-
+    
         </div>
 
+        
+        <div class="mt-4">
+            {{ $images->links('pagination::bootstrap-4') }}
+        </div>
     </div>
     <!-- End of container -->
 

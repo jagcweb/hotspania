@@ -76,8 +76,44 @@ class ImageController extends Controller
             $last_front->update();
         }
 
+        // Initialize the ImageManager with the GD driver (explicitly using GD)
+        $manager = new ImageManager(new Driver());
+
+        $file = \Storage::disk(StorageHelper::getDisk('images'))->get($image->route);
+
+        // Read the uploaded image
+        $imageReader = $manager->read($file);
+
+        
+        // Get the dimensions of the original image
+        $imageWidth = $imageReader->width();
+        $imageHeight = $imageReader->height();
+
+        if($imageWidth > $imageHeight) {
+            $imageReader->resize(250, 166, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        } else {
+            $imageReader->resize(166, 250, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        }
+
+        $newFileName = 'front-'.$image->route;
+
+        if (str_contains($image->route, '.gif')) {
+            $imageContent = $imageReader->toGif();
+        } else {
+            $imageContent = $imageReader->toPng();
+        }
+
+        \Storage::disk(StorageHelper::getDisk('images'))->put($newFileName, $imageContent);
+    
        
         $image->frontimage = 1;
+        $image->route_frontimage = $newFileName;
         $image->updated_at = \Carbon\Carbon::now();
         $image->update();
         
@@ -585,8 +621,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen aprobada.');
     }
 
-    public function unapprove($id)
-    {
+    public function unapprove($id) {
         $image = Image::findOrFail($id);
         $image->status = 'unapproved';
         $image->updated_at = \Carbon\Carbon::now();
@@ -619,8 +654,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagenes aprobadas.');
     }
 
-    public function unapproveAll($id)
-    {
+    public function unapproveAll($id) {
         $images = Image::
         where('user_id', $id)->where('status', 'pending')
         ->orWhere('user_id', $id)->where('status', 'approved')
@@ -635,8 +669,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Todas las imagenes aprobadas.');
     }
 
-    public function visible($id)
-    {
+    public function visible($id) {
         $image = Image::findOrFail($id);
         $image->visible = 1;
         $image->updated_at = \Carbon\Carbon::now();
@@ -645,8 +678,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen visible.');
     }
 
-    public function invisible($id)
-    {
+    public function invisible($id) {
         $image = Image::findOrFail($id);
         $image->visible = NULL;
         $image->updated_at = \Carbon\Carbon::now();
@@ -655,8 +687,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen oculta.');
     }
 
-    public function visibleAll($id)
-    {
+    public function visibleAll($id) {
         $images = Image::
         where('user_id', $id)->whereNull('visible')
         ->get();
@@ -670,8 +701,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Todas las imagenes visibles.');
     }
 
-    public function invisibleAll($id)
-    {
+    public function invisibleAll($id) {
         $images = Image::
         where('user_id', $id)->whereNotNull('visible')
         ->get();
@@ -685,8 +715,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Todas las imagenes visibles.');
     }
 
-    public function uploadProfile(Request $request)
-    {
+    public function uploadProfile(Request $request) {
         // Validate the request data
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -713,8 +742,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen de perfil cambiada');
     }
 
-    public function delete($id)
-    {
+    public function delete($id) {
         $image = Image::findOrFail($id);
        \Storage::disk(StorageHelper::getDisk('images'))->delete($image->route);
         $image->delete();
@@ -722,8 +750,7 @@ class ImageController extends Controller
         return redirect()->back()->with('exito', 'Imagen borrada!');
     }
 
-    public function deleteAll($id)
-    {
+    public function deleteAll($id) {
         $images = Image::where('user_id', $id)->get();
 
         foreach($images as $image) {

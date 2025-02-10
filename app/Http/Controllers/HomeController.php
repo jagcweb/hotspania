@@ -35,6 +35,7 @@ class HomeController extends Controller
             ->whereNull('banned')
             ->orderBy('created_at', 'desc')
             ->with('images')
+            ->inRandomOrder()
             ->get();
 
         return view('home' , [
@@ -48,6 +49,12 @@ class HomeController extends Controller
     }
 
     public function getImage($filename) {
+        $file = \Storage::disk(StorageHelper::getDisk('images'))->get($filename);
+
+        return new Response($file, 200);
+    }
+
+    public function getFrontImage($filename) {
         $file = \Storage::disk(StorageHelper::getDisk('images'))->get($filename);
 
         return new Response($file, 200);

@@ -18,8 +18,7 @@ class StorageHelper
         return App::environment('production') ? 'gcs' : $name;
     }
 
-    public static function getSize($image, $name = NULL)
-    {
+    public static function getSize($image, $name = NULL) {
         // Crear una instancia de getID3
         $getID3 = new getID3;
     

@@ -538,7 +538,9 @@
 
             // Show alert if there's an error and the input is not empty
             if (!valid && errorMessage && value.length > 0) {
-                alert(errorMessage);
+                setTimeout(function() {
+                    alert(errorMessage);
+                }, 200);
                 field.classList.add('is-invalid');
             } else {
                 field.classList.remove('is-invalid');
