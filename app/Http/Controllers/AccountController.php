@@ -28,7 +28,7 @@ class AccountController extends Controller
      */
     public function index()
     {
-        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->paginate(10);
+        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->paginate(9);
 
         $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
 
@@ -42,7 +42,7 @@ class AccountController extends Controller
     {
         $cities = City::orderBy('name', 'asc')->get();
 
-        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->paginate(10);
+        $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->paginate(9);
 
         $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
 
@@ -55,7 +55,7 @@ class AccountController extends Controller
     public function get($nickname) {
         $user = User::where('nickname', $nickname)->first();
 
-        $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->paginate(10);
+        $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->paginate(9);
 
         $frontimage = Image::where('user_id', $user->id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
 
