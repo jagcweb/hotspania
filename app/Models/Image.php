@@ -19,7 +19,8 @@ class Image extends Model
         'visible',
         'frontimage',
         'watermarked',
-        'vision_data'
+        'vision_data',
+        'route_frontimage'
     ];
 
     public function user()

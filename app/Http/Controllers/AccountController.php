@@ -30,7 +30,7 @@ class AccountController extends Controller
     {
         $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->paginate(10);
 
-        $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first();
+        $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
 
         return view('account.index', [
             'images' => $images,
@@ -44,7 +44,7 @@ class AccountController extends Controller
 
         $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->paginate(10);
 
-        $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first();
+        $frontimage = Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
 
         return view('account.edit', [
             'images' => $images,
@@ -57,7 +57,7 @@ class AccountController extends Controller
 
         $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->paginate(10);
 
-        $frontimage = Image::where('user_id', $user->id)->whereNotNull('frontimage')->first();
+        $frontimage = Image::where('user_id', $user->id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
 
         return view('account.get', [
             'user' => $user,
@@ -70,7 +70,7 @@ class AccountController extends Controller
 
         $image = Image::findOrFail($id);
 
-        $last_front = Image::where('user_id', $image->user_id)->whereNotNull('frontimage')->first();
+        $last_front = Image::where('user_id', $image->user_id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
 
         if(is_object($last_front)) {
             $last_front->frontimage = NULL;
