@@ -23,6 +23,7 @@
                             @php
                                 $image = \App\Models\Image::where('user_id', $user->id)
                                     ->whereNotNull('frontimage')
+                                    ->whereNotNull('route_frontimage')
                                     ->first();
                                 
                                 if (!is_object($image)) {
