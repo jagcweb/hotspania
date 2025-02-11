@@ -103,7 +103,7 @@ class AccountController extends Controller
             });
         }
 
-        $imageContent = $imageReader->toPng();
+        $imageContent = $imageReader->toJpeg(70);
 
         $newFileName = 'front-'.$image->route;
 

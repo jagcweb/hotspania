@@ -106,7 +106,7 @@ class ImageController extends Controller
         if (str_contains($image->route, '.gif')) {
             $imageContent = $imageReader->toGif();
         } else {
-            $imageContent = $imageReader->toPng();
+            $imageContent = $imageReader->toJpeg(70);
         }
 
         \Storage::disk(StorageHelper::getDisk('images'))->put($newFileName, $imageContent);
@@ -473,10 +473,10 @@ class ImageController extends Controller
                 //$image->toGif()->save(storage_path('app/public/images/' . $imageName));
             } else {
                 $disk = StorageHelper::getDisk('images');
-                $imageContent = $image->toPng();
+                $imageContent = $image->toJpeg(70);
                 $filePath = 'images/' . $imageName;
                 \Storage::disk($disk)->put($imageName, $imageContent);
-                //$image->toPng()->save(storage_path('app/public/images/' . $imageName));
+                //$image->toJpeg(70)->save(storage_path('app/public/images/' . $imageName));
             }
         }
 
@@ -527,10 +527,10 @@ class ImageController extends Controller
             //$image->toGif()->save(storage_path('app/public/images/' . $imageModel->route));
         } else {
             $disk = StorageHelper::getDisk('images');
-            $imageContent = $image->toPng();
+            $imageContent = $image->toJpeg(70);
             $filePath = 'images/' . $imageName;
             \Storage::disk($disk)->put($imageModel->route, $imageContent);
-            //$image->toPng()->save(storage_path('app/public/images/' . $imageModel->route));
+            //$image->toJpeg(70)->save(storage_path('app/public/images/' . $imageModel->route));
         }
     }
 

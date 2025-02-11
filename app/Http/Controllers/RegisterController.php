@@ -169,7 +169,7 @@ class RegisterController extends Controller
                         if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
                             $image->toGif()->save(storage_path('app/public/images/' . $imageName));
                         } else {
-                            $image->toPng()->save(storage_path('app/public/images/' . $imageName));
+                            $image->toJpeg(70)->save(storage_path('app/public/images/' . $imageName));
                         }
                     }
 
