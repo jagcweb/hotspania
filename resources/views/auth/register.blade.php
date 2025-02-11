@@ -55,7 +55,10 @@
                                         
                                         <div class="form-group">
                                             <label for="date_of_birth">Fecha de Nacimiento</label>
-                                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" required>
+                                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" required 
+                                            onkeydown="showAlert(event)" onpaste="showAlert(event)"
+                                            >
+
                                         </div>
                                     
                                         
@@ -271,6 +274,12 @@
 <script src="https://cdn.jsdelivr.net/npm/pica@7.0.0/dist/pica.min.js"></script>
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.7.0/dist/ffmpeg.min.js"></script>
 
+<script>
+    function showAlert(event) {
+        event.preventDefault(); // Evita que se escriba en el campo
+        alert("Por favor, seleccione la fecha en el calendario.");
+    }
+</script>
 
 <script>
     function startLoading() {
@@ -594,34 +603,37 @@
 
 
 
-<script> //Min 18 years date and put input age
+<script>
     // Obtener la fecha actual
     const today = new Date();
     // Calcular la fecha mínima (hace 18 años)
     const minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
     // Formatear la fecha a YYYY-MM-DD
     const formattedMinDate = minDate.toISOString().split('T')[0];
-    const formattedMaxDate = today.toISOString().split('T')[0];
 
     // Establecer el atributo min y max del input
-    document.getElementById('date_of_birth').setAttribute('min', '');
     document.getElementById('date_of_birth').setAttribute('max', formattedMinDate);
 
-    // Agregar un evento al input de fecha para calcular la edad
-    document.getElementById('date_of_birth').addEventListener('change', function() {
-        const selectedDate = new Date(this.value);
-        let age = today.getFullYear() - selectedDate.getFullYear();
-        const monthDifference = today.getMonth() - selectedDate.getMonth();
-        
-        // Ajustar la edad si no ha llegado el cumpleaños este año
-        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < selectedDate.getDate())) {
-            age--;
-        }
+    // Agregar un evento al input de fecha para calcular la edad solo si el año está completo
+    document.getElementById('date_of_birth').addEventListener('input', function() {
+        if (this.value.length === 10) { // Solo ejecutar cuando la fecha esté completa (YYYY-MM-DD)
+            const selectedDate = new Date(this.value);
+            let age = today.getFullYear() - selectedDate.getFullYear();
+            const monthDifference = today.getMonth() - selectedDate.getMonth();
+            
+            // Ajustar la edad si no ha llegado el cumpleaños este año
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < selectedDate.getDate())) {
+                age--;
+            }
 
-        // Establecer el valor de edad en el input
-        document.getElementById('age').value = age;
+            // Establecer el valor de edad en el input
+            document.getElementById('age').value = age;
+        } else {
+            document.getElementById('age').value = ''; // Limpiar el campo de edad si la fecha no está completa
+        }
     });
-</script>
+    </script>
+    
 
 <script> //Upload images
     const inputFile = document.querySelector('.image_upload');
