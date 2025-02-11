@@ -33,7 +33,6 @@ class HomeController extends Controller
             ->whereNotNull('active')
             ->whereNotNull('completed')
             ->whereNull('banned')
-            ->orderBy('created_at', 'desc')
             ->with('images')
             ->inRandomOrder()
             ->get();
