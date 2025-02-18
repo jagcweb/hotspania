@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\Tag;
 use App\Models\Package;
 use App\Models\PackageUser;
+use App\Models\PackageUserHistory;
 use App\Models\User;
 
 class UtilityController extends Controller
@@ -18,6 +19,29 @@ class UtilityController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
+    public function assignPackage(Request $request){
+
+        $has_package = PackageUser::where('user_id', $request->get('user_id'))->first();
+
+        if(is_object($has_package)){
+            $has_package->delete();
+        }
+
+        $pack_user = new PackageUser();
+        $pack_user->package_id = $request->get('package_id');
+        $pack_user->user_id = $request->get('user_id');
+        $pack_user->save();
+
+        $pack_user = new PackageUserHistory();
+        $pack_user->package_id = $request->get('package_id');
+        $pack_user->user_id = $request->get('user_id');
+        $pack_user->save();
+
+        return back()->with('exito', 'Paquete asignado.');
+    }
+
     public function zones()
     {
         $cities = City::orderBy('name', 'asc')->get();

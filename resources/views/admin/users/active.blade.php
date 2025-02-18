@@ -46,16 +46,21 @@
                                         <a href="#" data-toggle="modal" data-target="#ver-perfil-{{$u->id}}" style="font-size: 18px; color:black;">
                                             <i class="fa-solid fa-user"></i>
                                         </a>
-                                        <a href="#" style="font-size: 18px; color:black;">
-                                            <i class="fa-solid fa-euro-sign"></i>
+                                        <a href="#" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" style="font-size: 18px; color:black;">
+                                            <i class="fa-solid fa-archive"></i>
                                         </a>
                                         <a href="#" data-toggle="modal" data-target="#editar-status-{{$u->id}}" style="font-size: 18px; color:black;">
                                             <i class="fa-solid fa-pen"></i>
                                         </a>
+                                        <a href="#" data-toggle="modal" data-target="#historial-paquete-{{$u->id}}" style="font-size: 18px; color:black;">
+                                            <i class="fa-solid fa-clock-rotate-left"></i>
+                                        </a>
                                     </td>
                                 </tr>
+                                @include('modals.admin.modal_asignar_paquete')
                                 @include('modals.admin.modal_ver_perfil')
                                 @include('modals.admin.user.modal_editar_status')
+                                @include('modals.admin.modal_historial_paquete')
                             @endif
                         @endforeach
                     </tbody>

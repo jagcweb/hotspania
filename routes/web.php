@@ -92,6 +92,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('images/gif-{filename}', 'App\Http\Controllers\Admin\ImageController@getGif')->name('admin.images.get_gif');
 
     // Utility Management
+    Route::post('utilities/assign-package', 'App\Http\Controllers\Admin\UtilityController@assignPackage')->name('admin.utilities.assign_package');
     Route::post('utilities/city-save', 'App\Http\Controllers\Admin\UtilityController@saveCity')->name('admin.utilities.cities_save');
     Route::get('utilities/city-delete/{id}', 'App\Http\Controllers\Admin\UtilityController@deleteCity')->name('admin.utilities.cities_delete');
     Route::post('utilities/city-update', 'App\Http\Controllers\Admin\UtilityController@updateCity')->name('admin.utilities.cities_update');

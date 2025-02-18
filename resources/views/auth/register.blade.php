@@ -604,6 +604,7 @@
 
 
 <script>
+    /*
     // Obtener la fecha actual
     const today = new Date();
     // Calcular la fecha mínima (hace 18 años)
@@ -632,6 +633,7 @@
             document.getElementById('age').value = ''; // Limpiar el campo de edad si la fecha no está completa
         }
     });
+    */
     </script>
     
 

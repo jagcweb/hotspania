@@ -51,7 +51,7 @@ class User extends Authenticatable
         'banned',
         'email_verified_at',
         'completed',
-        'link'
+        'link',
     ];
 
     /**
@@ -69,6 +69,10 @@ class User extends Authenticatable
 
     public function cities(){
         return $this->hasMany('App\Models\City', 'user_id','id');
+    }
+
+    public function packageUser(){
+        return $this->hasOne('App\Models\PackageUser', 'user_id','id');
     }
 
     public function getRoleNames()
