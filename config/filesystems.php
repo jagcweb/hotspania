@@ -35,7 +35,8 @@ return [
             'project_id' => env('GOOGLE_CLOUD_PROJECT_ID'),
             'key_file' => env('GOOGLE_CLOUD_KEY_FILE'),
             'bucket' => env('GOOGLE_CLOUD_BUCKET'),
-            'path_prefix' => null, // Opcional
+            'path_prefix' => null, // Opcional,
+            'visibility' => 'private',
         ],
 
         'temp_img_ia' => [
