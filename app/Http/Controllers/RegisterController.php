@@ -166,7 +166,7 @@ class RegisterController extends Controller
                     $this->addWaterMark($file, $imageName, $extension, false);
         
                     $imageModel = new Image(); // Assuming you have an Image model
-                    $image->user_id = $user->id;
+                    $imageModel ->user_id = $user->id;
                     $imageModel->route = $imageName;
                     $imageModel->route_gif = $gifName ?? NULL;
                     $imageModel->size = round($file->getSize() / 1024, 2);
