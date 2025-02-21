@@ -178,7 +178,7 @@ class ImageController extends Controller
         //return back()->with('success', 'Images uploaded with watermark pattern successfully!');
     }
 
-    //private function analyzeImageWithVisionAI($imageData) {
+    /*private function analyzeImageWithVisionAI($imageData) {
         try {
             // Inicializar el cliente de Google Vision AI
             $imageAnnotator = new ImageAnnotatorClient([
@@ -308,7 +308,7 @@ class ImageController extends Controller
             // Cerramos el cliente para liberar recursos
             $imageAnnotator->close();
         }
-    //}
+    }*/
 
 
 
