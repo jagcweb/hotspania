@@ -167,9 +167,15 @@ class RegisterController extends Controller
                         }
 
                         if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
-                            $image->toGif()->save(storage_path('app/public/images/' . $imageName));
+                            $disk = StorageHelper::getDisk('images');
+                            $imageContent = $image->toGif();
+                            $filePath = 'images/' . $imageName;
+                            \Storage::disk($disk)->put($imageName, $imageContent);
                         } else {
-                            $image->toJpeg(70)->save(storage_path('app/public/images/' . $imageName));
+                            $disk = StorageHelper::getDisk('images');
+                            $imageContent = $image->toJpeg(70);
+                            $filePath = 'images/' . $imageName;
+                            \Storage::disk($disk)->put($imageName, $imageContent);
                         }
                     }
 
