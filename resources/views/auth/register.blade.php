@@ -65,7 +65,7 @@
                                         
                                         <div class="form-group">
                                             <label for="age">Edad (imposibilidad de cambiarlo después)</label>
-                                            <input type="number" class="form-control" id="age" name="age" value="{{ old('age') }}" min="18" max="99" readonly required>
+                                            <input type="number" class="form-control" id="age" name="age" value="{{ old('age') }}" min="18" max="99" required>
                                         </div>
                                         
                                         <div class="form-group">
