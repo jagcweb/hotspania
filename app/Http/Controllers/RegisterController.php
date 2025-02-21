@@ -255,20 +255,20 @@ class RegisterController extends Controller
             $disk = StorageHelper::getDisk('videogif');
             $imageContent = $image->toGif();
             $filePath = 'videogif/' . $imageName;
-            \Storage::disk($disk)->put($imageName, $imageContent);
+            \Storage::disk($disk)->put($imageName, $imageContent, 'private');
             //$image->toGif()->save(storage_path('app/public/videogif/' . $imageName));
         } else {
             if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
                 $disk = StorageHelper::getDisk('images');
                 $imageContent = $image->toGif();
                 $filePath = 'images/' . $imageName;
-                \Storage::disk($disk)->put($imageName, $imageContent);
+                \Storage::disk($disk)->put($imageName, $imageContent, 'private');
                 //$image->toGif()->save(storage_path('app/public/images/' . $imageName));
             } else {
                 $disk = StorageHelper::getDisk('images');
                 $imageContent = $image->toJpeg(70);
                 $filePath = 'images/' . $imageName;
-                \Storage::disk($disk)->put($imageName, $imageContent);
+                \Storage::disk($disk)->put($imageName, $imageContent, 'private');
                 //$image->toJpeg(70)->save(storage_path('app/public/images/' . $imageName));
             }
         }
