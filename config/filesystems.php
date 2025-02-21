@@ -36,7 +36,8 @@ return [
             'key_file' => env('GOOGLE_CLOUD_KEY_FILE'),
             'bucket' => env('GOOGLE_CLOUD_BUCKET'),
             'path_prefix' => null, // Opcional,
-            'visibility' => 'private',
+            'predefined_acl' => null, // Evita ACLs predeterminadas
+            'visibility' => null,    // Evita configuraciones de visibilidad heredadas
         ],
 
         'temp_img_ia' => [
