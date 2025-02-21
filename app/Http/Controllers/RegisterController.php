@@ -136,7 +136,7 @@ class RegisterController extends Controller
                 
                 $id = \Crypt::decryptString($id);
                 $user = User::find($id);
-                $files = $request->file('images');
+                $files = $request->file('files');
         
                 // Process each file
                 foreach ($files as $file) {
