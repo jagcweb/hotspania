@@ -145,14 +145,14 @@ class ImageController extends Controller
 
             $imageData = \Storage::disk('temp_img_ia')->get($imageName);
 
-            $visionResult = $this->analyzeImageWithVisionAI($imageData);
-            $vertexAIResult = $this->analyzeImageWithVertexAI($imageData);
+            //$visionResult = $this->analyzeImageWithVisionAI($imageData);
+            //$vertexAIResult = $this->analyzeImageWithVertexAI($imageData);
             //$opencvResult = $this->processImageWithOpenCV($imageData);
             
 
             $combinedResult = [
-                'vision' => $visionResult,
-                'vertex' => $vertexAIResult,
+                //'vision' => $visionResult,
+                //'vertex' => $vertexAIResult,
                 //'opencv' => $opencvResult,
             ];
 
@@ -178,7 +178,7 @@ class ImageController extends Controller
         //return back()->with('success', 'Images uploaded with watermark pattern successfully!');
     }
 
-    private function analyzeImageWithVisionAI($imageData) {
+    //private function analyzeImageWithVisionAI($imageData) {
         try {
             // Inicializar el cliente de Google Vision AI
             $imageAnnotator = new ImageAnnotatorClient([
@@ -308,7 +308,7 @@ class ImageController extends Controller
             // Cerramos el cliente para liberar recursos
             $imageAnnotator->close();
         }
-    }
+    //}
 
 
 
