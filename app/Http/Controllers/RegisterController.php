@@ -124,10 +124,6 @@ class RegisterController extends Controller
                     'files.*' => 'required|file|mimes:png,jpeg,jpg,webp,gif,bmp,avi,mp4,mpg,mov,3gp,wmv,flv|max:10240', // 10MB
                     'files' => 'array|max:8', // Maximum 8 files
                 ]);
-            
-                $id = \Crypt::decryptString($id);
-                $user = User::find($id);
-                $files = $request->file('files');
 
                 $videoMimeTypes = [
                     'video/mp4',
@@ -136,59 +132,52 @@ class RegisterController extends Controller
                     'video/x-ms-wmv',    // .wmv
                     'video/webm',        // .webm
                     'video/x-flv'        // .flv
-                ];    
-
+                ];   
+                
+                $id = \Crypt::decryptString($id);
+                $user = User::find($id);
+                $files = $request->file('images');
+        
                 // Process each file
                 foreach ($files as $file) {
-                    // Upload the image
+                    // Generate a unique name for the image
                     $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
+        
+        
                     $mimeType = $file->getMimeType();
                     $extension = $file->getClientOriginalExtension();
-
-                    if (in_array($mimeType, $videoMimeTypes)) {
-                        \Storage::disk(StorageHelper::getDisk('images'))->put($imageName, \File::get($file));
-                    } else {
-                        $manager = new ImageManager(new Driver());
-                        $image = $manager->read($file);
-
-                        $imageWidth = $image->width();
-                        $imageHeight = $image->height();
-
-                        if($imageWidth > $imageHeight) {
-                            $image->resize(400, 300, function ($constraint) {
-                                $constraint->aspectRatio();
-                                $constraint->upsize();
-                            });
-                        } else {
-                            $image->resize(300, 400, function ($constraint) {
-                                $constraint->aspectRatio();
-                                $constraint->upsize();
-                            });
-                        }
-
-                        if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
-                            $disk = StorageHelper::getDisk('images');
-                            $imageContent = $image->toGif();
-                            $filePath = 'images/' . $imageName;
-                            \Storage::disk($disk)->put($imageName, $imageContent);
-                        } else {
-                            $disk = StorageHelper::getDisk('images');
-                            $imageContent = $image->toJpeg(70);
-                            $filePath = 'images/' . $imageName;
-                            \Storage::disk($disk)->put($imageName, $imageContent);
-                        }
-                    }
-
-                    // Create an Image model and save it to the database
-                    $image = new Image();
+        
+                    \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
+        
+                    $imageData = \Storage::disk('temp_img_ia')->get($imageName);
+        
+                    //$visionResult = $this->analyzeImageWithVisionAI($imageData);
+                    //$vertexAIResult = $this->analyzeImageWithVertexAI($imageData);
+                    //$opencvResult = $this->processImageWithOpenCV($imageData);
+                    
+        
+                    $combinedResult = [];
+        
+                    \Storage::disk('temp_img_ia')->delete($imageName);
+        
+                    // Initialize the ImageManager with the GD driver (explicitly using GD)
+                    $manager = new ImageManager(new Driver());
+        
+                    $this->addWaterMark($file, $imageName, $extension, false);
+        
+                    $imageModel = new Image(); // Assuming you have an Image model
                     $image->user_id = $user->id;
-                    $image->route = $imageName;
-                    $image->size = round($file->getSize() / 1024, 2); // Size in KB
-                    $image->type = "images";
-                    $image->status = 'pending'; // Set initial status to active
-                    $image->watermarked = NULL;
-                    $image->save();
+                    $imageModel->route = $imageName;
+                    $imageModel->route_gif = $gifName ?? NULL;
+                    $imageModel->size = round($file->getSize() / 1024, 2);
+                    $imageModel->type = "images";
+                    $imageModel->status = 'approved'; // Set initial status to pending
+                    $imageModel->watermarked = 1;
+                    $imageModel->vision_data = json_encode($combinedResult);
+                    $imageModel->save();
                 }
+        
+                //return back()->with('success', 'Images uploaded with watermark pattern successfully!');
         
                 session(['paso-2-completado' => true]);
                 return redirect()->route('user.register', ['step' => '3', 'user' => \Crypt::encryptString($user->id)])->with('exito', 'Paso 2 completado. Imágenes subidas.');
@@ -222,6 +211,68 @@ class RegisterController extends Controller
         }
 
         return redirect()->route('admin.users.getActive')->with('exito', 'Usuario creado');
+    }
+
+    public function addWaterMark($file, $imageName, $extension, bool $generatedGif){
+        // Initialize the ImageManager with the GD driver (explicitly using GD)
+        $manager = new ImageManager(new Driver());
+
+        // Read the uploaded image
+        $image = $manager->read($file);
+
+        
+        // Get the dimensions of the original image
+        $imageWidth = $image->width();
+        $imageHeight = $image->height();
+
+        if($imageWidth > $imageHeight) {
+            $image->resize(1200, 800, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        } else {
+            $image->resize(800, 1200, function ($constraint) {
+                $constraint->aspectRatio();  // Maintain the aspect ratio
+                $constraint->upsize();       // Avoid stretching the image if it's smaller than the max size
+            });
+        }
+
+        // Path to the watermark image (the image you want to use as a pattern)
+        $watermarkPath = public_path('images/unique_marca_agua.png');  // Adjust the path as needed
+
+        // Read the watermark image
+        $watermark = $manager->read($watermarkPath);
+
+        $watermark->resize(234, 166);
+        
+        // Colocar el watermark en el centro
+        $image->place($watermark, 'center');
+
+        // Save the image to the storage path (app/public/images)
+        // Save the image with watermark to the storage path
+
+        if($generatedGif) {
+            $disk = StorageHelper::getDisk('videogif');
+            $imageContent = $image->toGif();
+            $filePath = 'videogif/' . $imageName;
+            \Storage::disk($disk)->put($imageName, $imageContent);
+            //$image->toGif()->save(storage_path('app/public/videogif/' . $imageName));
+        } else {
+            if ($extension === 'gif' || strpos($extension, 'gif') !== false) {
+                $disk = StorageHelper::getDisk('images');
+                $imageContent = $image->toGif();
+                $filePath = 'images/' . $imageName;
+                \Storage::disk($disk)->put($imageName, $imageContent);
+                //$image->toGif()->save(storage_path('app/public/images/' . $imageName));
+            } else {
+                $disk = StorageHelper::getDisk('images');
+                $imageContent = $image->toJpeg(70);
+                $filePath = 'images/' . $imageName;
+                \Storage::disk($disk)->put($imageName, $imageContent);
+                //$image->toJpeg(70)->save(storage_path('app/public/images/' . $imageName));
+            }
+        }
+
     }
 
     public function edit($id) {
