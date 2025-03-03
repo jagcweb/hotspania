@@ -14,7 +14,12 @@
                         <input type="file" class="form-control image_upload" id="image" name="images[]" multiple accept=".jpeg,.png,.jpg,.gif,.webp,.mp4,.mov,.avi,.wmv,.avchd,.webm,.flv">
                         <input type="text" id="user_id" name="user_id" value="{{$u->id}}" hidden/>
                     </div>
+
+                    @if (Request::is('account/edit*'))
+                    <button type="submit" id="upload-btn" class="btn" style="background:#f36e00; color:#fff;">Subir imágenes</button>
+                    @else
                     <button type="submit" id="upload-btn" class="btn btn-primary">Subir imágenes</button>
+                    @endif
                     <div id="progress-container"></div> 
                 </form>
             </div>
@@ -69,7 +74,10 @@
     async function uploadFile(file, userId, currentIndex, totalFiles) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            const uploadUrl = "{{ route('admin.images.upload') }}";
+            const uploadUrl = window.location.pathname.includes("/account/edit") 
+            ? "{{ route('account.images.upload') }}" 
+            : "{{ route('admin.images.upload') }}";
+
             xhr.open('POST', uploadUrl);
 
             // Incluir el token CSRF en los encabezados
@@ -148,10 +156,21 @@
         }
 
         // Mensaje de éxito
-        messageElement.innerText = 'Todos los archivos fueron subidos exitosamente. Recargando la página...';
-        setTimeout(() => {
+        
+        if(window.location.pathname.includes("/account/edit")) {
+            messageElement.innerText = 'Todos los archivos fueron subidos exitosamente como pendiente de aprobación del administrador. Recargando la página...';
+
+            setTimeout(() => {
+            window.location.reload();
+        }, 2500);
+        } else {
+            messageElement.innerText = 'Todos los archivos fueron subidos exitosamente. Recargando la página...';
+
+            setTimeout(() => {
             window.location.reload();
         }, 1000);
+        }
+
     } catch (error) {
         // Mensaje de error
         messageElement.innerText = 'Error al subir los archivos. Por favor, inténtalo de nuevo.';

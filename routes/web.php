@@ -42,10 +42,14 @@ Route::get('/home/gif-get/{filename}',  [App\Http\Controllers\HomeController::cl
 //AccountController
 Route::get('/account', [App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
 Route::get('/account/edit', [App\Http\Controllers\AccountController::class, 'edit'])->name('account.edit');
+Route::get('/account/edit/edit-data', [App\Http\Controllers\AccountController::class, 'editData'])->name('account.edit-data');
+Route::post('/account/edit/update', [App\Http\Controllers\AccountController::class, 'update'])->name('account.update');
 Route::get('/account/{nickname}', [App\Http\Controllers\AccountController::class, 'get'])->name('account.get');
 Route::get('/account/images/{image}/setfront', [App\Http\Controllers\AccountController::class, 'setFront'])->name('account.images.setfront');
 Route::get('/account/images/{image}/visible', [App\Http\Controllers\AccountController::class, 'visible'])->name('account.images.visible');
 Route::get('/account/images/{image}/invisible', [App\Http\Controllers\AccountController::class, 'invisible'])->name('account.images.invisible');
+
+Route::post('/account/upload-images', [App\Http\Controllers\AccountController::class, 'upload'])->name('account.images.upload');
 
 //RegistersController
 Route::middleware('guest')->group(function () {

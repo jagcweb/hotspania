@@ -82,12 +82,12 @@
                   @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
                   @if(is_object($frontimage))
                     @if(!is_null($frontimage->route_gif))
-                      <img class="img_logo2 rounded-circle"  src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                      <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
                     @else
-                      <img class="img_logo2 rounded-circle"  src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                      <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
                     @endif
                   @else
-                    <img src="{{ asset('images/user.jpg') }}" class="img_logo2 rounded-circle" />
+                    <img src="{{ asset('images/user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; border-radius:9999px;"/>
                   @endif
                   <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
                 </a>

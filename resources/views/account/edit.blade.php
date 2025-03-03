@@ -29,9 +29,6 @@
 
                 <h1 class="profile-user-name text-white">{{ \Auth::user()->nickname }}</h1>
 
-                <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog"
-                        aria-hidden="true"></i></button>
-
             </div>
 
             <div class="profile-stats">
@@ -91,6 +88,17 @@
     </div>
 
     <div class="container mt-5 container_mobile">
+        @php $u = \Auth::user(); @endphp
+        <a title="Subir fotos" href="{{ route('account.edit-data') }}" data-target="#subir-fotos-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Modificar datos
+            <i class="fa-solid fa-user-pen ml-1"></i>
+        </a>
+        <a title="Subir fotos" href="javascript:void(0);" data-toggle="modal" data-target="#subir-fotos-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Subir fotos
+            <i class="fa-solid fa-upload ml-1"></i>
+        </a>
+        @include('modals.admin.fotos.modal_subir_fotos')
+        <hr>
         <h2 class="w-100 text-center text-white" style="font-size: 20px;">Aquí solo aparecerán las imágenes aprobadas.</h2>
         <div class="gallery">
             @foreach ($images as $i=>$image)
@@ -129,16 +137,19 @@
                         </div>
                         <div class="gallery-item-buttons">
                             @if(is_null($image->visible))
-                                <a title="Hacer imagen visible" href="{{ route('account.images.visible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye"></i></a>
+                                <a title="Hacer imagen visible" href="{{ route('account.images.visible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;"><i class="fa-regular fa-eye"></i></a>
                             @else
-                                <a title="Hacer imagen invisible" href="{{ route('account.images.invisible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-eye-slash"></i></a>
+                                <a title="Hacer imagen invisible" href="{{ route('account.images.invisible', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;"><i class="fa-regular fa-eye-slash"></i></a>
                             @endif
+                            
                             @if($image->frontimage === 1)
-                                <a title="Imagen portada" href="javascript:void(0)" class="btn btn-primary" style="background:#f36e00!important;"><i class="fa-regular fa-image"></i></a>
+                                <a title="Imagen portada" href="javascript:void(0)" class="btn btn-primary" style="background:#f36e00!important; color:#fff;"><i class="fa-solid fa-star"></i></a>
                             @endif
 
-                            @if(is_null($image->frontimage) && !is_null($height) && $height > $width)
-                                <a title="Hacer imagen portada" href="{{ route('account.images.setfront', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-secondary"><i class="fa-regular fa-image"></i></a>
+                            @if(is_null($image->frontimage))
+                                @if(!is_null($height) && $height > $width)
+                                    <a title="Hacer imagen portada" href="{{ route('account.images.setfront', ['image' => \Crypt::encryptString($image->id)]) }}" class="btn btn-secondary" style="background:#f36e00!important; color:#fff;"><i class="fa-regular fa-image"></i></a>
+                                @endif
                             @endif
                         </div>
                     </div>

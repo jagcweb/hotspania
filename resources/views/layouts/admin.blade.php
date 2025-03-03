@@ -83,6 +83,17 @@
                         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid" width="200"/>
                     </div>
                     <ul class="nav flex-column mt-5 ml-5">
+                        <li class="menu-title mt-2">
+                            <a href="javascript:void(0);" class="text-white">
+                                <span>
+                                    Ciudad Actual: 
+                                    {{ !is_null(\Cookie::get('city')) ? 
+                                    ucfirst(\Cookie::get('city')) :
+                                    'Ninguna ciudad seleccionada. Por defecto: Barcelona' }}
+                                </span>
+                            </a>
+                        </li>
+                        <hr style="border-top:2px solid #fff; width:200px;">
                         <li class="menu-title mt-2"></li>
 
                         <li>
@@ -136,7 +147,6 @@
                                 </ul>
                             </div>
                         </li>
-
                         <li class="menu-title mt-2"></li>
 
                         <li class="mt-3">
@@ -245,53 +255,77 @@
                     </ul>
                 </div>
 
-                <div class="col-md-10" style=" min-height:93vh; height:auto; padding:25px; background: #1d1d1d;">
+                <div class="col-md-10" style="min-height:93vh; height:auto; padding:25px; background: #1d1d1d;">
                     <nav class="navbar navbar-expand-sm navbar-light bg-light">
                         <button
                             type="button"
-                            class="navbar-toggler text-white" data-toggle="collapse"
+                            class="navbar-toggler"
+                            data-toggle="collapse"
                             data-target="#navbarNav"
                         >
                             <span class="navbar-toggler-icon"></span>
                         </button>
                         <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav ml-left">
+                                <li class="nav-item search-container">
+                                    <a href="#" class="nav-link search-toggle">
+                                        <i class="fas fa-magnifying-glass search-icon"></i>
+                                    </a>
+                                    <input type="text" class="search-input d-none" placeholder="Buscar...">
+                                </li>
+                                <li class="nav-item city-menu">
+                                    <span class="nav-link">Ciudades <i class="fas fa-chevron-down"></i></span>
+                                    @php $cities = \App\Models\City::orderBy('name', 'asc')->get(); @endphp
+                                    <ul class="city-dropdown">
+                                        <li>Todas</li>
+                                        @foreach($cities as $c)
+                                        <li>{{$c->name}}</li>
+                                        @endforeach
+                                    </ul>
+                                </li>
+
+                                <form class="formsubmit d-none" method="POST" action="{{ route('admin.citychanges.apply') }}" autocomplete="off">
+                                    @csrf
+                                    <div class="form-group">
+                                        <input type="text" class="selected_city" name="city" hidden required />
+                                    </div>
+                                </form>
+                            </ul>
                             <ul class="navbar-nav ml-auto">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link text-white"
-                                        ><i class="fas fa-bell"></i
-                                    ></a>
+                                    <a href="#" class="nav-link" id="bell-icon">
+                                        <i class="fas fa-bell"></i>
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link text-white"
-                                        ><i class="fas fa-envelope"></i
-                                    ></a>
+                                    <a href="#" class="nav-link" id="envelope-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a
                                         href="#"
                                         class="nav-link dropdown-toggle"
-                                        id="navbarDropdown"
-                                        data-toggle="dropdown"
+                                        id="user-icon"
                                     >
                                         <i class="fas fa-user"></i>
                                     </a>
-                                    <div
-                                        class="dropdown-menu dropdown-menu-right"
-                                    >
-                                        <a href="#" class="dropdown-item"
-                                            >Perfil</a
-                                        >
-                                        <a href="#" class="dropdown-item"
-                                            >Configuración</a
-                                        >
-                                        <a href="#" class="dropdown-item"
-                                            >Registro de actividad</a
-                                        >
+                                    <div class="dropdown-menu dropdown-menu-right" id="bell-menu">
+                                        <a href="#" class="dropdown-item">Sin Notificaciones</a>
+                                    </div>
+                                    <div class="dropdown-menu dropdown-menu-right" id="envelope-menu">
+                                        <a href="#" class="dropdown-item">Sin Mensajes</a>
+                                    </div>
+                                    <div class="dropdown-menu dropdown-menu-right" id="user-menu">
+                                        <a href="#" class="dropdown-item">Perfil</a>
+                                        <a href="#" class="dropdown-item">Configuración</a>
+                                        <a href="#" class="dropdown-item">Registro de actividad</a>
                                         <div class="dropdown-divider"></div>
                                         <form id="logout-form" action="{{ url('logout') }}" method="POST">
                                             {{ csrf_field() }}
-                                            <a href="javascript:{}" onclick="document.getElementById('logout-form').submit();"
-                                                class="dropdown-item notify-item">
+                                            <a href="javascript:{}" 
+                                               onclick="document.getElementById('logout-form').submit();"
+                                               class="dropdown-item notify-item">
                                                 <i class="fas fa-sign-out-alt"></i>
                                                 <span>Cerrar sesión</span>
                                             </a>
@@ -300,10 +334,202 @@
                                 </li>
                             </ul>
                         </div>
+                
+                        <style>
+                            .navbar-nav .nav-link,
+                            .navbar-nav .nav-link i,
+                            .navbar-nav .search-icon {
+                                color: #000 !important;
+                            }
+                        
+                            .search-container {
+                                position: relative;
+                                display: flex;
+                                align-items: center;
+                            }
+                        
+                            .search-input {
+                                padding: 5px 10px;
+                                border: 1px solid #ccc;
+                                border-radius: 4px;
+                                margin-right: 10px;
+                                width: 0;
+                            }
+                        
+                            .search-toggle {
+                                padding: 0.5rem 1rem;
+                                display: flex;
+                                align-items: center;
+                            }
+                        
+                            .search-icon {
+                                cursor: pointer;
+                                font-size: 16px;
+                            }
+                        
+                            .dropdown-menu a {
+                                color: #000 !important;
+                            }
+                        
+                            /* Estilos para el menú "Ciudades" */
+                            .city-menu {
+                                position: relative;
+                                padding: 0.5rem 1rem;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                            }
+
+                            .city-menu i {
+                                margin-left: 5px;
+                                transition: transform 0.3s ease;
+                            }
+
+                            .city-dropdown {
+                                position: absolute;
+                                top: 100%;
+                                left: 0;
+                                background: rgba(0, 0, 0, 0.6);
+                                color: white;
+                                padding: 10px;
+                                width: auto;
+                                border-radius: 4px;
+                                z-index: 1000;
+                                display: none; /* Oculto por defecto */
+                                grid-template-columns: repeat(4, 1fr); /* 3 columnas */
+                                gap: 10px;
+                                white-space: nowrap;
+                            }
+
+                            .city-menu:hover .city-dropdown {
+                                display: grid; /* Se muestra en grid */
+                            }
+
+                            .city-dropdown li {
+                                padding: 5px;
+                                cursor: pointer;
+                            }
+
+                            .city-dropdown li:hover {
+                                background: rgba(255, 255, 255, 0.2);
+                            }
+
+                            .city-menu:hover i {
+                                transform: rotate(180deg);
+                            }
+
+                            #bell-menu, #envelope-menu, #user-menu {
+                                display: none;
+                                position: absolute;
+                                top: 30px; /* Ajusta la distancia del menú con respecto al ícono */
+                                right: 0;  /* Alinea el menú al borde derecho del contenedor padre */
+                                width: 150px; /* Ajusta el ancho del menú */
+                                background-color: #fff;
+                                border: 1px solid #ddd;
+                                border-radius: 5px;
+                                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                                font-size: 12px;
+                                padding: 5px 0;
+                            }
+
+                            #bell-menu .dropdown-item, #envelope-menu .dropdown-item, #user-menu .dropdown-item {
+                                padding: 8px 12px;
+                                font-size: 12px;
+                            }
+
+                            #bell-menu .dropdown-item:hover, , #envelope-menu .dropdown-item:hover, , #user-menu .dropdown-item:hover {
+                                background-color: #f0f0f0;
+                            }
+
+
+
+                        </style>
+                
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                
+                        <script>
+                            $(document).ready(function() {
+                                const $container = $('.search-container');
+                                const $input = $('.search-input');
+                                const $toggle = $('.search-toggle');
+                        
+                                $input.addClass('d-none');
+                        
+                                $toggle.on('click', (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                        
+                                    if ($input.hasClass('d-none')) {
+                                        $input.removeClass('d-none')
+                                            .css('opacity', 0)
+                                            .animate({
+                                                width: '200px',
+                                                opacity: 1
+                                            }, 300, () => {
+                                                $input.focus();
+                                            });
+                                    }
+                                });
+                        
+                                $input.on('keydown', (e) => {
+                                    if (e.key === 'Escape') {
+                                        cerrarBusqueda();
+                                    } else if (e.key === 'Enter' && $input.val().trim() !== '') {
+                                        console.log('Buscando:', $input.val());
+                                    }
+                                });
+                        
+                                $input.on('click', (e) => {
+                                    e.stopPropagation();
+                                });
+                        
+                                $(document).on('click', () => {
+                                    if ($input.val().trim() === '') {
+                                        cerrarBusqueda();
+                                    }
+                                });
+                        
+                                const cerrarBusqueda = () => {
+                                    if (!$input.hasClass('d-none')) {
+                                        $input.animate({
+                                            width: '0',
+                                            opacity: 0
+                                        }, 300, () => {
+                                            $input.val('').addClass('d-none');
+                                        });
+                                    }
+                                };
+
+                                $('.city-dropdown li').on('click', function() {
+                                    const cityName = $(this).text().trim().toLowerCase();
+                                    $('.selected_city').val(cityName);
+                                    $('.formsubmit').submit();
+                                });
+
+                                function toggleMenu(icon, menu) {
+                                    $(icon).click(function (e) {
+                                        e.stopPropagation();
+                                        $(menu).toggle();
+                                    });
+
+                                    $(document).click(function (e) {
+                                        if (!$(e.target).closest(icon + ', ' + menu).length) {
+                                            $(menu).hide();
+                                        }
+                                    });
+                                }
+
+                                toggleMenu('#bell-icon', '#bell-menu');
+                                toggleMenu('#envelope-icon', '#envelope-menu');
+                                toggleMenu('#user-icon', '#user-menu');
+                            });
+                        </script>
+                        
+                        
                     </nav>
-
+                
                     @include('partial_msg')
-
+                
                     <div class="container mt-3" style="max-width: 100% !important;">@yield('content')</div>
                 </div>
             </div>
