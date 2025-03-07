@@ -634,7 +634,7 @@ class ImageController extends Controller
         $images = Image::
         where('user_id', $id)->where('status', 'pending')
         ->orWhere('user_id', $id)->where('status', 'unapproved')
-        ->paginate(8);
+        ->get();
 
         foreach($images as $imageModel) {
             if(is_null($imageModel->watermarked)) {
@@ -658,7 +658,7 @@ class ImageController extends Controller
         $images = Image::
         where('user_id', $id)->where('status', 'pending')
         ->orWhere('user_id', $id)->where('status', 'approved')
-        ->paginate(8);
+        ->get();
 
         foreach($images as $image) {
             $image->status = 'unapproved';
@@ -690,7 +690,7 @@ class ImageController extends Controller
     public function visibleAll($id) {
         $images = Image::
         where('user_id', $id)->whereNull('visible')
-        ->paginate(8);
+        ->get();
 
         foreach($images as $image) {
             $image->visible = 1;
@@ -704,7 +704,7 @@ class ImageController extends Controller
     public function invisibleAll($id) {
         $images = Image::
         where('user_id', $id)->whereNotNull('visible')
-        ->paginate(8);
+        ->get();
 
         foreach($images as $image) {
             $image->visible = NULL;
@@ -751,7 +751,7 @@ class ImageController extends Controller
     }
 
     public function deleteAll($id) {
-        $images = Image::where('user_id', $id)->paginate(8);
+        $images = Image::where('user_id', $id)->get();
 
         foreach($images as $image) {
            \Storage::disk(StorageHelper::getDisk('images'))->delete($image->route);
