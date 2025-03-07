@@ -100,8 +100,8 @@
         @include('modals.admin.fotos.modal_subir_fotos')
         <hr>
         <h2 class="w-100 text-center text-white" style="font-size: 20px;">Aquí solo aparecerán las imágenes aprobadas.</h2>
-        <div class="gallery">
-            @foreach ($images as $i=>$image)
+        <div class="gallery" id="gallery">
+            @foreach ($images->take(8) as $i=>$image)
                 @php
                     $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
                 @endphp
@@ -114,7 +114,7 @@
                         <div class="gallery-item image-hover-zoom" tabindex="0">
 
                             <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
-                                class="gallery-image" alt="">
+                                class="gallery-image" alt="" loading="lazy">
 
                             @if(!is_null($image->frontimage))
                             <div class="gallery-item-type">
@@ -200,9 +200,10 @@
             @endforeach
 
         </div>
-
+        <div id="loading" style="display: none; text-align: center; padding: 20px;">
+            <div class="loader"></div>
+        </div>
     </div>
-    <!-- End of container -->
 
 </main>
 
@@ -1103,6 +1104,47 @@
         }
     });
 </script>
-    
+
+<script>
+let page = 1;
+const loading = document.getElementById('loading');
+const gallery = document.getElementById('gallery');
+let isLoading = false;
+
+const loadMoreImages = async () => {
+    if (isLoading) return;
+    isLoading = true;
+    loading.style.display = 'block';
+
+    try {
+        const response = await fetch(`/account/load-more?page=${page + 1}`);
+        const data = await response.text();
+        
+        if (data.trim()) {
+            gallery.insertAdjacentHTML('beforeend', data);
+            page++;
+            initializeNewImages();
+        }
+    } catch (error) {
+        console.error('Error loading more images:', error);
+    } finally {
+        loading.style.display = 'none';
+        isLoading = false;
+    }
+};
+
+const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !isLoading) {
+        loadMoreImages();
+    }
+}, { threshold: 0.5 });
+
+observer.observe(loading);
+
+function initializeNewImages() {
+    // Re-initialize click events and other functionality for new images
+    // Add your existing gallery item click handlers here
+}
+</script>
 
 @endsection

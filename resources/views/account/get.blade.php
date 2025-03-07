@@ -100,6 +100,70 @@
     <input type="text" class="user_nickname" value="{{ $user->nickname }}" hidden/>
 
     <div class="container mt-5 container_mobile">
+        <div class="gallery" id="gallery">
+            @foreach ($images->take(8) as $i=>$image)
+                @php
+                    $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
+                @endphp
+                @if ($mimeType && strpos($mimeType, 'image/') === 0)
+                    <div class="gallery-item image-hover-zoom" tabindex="0">
+                        <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
+                            class="gallery-image" alt="" loading="lazy">
+                        @if(!is_null($image->frontimage))
+                        <div class="gallery-item-type">
+
+                            <span class="visually-hidden">Portada</span><i class="fa-solid fa-star" aria-hidden="true"></i>
+
+                        </div>
+                        @endif
+
+                        <div class="gallery-item-info">
+
+                            <ul>
+                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
+                                        class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                {{--
+                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
+                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
+                            </ul>
+
+                        </div>
+                    </div>
+                @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
+                    <div class="gallery-item" tabindex="0">
+
+                        <video crossorigin="anonymous" class="gallery-image">
+                            <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}">
+                            Your browser does not support the video tag.
+                        </video>
+
+                        <div class="gallery-item-type">
+
+                            <span class="visually-hidden">Video</span><i class="fas fa-video" aria-hidden="true"></i>
+
+                        </div>
+
+                        <div class="gallery-item-info">
+
+                            <ul>
+                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
+                                        class="fas fa-heart" aria-hidden="true"></i> 30</li>
+                                {{--
+                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
+                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
+                            </ul>
+                        </div>
+                    </div>
+                @endif
+
+            @endforeach
+        </div>
+        <div id="loading" style="display: none; text-align: center; padding: 20px;">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <div class="container mt-5 container_mobile">
 
         <div class="gallery">
             @foreach ($images as $i=>$image)

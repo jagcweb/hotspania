@@ -350,4 +350,16 @@ class AccountController extends Controller
 
         return redirect()->back()->with('exito', 'Imagen oculta.');
     }
+
+    public function loadMore(Request $request)
+    {
+        $page = $request->get('page', 1);
+        $images = Image::where('user_id', Auth::id())
+                      ->orderBy('created_at', 'desc')
+                      ->skip(($page - 1) * 8)
+                      ->take(8)
+                      ->get();
+
+        return view('account.partials.gallery-items', compact('images'));
+    }
 }
