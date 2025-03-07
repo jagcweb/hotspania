@@ -16,52 +16,84 @@
                 </div>
             </div>
             <div class=" mt-5 container_mobile">
-
-                <div class="gallery">
-                    @foreach ($users as $i=>$user)
-                        @if(count($user->images) > 0)
-                            @php
-                                $image = \App\Models\Image::where('user_id', $user->id)
-                                    ->whereNotNull('frontimage')
-                                    ->whereNotNull('route_frontimage')
-                                    ->first();
-                                
-                                if (!is_object($image)) {
-                                    $image = \App\Models\Image::where('user_id', $user->id)->orderBy('id', 'asc')->first();
-                                }
-                            @endphp
-                            
-                            <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
-                                <div class="gallery-item image-hover-zoom" tabindex="0">
-            
-                                    <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage ?? $image->route]) }}"
-                                        class="gallery-image" alt="">
-                                    <div class="franja">
-                                        <p>{{ Str::limit(explode(' ', trim($user->nickname))[0], 10, '') }}</p>
-                                    </div>
-            
-                                    <div class="gallery-item-info">
-            
-                                        <ul>
-                                            <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                                    class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
-                                            {{--
-                                            <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                                    class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
-                                        </ul>
-            
-                                    </div>
-            
-                                </div>
-                            </a>
-                        @endif
-                    @endforeach
+                <div class="gallery" id="gallery">
+                    @include('partials.user-grid')
                 </div>
-        
+                <div id="loading" style="display: block; text-align: center; padding: 20px; margin: 20px 0;">
+                    <div class="modern-loader"></div>
+                </div>
             </div>
         </article>
     </main>
 </div>
+
+<script>
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json'
+    }
+});
+
+let page = 1;
+const loading = document.getElementById('loading');
+const gallery = document.getElementById('gallery');
+let isLoading = false;
+let hasMore = true;
+
+function isElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
+
+const loadMoreUsers = () => {
+    if (isLoading || !hasMore) return;
+    
+    isLoading = true;
+    loading.style.display = 'block';
+
+    $.ajax({
+        url: `/?page=${page + 1}&per_page=20`, // Añadimos el parámetro per_page
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: function(response) {
+            if (response.html && response.html.trim()) {
+                gallery.insertAdjacentHTML('beforeend', response.html);
+                page++;
+                hasMore = response.hasMore;
+                if (!hasMore) {
+                    loading.style.display = 'none';
+                }
+            } else {
+                hasMore = false;
+                loading.style.display = 'none';
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            hasMore = false;
+            loading.style.display = 'none';
+        },
+        complete: function() {
+            isLoading = false;
+        }
+    });
+};
+
+$(window).scroll(function() {
+    if (isElementInViewport(loading) && !isLoading && hasMore) {
+        loadMoreUsers();
+    }
+});
+</script>
+
 <style>
     /*
 

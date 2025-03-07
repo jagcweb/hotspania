@@ -158,83 +158,10 @@
 
             @endforeach
         </div>
-        <div id="loading" style="display: none; text-align: center; padding: 20px;">
-            <div class="loader"></div>
+        <div id="loading" style="display: block; text-align: center; padding: 20px; margin: 20px 0;">
+            <div class="modern-loader"></div>
         </div>
     </div>
-
-    <div class="container mt-5 container_mobile">
-
-        <div class="gallery">
-            @foreach ($images as $i=>$image)
-                @php
-                    $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
-                    $width = \App\Helpers\StorageHelper::getSize($image, 'images')["width"];
-                    $height = \App\Helpers\StorageHelper::getSize($image, 'images')["height"];
-                @endphp
-                @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    <div class="gallery-item image-hover-zoom" tabindex="0">
-
-                        <img src="{{ route('home.imageget', ['filename' => $image->route]) }}" class="gallery-image" alt="">
-                    
-                        @if(!is_null($image->frontimage))
-                        <div class="gallery-item-type">
-
-                            <span class="visually-hidden">Portada</span><i class="fa-solid fa-star" aria-hidden="true"></i>
-
-                        </div>
-                        @endif
-
-                        <div class="gallery-item-info">
-
-                            <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
-                                {{--
-                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
-                            </ul>
-
-                        </div>
-
-                    </div>
-                @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
-                    <div class="gallery-item" tabindex="0">
-
-                        <video crossorigin="anonymous" class="gallery-image">
-                            <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}">
-                            Your browser does not support the video tag.
-                        </video>
-
-                        <div class="gallery-item-type">
-
-                            <span class="visually-hidden">Video</span><i class="fas fa-video" aria-hidden="true"></i>
-
-                        </div>
-
-                        <div class="gallery-item-info">
-
-                            <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-heart" aria-hidden="true"></i> 30</li>
-                                {{--
-                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
-                            </ul>
-                        </div>
-                    </div>
-                @endif
-
-            @endforeach
-    
-        </div>
-
-        
-        <div class="mt-4">
-            {{ $images->links('pagination::bootstrap-4') }}
-        </div>
-    </div>
-    <!-- End of container -->
 
 </main>
 
@@ -792,6 +719,52 @@
         animation: loader 500ms linear infinite;
     }
 
+    /* Nuevo loader más moderno */
+    .modern-loader {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin: 0 auto;
+        position: relative;
+        border: 3px solid transparent;
+        border-top-color: #F65807;
+        animation: spin 1s linear infinite;
+    }
+
+    .modern-loader:before, .modern-loader:after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        border: 3px solid transparent;
+    }
+
+    .modern-loader:before {
+        top: -12px;
+        left: -12px;
+        right: -12px;
+        bottom: -12px;
+        border-top-color: #F65807;
+        animation: spin 2s linear infinite;
+    }
+
+    .modern-loader:after {
+        top: 6px;
+        left: 6px;
+        right: 6px;
+        bottom: 6px;
+        border-top-color: #F65807;
+        animation: spin 3s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
     /* Media Query */
 
     @media screen and (max-width: 40rem) {
@@ -1083,55 +1056,92 @@
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const videos = document.querySelectorAll('.gallery-item video');
-        videos.forEach((video) => {
-            video.setAttribute('crossorigin', 'anonymous');
-            video.setAttribute('playsinline', '');
-            video.muted = true;
-            video.preload = 'metadata';  // Solo cargar los metadatos para evitar la reproducción automática
+// Añadir el meta tag CSRF token justo después del script de jQuery
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json'
+    }
+});
+
+let page = 1;
+const loading = document.getElementById('loading');
+const gallery = document.getElementById('gallery');
+let isLoading = false;
+let hasMore = true;
+
+function isElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
+
+const loadMoreImages = () => {
+    if (isLoading || !hasMore) return;
     
-            const thumbnail = video.parentElement.querySelector('.video-thumbnail');
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-    
-            video.onloadeddata = function() {
-                if (video.readyState >= 3) {
-                    setTimeout(function() {
-                        captureRandomFrame(video, thumbnail, canvas, ctx);
-                    }, 300); // Aumentar el tiempo de espera para garantizar que el video está listo
+    isLoading = true;
+    loading.style.display = 'block';
+    console.log('Cargando más imágenes...');
+
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    $.ajax({
+        url: `/account/load-more/${page + 1}/{{ $user->id }}`,
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: function(response) {
+            console.log('Respuesta:', response);
+            
+            if (response.html && response.html.trim()) {
+                gallery.insertAdjacentHTML('beforeend', response.html);
+                page++;
+                hasMore = response.hasMore;
+                initializeNewImages();
+                if (!hasMore) {
+                    loading.style.display = 'none';
                 }
-            };
-        });
-    
-        function captureRandomFrame(video, thumbnail, canvas, ctx) {
-            const randomTime = Math.random() * video.duration;
-            video.currentTime = randomTime; // Establecer el tiempo al fotograma deseado
-    
-            video.onseeked = function() {
-                // Solo capturamos el fotograma después de que el video haya cambiado al tiempo deseado
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-
-                // Usamos requestAnimationFrame para una captura más confiable
-                requestAnimationFrame(function() {
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    const imageUrl = canvas.toDataURL('image/png');
-                    thumbnail.src = imageUrl;
-                    thumbnail.style.display = 'block';
-
-                    // No es necesario reproducir el video, lo dejamos pausado
-                    video.pause();
-                });
-            };
+            } else {
+                hasMore = false;
+                loading.style.display = 'none';
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            console.error('Response:', xhr.responseText);
+            hasMore = false;
+            loading.style.display = 'none';
+        },
+        complete: function() {
+            isLoading = false;
         }
     });
+};
+
+// Usar scroll en lugar de Intersection Observer
+$(window).scroll(function() {
+    if (isElementInViewport(loading) && !isLoading && hasMore) {
+        loadMoreImages();
+    }
+});
+
+function initializeNewImages() {
+    const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');
+    newItems.forEach(item => {
+        item.setAttribute('data-initialized', 'true');
+        // Re-inicializar los eventos de clic para las nuevas imágenes
+        $(item).on('click', function() {
+            // Aquí va tu código existente para manejar clics
+        });
+    });
+}
 </script>
-
-
-    
-
 
 <script>
     const numberInput = document.querySelector('.user_number');

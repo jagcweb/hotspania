@@ -40,12 +40,16 @@ class HomeController extends Controller
             })
             ->with(['images', 'packageUser.package'])
             ->inRandomOrder()
-            ->get();
+            ->paginate(20); // Cambiado a 20 elementos por página
         
+        if(request()->ajax()) {
+            return response()->json([
+                'html' => view('partials.user-grid', compact('users'))->render(),
+                'hasMore' => $users->hasMorePages()
+            ]);
+        }
 
-        return view('home' , [
-            'users' => $users
-        ]);
+        return view('home', compact('users'));
     }
 
     public function privacyPolicies()

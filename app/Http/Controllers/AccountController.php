@@ -39,7 +39,7 @@ class AccountController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('logged')->except('get');
+        $this->middleware('logged')->except(['get', 'loadMore']);
     }
 
     /**
@@ -147,9 +147,22 @@ class AccountController extends Controller
     public function get($nickname) {
         $user = User::where('nickname', $nickname)->first();
 
-        $images = Image::where('user_id', $user->id)->where('status', 'approved')->whereNotNull('visible')->paginate(9);
+        if (!$user) {
+            abort(404, 'Usuario no encontrado');
+        }
 
-        $frontimage = Image::where('user_id', $user->id)->whereNotNull('frontimage')->whereNotNull('route_frontimage')->first();
+        $images = Image::where('user_id', $user->id)
+                      ->where('status', 'approved')
+                      ->whereNotNull('visible')
+                      ->orderBy('created_at', 'desc')
+                      ->get();
+
+        $frontimage = Image::where('user_id', $user->id)
+                          ->whereNotNull('frontimage')
+                          ->whereNotNull('route_frontimage')
+                          ->first();
+
+        \Log::info('Total images for user ' . $user->id . ': ' . $images->count());
 
         return view('account.get', [
             'user' => $user,
@@ -351,15 +364,45 @@ class AccountController extends Controller
         return redirect()->back()->with('exito', 'Imagen oculta.');
     }
 
-    public function loadMore(Request $request)
+    public function loadMore($page, $userId)
     {
-        $page = $request->get('page', 1);
-        $images = Image::where('user_id', Auth::id())
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json([
+                'error' => 'User not found'
+            ], 404);
+        }
+
+        $perPage = 8;
+        $offset = ($page - 1) * $perPage;
+        
+        $images = Image::where('user_id', $userId)
+                      ->where('status', 'approved')
+                      ->whereNotNull('visible')
                       ->orderBy('created_at', 'desc')
-                      ->skip(($page - 1) * 8)
-                      ->take(8)
+                      ->skip($offset)
+                      ->take($perPage)
                       ->get();
 
-        return view('account.partials.gallery-items', compact('images'));
+        $totalImages = Image::where('user_id', $userId)
+                           ->where('status', 'approved')
+                           ->whereNotNull('visible')
+                           ->count();
+
+        $hasMore = ($offset + $perPage) < $totalImages;
+
+        $html = view('account.partials.gallery-items', ['images' => $images])->render();
+        
+        return response()->json([
+            'html' => $html,
+            'hasMore' => $hasMore,
+            'debug' => [
+                'page' => $page,
+                'offset' => $offset,
+                'count' => $images->count(),
+                'total' => $totalImages
+            ]
+        ]);
     }
 }

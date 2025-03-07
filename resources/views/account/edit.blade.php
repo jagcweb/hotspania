@@ -200,8 +200,8 @@
             @endforeach
 
         </div>
-        <div id="loading" style="display: none; text-align: center; padding: 20px;">
-            <div class="loader"></div>
+        <div id="loading" style="display: block; text-align: center; padding: 20px; margin: 20px 0;">
+            <div class="modern-loader"></div>
         </div>
     </div>
 
@@ -1144,6 +1144,94 @@ observer.observe(loading);
 function initializeNewImages() {
     // Re-initialize click events and other functionality for new images
     // Add your existing gallery item click handlers here
+}
+</script>
+
+<script>
+// Añadir el meta tag CSRF token justo después del script de jQuery
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        'Accept': 'application/json'
+    }
+});
+
+let page = 1;
+const loading = document.getElementById('loading');
+const gallery = document.getElementById('gallery');
+let isLoading = false;
+let hasMore = true;
+
+function isElementInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
+
+const loadMoreImages = () => {
+    if (isLoading || !hasMore) return;
+    
+    isLoading = true;
+    loading.style.display = 'block';
+    console.log('Cargando más imágenes...');
+
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    $.ajax({
+        url: `/account/load-more/${page + 1}`,
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': token,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: function(response) {
+            console.log('Respuesta:', response);
+            
+            if (response.html && response.html.trim()) {
+                gallery.insertAdjacentHTML('beforeend', response.html);
+                page++;
+                hasMore = response.hasMore;
+                initializeNewImages();
+                if (!hasMore) {
+                    loading.style.display = 'none';
+                }
+            } else {
+                hasMore = false;
+                loading.style.display = 'none';
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            console.error('Response:', xhr.responseText);
+            hasMore = false;
+            loading.style.display = 'none';
+        },
+        complete: function() {
+            isLoading = false;
+        }
+    });
+};
+
+// Usar scroll en lugar de Intersection Observer
+$(window).scroll(function() {
+    if (isElementInViewport(loading) && !isLoading && hasMore) {
+        loadMoreImages();
+    }
+});
+
+function initializeNewImages() {
+    const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');
+    newItems.forEach(item => {
+        item.setAttribute('data-initialized', 'true');
+        // Re-inicializar los eventos de clic para las nuevas imágenes
+        $(item).on('click', function() {
+            // Aquí va tu código existente para manejar clics
+        });
+    });
 }
 </script>
 

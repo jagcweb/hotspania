@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Hotspania">
     <meta name="author" content="jagcweb">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="icon" type="image/x-icon" href="{{ asset('images/logo.png') }}">
 
@@ -107,7 +106,7 @@
 
     <div style="margin-top:60px;"></div>
 
-<div class="footer mt-3">
+<div class="footer mt-3 d-none">
   <div class="bubbles">
     <div class="bubble" style="--size:3.9544746530484645rem; --distance:9.305364258132585rem; --position:78.42261521222024%; --time:2.323553913631863s; --delay:-3.9154029074929033s;"></div>
     <div class="bubble" style="--size:4.071839379938712rem; --distance:8.029740377986665rem; --position:100.54530778248105%; --time:3.085955849628327s; --delay:-3.3786024579902865s;"></div>

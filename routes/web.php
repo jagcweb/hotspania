@@ -48,7 +48,9 @@ Route::get('/account/{nickname}', [App\Http\Controllers\AccountController::class
 Route::get('/account/images/{image}/setfront', [App\Http\Controllers\AccountController::class, 'setFront'])->name('account.images.setfront');
 Route::get('/account/images/{image}/visible', [App\Http\Controllers\AccountController::class, 'visible'])->name('account.images.visible');
 Route::get('/account/images/{image}/invisible', [App\Http\Controllers\AccountController::class, 'invisible'])->name('account.images.invisible');
-Route::get('/account/load-more', 'AccountController@loadMore')->name('account.loadMore');
+Route::get('/account/load-more/{page}/{userId}', [App\Http\Controllers\AccountController::class, 'loadMore'])
+    ->middleware(['web'])
+    ->name('account.loadMore');
 
 Route::post('/account/upload-images', [App\Http\Controllers\AccountController::class, 'upload'])->name('account.images.upload');
 
