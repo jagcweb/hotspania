@@ -34,25 +34,25 @@ class ImageController extends Controller
     public function get($id, $name, $filter) {
         switch($filter) {
             case 'pendientes':
-                $images = Image::where('user_id', $id)->where('status', 'pending')->orderBy('id', 'desc')->paginate(10);
+                $images = Image::where('user_id', $id)->where('status', 'pending')->orderBy('id', 'desc')->paginate(8);
                 break;
             case 'aprobadas':
-                $images = Image::where('user_id', $id)->where('status', 'approved')->orderBy('id', 'desc')->paginate(10);
+                $images = Image::where('user_id', $id)->where('status', 'approved')->orderBy('id', 'desc')->paginate(8);
                 break;
             case 'desaprobadas':
-                $images = Image::where('user_id', $id)->where('status', 'unapproved')->orderBy('id', 'desc')->paginate(10);
+                $images = Image::where('user_id', $id)->where('status', 'unapproved')->orderBy('id', 'desc')->paginate(8);
                 break;
             case 'visible':
-                $images = Image::where('user_id', $id)->whereNotNull('visible')->orderBy('id', 'desc')->paginate(10);
+                $images = Image::where('user_id', $id)->whereNotNull('visible')->orderBy('id', 'desc')->paginate(8);
                 break;
             case 'ocultas':
-                $images = Image::where('user_id', $id)->whereNull('visible')->orderBy('id', 'desc')->paginate(10);
+                $images = Image::where('user_id', $id)->whereNull('visible')->orderBy('id', 'desc')->paginate(8);
                 break;
             case 'todas':
-                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->paginate(10);
+                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->paginate(8);
                 break;
             default:
-                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->paginate(10);
+                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->paginate(8);
                 break;
         }
 
@@ -634,7 +634,7 @@ class ImageController extends Controller
         $images = Image::
         where('user_id', $id)->where('status', 'pending')
         ->orWhere('user_id', $id)->where('status', 'unapproved')
-        ->get();
+        ->paginate(8);
 
         foreach($images as $imageModel) {
             if(is_null($imageModel->watermarked)) {
@@ -658,7 +658,7 @@ class ImageController extends Controller
         $images = Image::
         where('user_id', $id)->where('status', 'pending')
         ->orWhere('user_id', $id)->where('status', 'approved')
-        ->get();
+        ->paginate(8);
 
         foreach($images as $image) {
             $image->status = 'unapproved';
@@ -690,7 +690,7 @@ class ImageController extends Controller
     public function visibleAll($id) {
         $images = Image::
         where('user_id', $id)->whereNull('visible')
-        ->get();
+        ->paginate(8);
 
         foreach($images as $image) {
             $image->visible = 1;
@@ -704,7 +704,7 @@ class ImageController extends Controller
     public function invisibleAll($id) {
         $images = Image::
         where('user_id', $id)->whereNotNull('visible')
-        ->get();
+        ->paginate(8);
 
         foreach($images as $image) {
             $image->visible = NULL;
@@ -751,7 +751,7 @@ class ImageController extends Controller
     }
 
     public function deleteAll($id) {
-        $images = Image::where('user_id', $id)->get();
+        $images = Image::where('user_id', $id)->paginate(8);
 
         foreach($images as $image) {
            \Storage::disk(StorageHelper::getDisk('images'))->delete($image->route);
