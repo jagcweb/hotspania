@@ -27,6 +27,29 @@ class HomeController extends Controller
      */
     public function index()
     {
+        if (!request()->ajax()) {
+            $users = User::whereHas('roles', function ($q) {
+                    $q->where('name', 'user');
+                })
+                ->whereNotNull('active')
+                ->whereNotNull('completed')
+                ->whereNull('banned')
+                ->whereHas('packageUser', function ($q) {
+                    $q->whereHas('package', function ($query) {
+                        $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
+                    });
+                })
+                ->with(['images', 'packageUser.package'])
+                ->inRandomOrder()
+                ->paginate(20);
+
+            return view('home', compact('users'));
+        }
+
+        $page = request()->get('page', 1);
+        $perPage = 20;
+        $offset = ($page - 1) * $perPage;
+
         $users = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })
@@ -40,16 +63,37 @@ class HomeController extends Controller
             })
             ->with(['images', 'packageUser.package'])
             ->inRandomOrder()
-            ->paginate(20); // Cambiado a 20 elementos por página
-        
-        if(request()->ajax()) {
-            return response()->json([
-                'html' => view('partials.user-grid', compact('users'))->render(),
-                'hasMore' => $users->hasMorePages()
-            ]);
-        }
+            ->skip($offset)
+            ->take($perPage)
+            ->get();
 
-        return view('home', compact('users'));
+        $totalUsers = User::whereHas('roles', function ($q) {
+                $q->where('name', 'user');
+            })
+            ->whereNotNull('active')
+            ->whereNotNull('completed')
+            ->whereNull('banned')
+            ->whereHas('packageUser', function ($q) {
+                $q->whereHas('package', function ($query) {
+                    $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
+                });
+            })
+            ->count();
+
+        $hasMore = ($offset + $perPage) < $totalUsers;
+
+        $html = view('partials.user-grid', ['users' => $users])->render();
+        
+        return response()->json([
+            'html' => $html,
+            'hasMore' => $hasMore,
+            'debug' => [
+                'page' => $page,
+                'offset' => $offset,
+                'count' => $users->count(),
+                'total' => $totalUsers
+            ]
+        ]);
     }
 
     public function privacyPolicies()
