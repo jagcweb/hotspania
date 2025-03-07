@@ -34,7 +34,8 @@ class StorageHelper
             $width = $fileInfo['image_width'] ?? null;
             $height = $fileInfo['image_height'] ?? null;
 
-            var_dump($fileInfo);
+            var_dump($fileInfo['image_width']);
+            var_dump($fileInfo['image_height']);
         } else {
             // Obtener la ruta local de la imagen
             $imagePath = \Storage::disk($name)->path($image->route);
