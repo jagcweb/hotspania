@@ -4,6 +4,8 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\App;
 use getID3;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class StorageHelper
 {
@@ -19,36 +21,40 @@ class StorageHelper
     }
 
     public static function getSize($image, $name = NULL) {
-        // Crear una instancia de getID3
-        $getID3 = new getID3;
-    
-        // Si estamos en producción, usamos GCS; de lo contrario, 'images' (local)
         if (App::environment('production')) {
-            // Obtener el contenido de la imagen desde GCS
-            $imageContent = \Storage::disk('gcs')->get($image->route);
-    
-            // Analizar el contenido de la imagen
-            $fileInfo = $getID3->analyze($imageContent);
-    
-            // Obtener las dimensiones
-            $width = $fileInfo['image_width'] ?? null;
-            $height = $fileInfo['image_height'] ?? null;
+            try {
+                // Obtener el contenido de la imagen desde GCS
+                $imageContent = \Storage::disk('gcs')->get($image->route);
+                
+                // Crear un archivo temporal
+                $tempFile = tempnam(sys_get_temp_dir(), 'img_');
+                file_put_contents($tempFile, $imageContent);
+                
+                // Usar Intervention Image para obtener las dimensiones
+                $manager = new ImageManager(new Driver());
+                $img = $manager->read($tempFile);
+                $width = $img->width();
+                $height = $img->height();
+                
+                // Limpiar el archivo temporal
+                unlink($tempFile);
 
-            var_dump($fileInfo['image_width']);
-            var_dump($fileInfo['image_height']);
+                var_dump($width, $height);
+                
+                return ['width' => $width, 'height' => $height];
+            } catch (\Exception $e) {
+                \Log::error('Error al obtener dimensiones de imagen: ' . $e->getMessage());
+                return ['width' => NULL, 'height' => NULL];
+            }
         } else {
-            // Obtener la ruta local de la imagen
-            $imagePath = \Storage::disk($name)->path($image->route);
-    
-            // Obtener las dimensiones de la imagen localmente
-            list($width, $height) = getimagesize($imagePath);
-        }
-    
-        // Verificar si se obtuvieron las dimensiones
-        if ($width && $height) {
-            return ['width' => $width, 'height' => $height];
-        } else {
-            return ['width' => NULL, 'height' => NULL];
+            try {
+                $imagePath = \Storage::disk($name)->path($image->route);
+                list($width, $height) = getimagesize($imagePath);
+                return ['width' => $width, 'height' => $height];
+            } catch (\Exception $e) {
+                \Log::error('Error al obtener dimensiones de imagen local: ' . $e->getMessage());
+                return ['width' => NULL, 'height' => NULL];
+            }
         }
     }
 }
