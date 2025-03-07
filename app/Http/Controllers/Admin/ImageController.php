@@ -34,25 +34,25 @@ class ImageController extends Controller
     public function get($id, $name, $filter) {
         switch($filter) {
             case 'pendientes':
-                $images = Image::where('user_id', $id)->where('status', 'pending')->orderBy('id', 'desc')->get();
+                $images = Image::where('user_id', $id)->where('status', 'pending')->orderBy('id', 'desc')->paginate(10);
                 break;
             case 'aprobadas':
-                $images = Image::where('user_id', $id)->where('status', 'approved')->orderBy('id', 'desc')->get();
+                $images = Image::where('user_id', $id)->where('status', 'approved')->orderBy('id', 'desc')->paginate(10);
                 break;
             case 'desaprobadas':
-                $images = Image::where('user_id', $id)->where('status', 'unapproved')->orderBy('id', 'desc')->get();
+                $images = Image::where('user_id', $id)->where('status', 'unapproved')->orderBy('id', 'desc')->paginate(10);
                 break;
             case 'visible':
-                $images = Image::where('user_id', $id)->whereNotNull('visible')->orderBy('id', 'desc')->get();
+                $images = Image::where('user_id', $id)->whereNotNull('visible')->orderBy('id', 'desc')->paginate(10);
                 break;
             case 'ocultas':
-                $images = Image::where('user_id', $id)->whereNull('visible')->orderBy('id', 'desc')->get();
+                $images = Image::where('user_id', $id)->whereNull('visible')->orderBy('id', 'desc')->paginate(10);
                 break;
             case 'todas':
-                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->get();
+                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->paginate(10);
                 break;
             default:
-                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->get();
+                $images = Image::where('user_id', $id)->orderBy('id', 'desc')->paginate(10);
                 break;
         }
 

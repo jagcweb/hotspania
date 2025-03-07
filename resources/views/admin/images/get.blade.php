@@ -54,7 +54,6 @@
                         </a>
                     </p>
                     <div style="max-width: 100%; display:flex; flex-direction:row; justify-content:space-around; align-items:center; flex-wrap: wrap;">
-                        @php $portada = \App\Models\Image::where('user_id', $id)->whereNotNull('frontimage')->first(); @endphp
                         @foreach ($images as $i=>$image)
                         
                             @php
@@ -132,6 +131,11 @@
                                 </div>
                             </div>
                         @endforeach
+
+                                
+                        <div class="mt-4">
+                            {{ $images->links('pagination::bootstrap-4') }}
+                        </div>
                     </div>
                 @else
                     @if($filter === 'pendientes')
