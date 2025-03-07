@@ -38,8 +38,6 @@ class StorageHelper
                 
                 // Limpiar el archivo temporal
                 unlink($tempFile);
-
-                var_dump($width, $height);
                 
                 return ['width' => $width, 'height' => $height];
             } catch (\Exception $e) {
