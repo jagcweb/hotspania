@@ -59,7 +59,7 @@ const loadMoreUsers = () => {
     loading.style.display = 'block';
 
     $.ajax({
-        url: `/?page=${page + 1}&per_page=20`, // Añadimos el parámetro per_page
+        url: `/home/load-more/${page + 1}`,
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'

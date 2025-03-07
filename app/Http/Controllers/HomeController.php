@@ -27,29 +27,29 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (!request()->ajax()) {
-            $users = User::whereHas('roles', function ($q) {
-                    $q->where('name', 'user');
-                })
-                ->whereNotNull('active')
-                ->whereNotNull('completed')
-                ->whereNull('banned')
-                ->whereHas('packageUser', function ($q) {
-                    $q->whereHas('package', function ($query) {
-                        $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
-                    });
-                })
-                ->with(['images', 'packageUser.package'])
-                ->inRandomOrder()
-                ->paginate(20);
+        $users = User::whereHas('roles', function ($q) {
+                $q->where('name', 'user');
+            })
+            ->whereNotNull('active')
+            ->whereNotNull('completed')
+            ->whereNull('banned')
+            ->whereHas('packageUser', function ($q) {
+                $q->whereHas('package', function ($query) {
+                    $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
+                });
+            })
+            ->with(['images', 'packageUser.package'])
+            ->inRandomOrder()
+            ->paginate(20);
 
-            return view('home', compact('users'));
-        }
+        return view('home', compact('users'));
+    }
 
-        $page = request()->get('page', 1);
+    public function loadMore($page)
+    {
         $perPage = 20;
         $offset = ($page - 1) * $perPage;
-
+        
         $users = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })

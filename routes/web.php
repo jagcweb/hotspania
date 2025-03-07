@@ -38,6 +38,7 @@ Route::get('/logout', function(){
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home/image-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getImage'])->name('home.imageget');
 Route::get('/home/gif-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getGif'])->name('home.gifget');
+Route::get('/home/load-more/{page}', [App\Http\Controllers\HomeController::class, 'loadMore'])->name('home.loadmore');
 
 //AccountController
 Route::get('/account', [App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
