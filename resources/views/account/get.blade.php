@@ -1135,12 +1135,31 @@ function initializeNewImages() {
     const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');
     newItems.forEach(item => {
         item.setAttribute('data-initialized', 'true');
-        // Re-inicializar los eventos de clic para las nuevas imágenes
+        
+        // Agregar el evento click para abrir el modal
         $(item).on('click', function() {
-            // Aquí va tu código existente para manejar clics
+            let currentIndex = $(this).index(); // Obtener el índice de la imagen/video
+            let isImage = $(this).find('img').length > 0;
+            let contentSrc = isImage ? $(this).find('img').attr('src') : $(this).find('video source').attr('src');
+            
+            // Actualizar el contenido del modal
+            if (isImage) {
+                $('#modalImage').attr('src', contentSrc).show();
+                $('#modalVideo').hide();
+            } else {
+                $('#modalVideo').find('source').attr('src', contentSrc);
+                $('#modalVideo')[0].load();
+                $('#modalVideo').show();
+                $('#modalImage').hide();
+            }
+            
+            // Mostrar el modal
+            $('#contentModal').fadeIn();
+            isModalActive = true;
         });
     });
 }
+
 </script>
 
 <script>

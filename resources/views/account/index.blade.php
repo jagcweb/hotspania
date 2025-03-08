@@ -341,15 +341,21 @@
         let contentList = []; // Array de contenido (imagen/video)
         let isModalActive = false; // Flag para verificar si el modal está activo
 
-        // Al cargar la galería, almacenamos todas las imágenes y videos
-        $('.gallery-item').each(function() {
-            let isImage = $(this).find('img').length > 0;
-            let contentSrc = isImage ? $(this).find('img').attr('src') : $(this).find('video source').attr('src');
-            contentList.push({
-                type: isImage ? 'image' : 'video',
-                src: contentSrc
+        // Nueva función para actualizar contentList
+        function updateContentList() {
+            contentList = [];
+            $('.gallery-item').each(function() {
+                let isImage = $(this).find('img').length > 0;
+                let contentSrc = isImage ? $(this).find('img').attr('src') : $(this).find('video source').attr('src');
+                contentList.push({
+                    type: isImage ? 'image' : 'video',
+                    src: contentSrc
+                });
             });
-        });
+        }
+
+        // Inicialización inicial
+        updateContentList();
 
         // Función para cargar el contenido en el modal (imagen o video)
         function loadContent(index) {
@@ -379,12 +385,14 @@
 
         // Función para navegar a la imagen/video anterior
         function prevContent() {
+            updateContentList(); // Actualizar antes de navegar
             currentIndex = (currentIndex > 0) ? currentIndex - 1 : contentList.length - 1;
             loadContent(currentIndex);
         }
 
         // Función para navegar a la imagen/video siguiente
         function nextContent() {
+            updateContentList(); // Actualizar antes de navegar
             currentIndex = (currentIndex < contentList.length - 1) ? currentIndex + 1 : 0;
             loadContent(currentIndex);
         }
@@ -1115,8 +1123,31 @@ const observer = new IntersectionObserver((entries) => {
 observer.observe(loading);
 
 function initializeNewImages() {
-    // Re-initialize click events and other functionality for new images
-    // Add your existing gallery item click handlers here
+    const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');
+    newItems.forEach(item => {
+        item.setAttribute('data-initialized', 'true');
+        
+        $(item).on('click', function() {
+            // Detectar si es imagen o video
+            let isImage = $(this).find('img').length > 0;
+            let contentSrc = isImage ? $(this).find('img').attr('src') : $(this).find('video source').attr('src');
+            
+            // Actualizar el contenido del modal
+            if (isImage) {
+                $('#modalImage').attr('src', contentSrc).show();
+                $('#modalVideo').hide();
+            } else {
+                $('#modalVideo').find('source').attr('src', contentSrc);
+                $('#modalVideo')[0].load();
+                $('#modalVideo').show();
+                $('#modalImage').hide();
+            }
+            
+            // Mostrar el modal
+            $('#contentModal').fadeIn();
+            isModalActive = true;
+        });
+    });
 }
 </script>
 
