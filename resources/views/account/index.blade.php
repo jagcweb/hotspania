@@ -337,74 +337,70 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-        let currentIndex = 0; // Índice de la imagen/video actual
-        let contentList = []; // Array de contenido (imagen/video)
-        let isModalActive = false; // Flag para verificar si el modal está activo
-
-        // Nueva función para actualizar contentList
+        let currentIndex = 0; 
+        window.contentList = []; // Hacemos contentList global
+        let isModalActive = false;
+        
+        // Función para inicializar/actualizar contentList
         function updateContentList() {
-            contentList = [];
+            window.contentList = []; // Limpiamos el array
             $('.gallery-item').each(function() {
                 let isImage = $(this).find('img').length > 0;
                 let contentSrc = isImage ? $(this).find('img').attr('src') : $(this).find('video source').attr('src');
-                contentList.push({
+                window.contentList.push({
                     type: isImage ? 'image' : 'video',
-                    src: contentSrc
+                    src: contentSrc,
+                    element: this
                 });
             });
         }
 
-        // Inicialización inicial
+        // Inicializar contentList con las imágenes existentes
         updateContentList();
 
-        // Función para cargar el contenido en el modal (imagen o video)
         function loadContent(index) {
-            let content = contentList[index];
-
-            // Pausar el video si estamos cambiando de contenido y es un video
-            $('#modalVideo')[0].pause(); 
+            let content = window.contentList[index];
+            $('#modalVideo')[0].pause();
 
             if (content.type === 'image') {
-                $('#modalImage').attr('src', content.src).show(); // Mostrar imagen
-                $('#modalVideo').hide(); // Ocultar video
+                $('#modalImage').attr('src', content.src).show();
+                $('#modalVideo').hide();
             } else {
                 $('#modalVideo').find('source').attr('src', content.src);
-                $('#modalVideo')[0].load(); // Recargar el video
-                $('#modalVideo').show(); // Mostrar video
-                $('#modalImage').hide(); // Ocultar imagen
+                $('#modalVideo')[0].load();
+                $('#modalVideo').show();
+                $('#modalImage').hide();
             }
         }
 
-        // Cuando se hace clic en cualquier .gallery-item
-        $('.gallery-item').on('click', function() {
-            currentIndex = $(this).index(); // Obtener el índice de la imagen/video
-            loadContent(currentIndex); // Cargar el contenido en el modal
-            $('#contentModal').fadeIn(); // Mostrar el modal
-            isModalActive = true; // Marcar que el modal está activo
+        function findContentIndex(element) {
+            return window.contentList.findIndex(item => item.element === element);
+        }
+
+        $(document).on('click', '.gallery-item', function() {
+            updateContentList(); // Actualizar lista antes de abrir modal
+            currentIndex = findContentIndex(this);
+            loadContent(currentIndex);
+            $('#contentModal').fadeIn();
+            isModalActive = true;
         });
 
-        // Función para navegar a la imagen/video anterior
         function prevContent() {
-            updateContentList(); // Actualizar antes de navegar
-            currentIndex = (currentIndex > 0) ? currentIndex - 1 : contentList.length - 1;
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : window.contentList.length - 1;
             loadContent(currentIndex);
         }
 
-        // Función para navegar a la imagen/video siguiente
         function nextContent() {
-            updateContentList(); // Actualizar antes de navegar
-            currentIndex = (currentIndex < contentList.length - 1) ? currentIndex + 1 : 0;
+            currentIndex = (currentIndex < window.contentList.length - 1) ? currentIndex + 1 : 0;
             loadContent(currentIndex);
         }
 
-        // Navegar a la imagen/video anterior
         $('#prevBtn').on('click', function() {
-            prevContent(); // Cargar contenido anterior
+            prevContent();
         });
 
-        // Navegar a la imagen/video siguiente
         $('#nextBtn').on('click', function() {
-            nextContent(); // Cargar contenido siguiente
+            nextContent();
         });
 
         // Cerrar el modal
@@ -454,6 +450,92 @@
                 isModalActive = false; // Desactivar el modal
             }
         });
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                'Accept': 'application/json'
+            }
+        });
+
+        let page = 1;
+        const loading = document.getElementById('loading');
+        const gallery = document.getElementById('gallery');
+        let isLoading = false;
+        let hasMore = true;
+
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+
+        const loadMoreImages = () => {
+            if (isLoading || !hasMore) return;
+            
+            isLoading = true;
+            loading.style.display = 'block';
+            console.log('Cargando más imágenes...');
+
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            $.ajax({
+                url: `/account/load-more/${page + 1}/{{ \Auth::user()->id }}`,
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    console.log('Respuesta:', response);
+                    
+                    if (response.html && response.html.trim()) {
+                        gallery.insertAdjacentHTML('beforeend', response.html);
+                        page++;
+                        hasMore = response.hasMore;
+                        initializeNewImages();
+                        if (!hasMore) {
+                            loading.style.display = 'none';
+                        }
+                    } else {
+                        hasMore = false;
+                        loading.style.display = 'none';
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    console.error('Response:', xhr.responseText);
+                    hasMore = false;
+                    loading.style.display = 'none';
+                },
+                complete: function() {
+                    isLoading = false;
+                }
+            });
+        };
+
+        // Usar scroll en lugar de Intersection Observer
+        $(window).scroll(function() {
+            if (isElementInViewport(loading) && !isLoading && hasMore) {
+                loadMoreImages();
+            }
+        });
+
+        function initializeNewImages() {
+            const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');
+            newItems.forEach(item => {
+                item.setAttribute('data-initialized', 'true');
+                // No necesitamos añadir el evento click aquí ya que está manejado por la delegación de eventos arriba
+            });
+            // Actualizar contentList después de añadir nuevas imágenes
+            if (typeof window.contentList !== 'undefined') {
+                updateContentList();
+            }
+        }
     });
 </script>
 
@@ -1084,159 +1166,6 @@
             };
         }
     });
-</script>
-
-<script>
-let page = 1;
-const loading = document.getElementById('loading');
-const gallery = document.getElementById('gallery');
-let isLoading = false;
-
-const loadMoreImages = async () => {
-    if (isLoading) return;
-    isLoading = true;
-    loading.style.display = 'block';
-
-    try {
-        const response = await fetch(`/account/load-more?page=${page + 1}`);
-        const data = await response.text();
-        
-        if (data.trim()) {
-            gallery.insertAdjacentHTML('beforeend', data);
-            page++;
-            initializeNewImages();
-        }
-    } catch (error) {
-        console.error('Error loading more images:', error);
-    } finally {
-        loading.style.display = 'none';
-        isLoading = false;
-    }
-};
-
-const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading) {
-        loadMoreImages();
-    }
-}, { threshold: 0.5 });
-
-observer.observe(loading);
-
-function initializeNewImages() {
-    const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');
-    newItems.forEach(item => {
-        item.setAttribute('data-initialized', 'true');
-        
-        $(item).on('click', function() {
-            // Detectar si es imagen o video
-            let isImage = $(this).find('img').length > 0;
-            let contentSrc = isImage ? $(this).find('img').attr('src') : $(this).find('video source').attr('src');
-            
-            // Actualizar el contenido del modal
-            if (isImage) {
-                $('#modalImage').attr('src', contentSrc).show();
-                $('#modalVideo').hide();
-            } else {
-                $('#modalVideo').find('source').attr('src', contentSrc);
-                $('#modalVideo')[0].load();
-                $('#modalVideo').show();
-                $('#modalImage').hide();
-            }
-            
-            // Mostrar el modal
-            $('#contentModal').fadeIn();
-            isModalActive = true;
-        });
-    });
-}
-</script>
-
-<script>
-// Añadir el meta tag CSRF token justo después del script de jQuery
-$.ajaxSetup({
-    headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-        'Accept': 'application/json'
-    }
-});
-
-let page = 1;
-const loading = document.getElementById('loading');
-const gallery = document.getElementById('gallery');
-let isLoading = false;
-let hasMore = true;
-
-function isElementInViewport(el) {
-    const rect = el.getBoundingClientRect();
-    return (
-        rect.top >= 0 &&
-        rect.left >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    );
-}
-
-const loadMoreImages = () => {
-    if (isLoading || !hasMore) return;
-    
-    isLoading = true;
-    loading.style.display = 'block';
-    console.log('Cargando más imágenes...');
-
-    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    $.ajax({
-        url: `/account/load-more/${page + 1}`,
-        method: 'GET',
-        headers: {
-            'X-CSRF-TOKEN': token,
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        success: function(response) {
-            console.log('Respuesta:', response);
-            
-            if (response.html && response.html.trim()) {
-                gallery.insertAdjacentHTML('beforeend', response.html);
-                page++;
-                hasMore = response.hasMore;
-                initializeNewImages();
-                if (!hasMore) {
-                    loading.style.display = 'none';
-                }
-            } else {
-                hasMore = false;
-                loading.style.display = 'none';
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-            console.error('Response:', xhr.responseText);
-            hasMore = false;
-            loading.style.display = 'none';
-        },
-        complete: function() {
-            isLoading = false;
-        }
-    });
-};
-
-// Usar scroll en lugar de Intersection Observer
-$(window).scroll(function() {
-    if (isElementInViewport(loading) && !isLoading && hasMore) {
-        loadMoreImages();
-    }
-});
-
-function initializeNewImages() {
-    const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');
-    newItems.forEach(item => {
-        item.setAttribute('data-initialized', 'true');
-        // Re-inicializar los eventos de clic para las nuevas imágenes
-        $(item).on('click', function() {
-            // Aquí va tu código existente para manejar clics
-        });
-    });
-}
 </script>
 
 @endsection
