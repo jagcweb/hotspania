@@ -41,6 +41,13 @@ const loading = document.getElementById('loading');
 const gallery = document.getElementById('gallery');
 let isLoading = false;
 let hasMore = true;
+let loadedUserIds = []; // Array para almacenar los IDs de usuarios ya cargados
+
+// Recolectar IDs iniciales
+document.querySelectorAll('.gallery-item').forEach(item => {
+    const userId = item.getAttribute('data-user-id');
+    if (userId) loadedUserIds.push(parseInt(userId));
+});
 
 function isElementInViewport(el) {
     const rect = el.getBoundingClientRect();
@@ -64,9 +71,20 @@ const loadMoreUsers = () => {
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         },
+        data: {
+            loaded_users: loadedUserIds
+        },
         success: function(response) {
             if (response.html && response.html.trim()) {
                 gallery.insertAdjacentHTML('beforeend', response.html);
+                
+                // Añadir nuevos IDs al array
+                document.querySelectorAll('.gallery-item:not([data-processed])').forEach(item => {
+                    const userId = item.getAttribute('data-user-id');
+                    if (userId) loadedUserIds.push(parseInt(userId));
+                    item.setAttribute('data-processed', 'true');
+                });
+
                 page++;
                 hasMore = response.hasMore;
                 if (!hasMore) {

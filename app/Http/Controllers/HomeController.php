@@ -49,6 +49,7 @@ class HomeController extends Controller
     {
         $perPage = 20;
         $offset = ($page - 1) * $perPage;
+        $loadedUsers = request()->input('loaded_users', []);
         
         $users = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
@@ -61,9 +62,11 @@ class HomeController extends Controller
                     $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
                 });
             })
+            ->when(!empty($loadedUsers), function($query) use ($loadedUsers) {
+                return $query->whereNotIn('id', $loadedUsers);
+            })
             ->with(['images', 'packageUser.package'])
             ->inRandomOrder()
-            ->skip($offset)
             ->take($perPage)
             ->get();
 
@@ -77,6 +80,9 @@ class HomeController extends Controller
                 $q->whereHas('package', function ($query) {
                     $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
                 });
+            })
+            ->when(!empty($loadedUsers), function($query) use ($loadedUsers) {
+                return $query->whereNotIn('id', $loadedUsers);
             })
             ->count();
 

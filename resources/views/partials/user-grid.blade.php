@@ -12,7 +12,7 @@
         @endphp
         
         <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
-            <div class="gallery-item image-hover-zoom" tabindex="0">
+            <div class="gallery-item image-hover-zoom" tabindex="0" data-user-id="{{ $user->id }}">
                 <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage ?? $image->route]) }}"
                     class="gallery-image" alt="">
                 <div class="franja">
