@@ -78,7 +78,7 @@
                         <select class="form-control" id="gender" name="gender" required>
                             <option class="option" value="mujer" {{ \Auth::user()->gender == 'mujer' ? 'selected' : '' }}>Mujer</option>
                             <option class="option" value="hombre" {{ \Auth::user()->gender == 'hombre' ? 'selected' : '' }}>Hombre</option>
-                            <option class="option" value="lgbti+" {{ \Auth::user()->gender == 'lgbti+' ? 'selected' : '' }}>Otro</option>
+                            <option class="option" value="lgbti" {{ \Auth::user()->gender == 'lgbti' ? 'selected' : '' }}>LGTBI+</option>
                         </select>
                     </div>
                     

@@ -289,7 +289,7 @@
     <!-- Global Init -->
     <script src="{{ asset('js/custom.js') }}"></script>
 
-    <script>
+    <!--<script>
       window.addEventListener('scroll', function() {
           localStorage.setItem('scrollPosition', window.scrollY);
       });
@@ -300,7 +300,7 @@
               window.scrollTo(0, parseInt(scrollPosition));
           }
       });
-    </script>
+    </script>-->
 
     <script>
 

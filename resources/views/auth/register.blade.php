@@ -120,7 +120,7 @@
                                             <select class="form-control" id="gender" name="gender" required>
                                                 <option class="option" value="mujer" {{ old('gender') == 'mujer' ? 'selected' : '' }}>Mujer</option>
                                                 <option class="option" value="hombre" {{ old('gender') == 'hombre' ? 'selected' : '' }}>Hombre</option>
-                                                <option class="option" value="lgbti+" {{ old('gender') == 'lgbti+' ? 'selected' : '' }}>Otro</option>
+                                                <option class="option" value="lgbti" {{ old('gender') == 'lgbti' ? 'selected' : '' }}>LGTBI+</option>
                                             </select>
                                         </div>
                                         

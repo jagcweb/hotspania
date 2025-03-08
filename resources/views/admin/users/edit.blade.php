@@ -121,7 +121,7 @@
                                 <option value="{{$user->gender}}" selected hidden>{{ucfirst($user->gender)}}</option>
                                 <option value="hombre">Hombre</option>
                                 <option value="mujer">Mujer</option>
-                                <option value="lgbti+">LGTBI+</option>
+                                <option value="lgbti">LGTBI+</option>
                             </select>
                             </div>
                         

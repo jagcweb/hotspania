@@ -90,7 +90,7 @@ class AccountController extends Controller
             'city.*' => 'exists:cities,id',
             'working_zone' => 'required|string|max:255',
             'service_location' => 'required|in:piso_propio,domicilio,hotel',
-            'gender' => 'required|in:mujer,hombre,lgbti+',
+            'gender' => 'required|in:mujer,hombre,lgbti',
             'height' => 'required|integer|min:100|max:250',
             'weight' => 'required|integer|min:30|max:200',
             'bust' => 'nullable|integer|min:30|max:200',
