@@ -40,16 +40,18 @@ class HomeController extends Controller
             })
             ->with(['images', 'packageUser.package'])
             ->inRandomOrder()
-            ->paginate(20);
+            ->take(20)
+            ->get();
 
-        return view('home', compact('users'));
+        $loadedUserIds = $users->pluck('id')->toArray();
+
+        return view('home', compact('users', 'loadedUserIds'));
     }
 
     public function loadMore($page)
     {
         $perPage = 20;
-        $offset = ($page - 1) * $perPage;
-        $loadedUsers = request()->input('loaded_users', []);
+        $loadedUsers = json_decode(request()->input('loaded_users', '[]'));
         
         $users = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
@@ -62,15 +64,13 @@ class HomeController extends Controller
                     $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
                 });
             })
-            ->when(!empty($loadedUsers), function($query) use ($loadedUsers) {
-                return $query->whereNotIn('id', $loadedUsers);
-            })
+            ->whereNotIn('id', $loadedUsers)
             ->with(['images', 'packageUser.package'])
             ->inRandomOrder()
             ->take($perPage)
             ->get();
 
-        $totalUsers = User::whereHas('roles', function ($q) {
+        $totalRemaining = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })
             ->whereNotNull('active')
@@ -81,24 +81,17 @@ class HomeController extends Controller
                     $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
                 });
             })
-            ->when(!empty($loadedUsers), function($query) use ($loadedUsers) {
-                return $query->whereNotIn('id', $loadedUsers);
-            })
+            ->whereNotIn('id', $loadedUsers)
             ->count();
 
-        $hasMore = ($offset + $perPage) < $totalUsers;
+        $hasMore = $totalRemaining > $users->count();
 
         $html = view('partials.user-grid', ['users' => $users])->render();
         
         return response()->json([
             'html' => $html,
             'hasMore' => $hasMore,
-            'debug' => [
-                'page' => $page,
-                'offset' => $offset,
-                'count' => $users->count(),
-                'total' => $totalUsers
-            ]
+            'loadedUsers' => array_merge($loadedUsers, $users->pluck('id')->toArray())
         ]);
     }
 

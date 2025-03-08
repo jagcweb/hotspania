@@ -41,13 +41,8 @@ const loading = document.getElementById('loading');
 const gallery = document.getElementById('gallery');
 let isLoading = false;
 let hasMore = true;
-let loadedUserIds = []; // Array para almacenar los IDs de usuarios ya cargados
-
-// Recolectar IDs iniciales
-document.querySelectorAll('.gallery-item').forEach(item => {
-    const userId = item.getAttribute('data-user-id');
-    if (userId) loadedUserIds.push(parseInt(userId));
-});
+// Inicializar el array con los IDs pasados desde el controlador
+let loadedUserIds = @json($loadedUserIds ?? []);
 
 function isElementInViewport(el) {
     const rect = el.getBoundingClientRect();
@@ -68,30 +63,19 @@ const loadMoreUsers = () => {
     $.ajax({
         url: `/home/load-more/${page + 1}`,
         method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
         data: {
-            loaded_users: loadedUserIds
+            loaded_users: JSON.stringify(loadedUserIds)
         },
         success: function(response) {
             if (response.html && response.html.trim()) {
                 gallery.insertAdjacentHTML('beforeend', response.html);
-                
-                // Añadir nuevos IDs al array
-                document.querySelectorAll('.gallery-item:not([data-processed])').forEach(item => {
-                    const userId = item.getAttribute('data-user-id');
-                    if (userId) loadedUserIds.push(parseInt(userId));
-                    item.setAttribute('data-processed', 'true');
-                });
-
+                loadedUserIds = response.loadedUsers; // Actualizar los IDs cargados
                 page++;
                 hasMore = response.hasMore;
-                if (!hasMore) {
-                    loading.style.display = 'none';
-                }
             } else {
                 hasMore = false;
+            }
+            if (!hasMore) {
                 loading.style.display = 'none';
             }
         },
