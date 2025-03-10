@@ -17,7 +17,7 @@
                     @if(!is_null($frontimage->route_gif))
                         <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
                     @else
-                        <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route_frontimage]) }}" />
+                        <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
                     @endif
                 @else
                     <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
@@ -600,8 +600,12 @@
     }
 
     .img_profile {
-        max-width: 280px;
+        width: 280px;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        object-position: center;
     }
+
 
     .container {
         max-width: 93.5rem;
