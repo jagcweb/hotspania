@@ -15,7 +15,12 @@
                     <p class="margin-bottom-0 text-size-16 text-white">más calientes de tu zona</p>
                 </div>
             </div>
-            <div class=" mt-5 container_mobile">
+            
+            <!-- Add a spacer div for Android devices -->
+            @if(preg_match('/android/i', Request::header('User-Agent')))
+                <div style="height: 50px;"></div>
+            @endif
+            <div class="container_mobile {{ preg_match('/android/i', Request::header('User-Agent')) ? 'mt-5' : 'mt-2' }}">
                 <div class="gallery" id="gallery">
                     @include('partials.user-grid')
                 </div>
