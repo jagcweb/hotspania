@@ -294,12 +294,48 @@ class UserController extends Controller
             'roles', function($q){
                 $q->where('name', 'user');
             })
-            ->where('active', 1)->get(); // Replace 1 with your active user status value
+            ->where('active', 1)
+            ->get();
 
         return view('admin.users.active', compact('users'));
     }
 
-        /**
+    public function getPositionals()
+    {
+        $users = User::whereHas('roles', function ($q) {
+            $q->where('name', 'user');
+        })
+        ->whereNotNull('active')
+        ->whereNotNull('completed')
+        ->whereNull('banned')
+        ->whereHas('packageUser', function ($q) {
+            $q->where('end_date', '>=', now())
+              ->orderBy('end_date', 'desc');
+        })
+        ->whereHas('images', function($q) {
+            $q->where('frontimage', 1);
+        })
+        ->orderBy('position')
+        ->get();
+
+        return view('admin.users.positions', compact('users'));
+    }
+
+    public function updatePositions(Request $request)
+    {
+        $positions = $request->get('positions');
+        
+        foreach ($positions as $position) {
+            if (isset($position['id']) && isset($position['position'])) {
+                User::where('id', $position['id'])
+                    ->update(['position' => $position['position']]);
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Get a list of requests.
      *
      * @return \Illuminate\Http\Response

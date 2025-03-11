@@ -80,6 +80,8 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('users/getActive', 'App\Http\Controllers\Admin\UserController@getActive')->name('admin.users.getActive');
     Route::get('users/getRequests', 'App\Http\Controllers\Admin\UserController@getRequests')->name('admin.users.getRequests');
     Route::get('users/getLoginRecords', 'App\Http\Controllers\Admin\UserController@getLoginRecords')->name('admin.users.getLoginRecords');
+    Route::get('users/positions', 'App\Http\Controllers\Admin\UserController@getPositionals')->name('admin.users.getPositionals');
+    Route::post('users/update-positions', 'App\Http\Controllers\Admin\UserController@updatePositions')->name('admin.users.updatePositions');
 
     // Image Management
     Route::get('images-get/{id}/{name}/{filter}', 'App\Http\Controllers\Admin\ImageController@get')->name('admin.images.getFilter');

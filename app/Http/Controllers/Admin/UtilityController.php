@@ -21,23 +21,37 @@ class UtilityController extends Controller
      */
 
 
-    public function assignPackage(Request $request){
+    public function assignPackage(Request $request)
+    {
+        $user_id = $request->get('user_id');
+        $package = Package::findOrFail($request->get('package_id'));
+        
+        // Obtener el último paquete del usuario
+        $lastPackage = PackageUser::where('user_id', $user_id)
+            ->orderBy('end_date', 'desc')
+            ->first();
 
-        $has_package = PackageUser::where('user_id', $request->get('user_id'))->first();
-
-        if(is_object($has_package)){
-            $has_package->delete();
+        $startDate = null;
+        if ($lastPackage && $lastPackage->end_date > now()) {
+            // Si hay un paquete activo, el nuevo empezará cuando termine el último
+            $startDate = $lastPackage->end_date;
+        } else {
+            // Si no hay paquetes activos, empieza hoy
+            $startDate = now()->startOfDay();
         }
 
         $pack_user = new PackageUser();
-        $pack_user->package_id = $request->get('package_id');
-        $pack_user->user_id = $request->get('user_id');
+        $pack_user->package_id = $package->id;
+        $pack_user->user_id = $user_id;
+        $pack_user->start_date = $startDate;
+        $pack_user->end_date = $startDate->copy()->addDays($package->days);
         $pack_user->save();
 
-        $pack_user = new PackageUserHistory();
-        $pack_user->package_id = $request->get('package_id');
-        $pack_user->user_id = $request->get('user_id');
-        $pack_user->save();
+        // Guardar en historial
+        $pack_history = new PackageUserHistory();
+        $pack_history->package_id = $package->id;
+        $pack_history->user_id = $user_id;
+        $pack_history->save();
 
         return back()->with('exito', 'Paquete asignado.');
     }

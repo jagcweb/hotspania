@@ -61,20 +61,20 @@
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.7.0/dist/ffmpeg.min.js"></script>
 
 <script>
-    const uploadButton = document.getElementById('upload-btn');
-    const form = document.getElementById('upload-form');
-    const fileInput = document.getElementById('image');
-    const progressContainer = document.getElementById('progress-container');
-    const userId = document.getElementById('user_id').value;
+    var uploadButton = document.getElementById('upload-btn');
+    var form = document.getElementById('upload-form');
+    var fileInput = document.getElementById('image');
+    var progressContainer = document.getElementById('progress-container');
+    var userId = document.getElementById('user_id').value;
 
     // Obtener el token CSRF del meta tag
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     // Función que maneja la subida de cada archivo
     async function uploadFile(file, userId, currentIndex, totalFiles) {
         return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            const uploadUrl = window.location.pathname.includes("/account/edit") 
+            var xhr = new XMLHttpRequest();
+            var uploadUrl = window.location.pathname.includes("/account/edit") 
             ? "{{ route('account.images.upload') }}" 
             : "{{ route('admin.images.upload') }}";
 
@@ -84,8 +84,8 @@
             xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
 
             // Crear el progress bar para cada archivo
-            const progressBarWrapper = document.createElement('div');
-            const progressBar = document.createElement('progress');
+            var progressBarWrapper = document.createElement('div');
+            var progressBar = document.createElement('progress');
             progressBar.setAttribute('max', '100');
             progressBar.setAttribute('value', '0');
             progressBarWrapper.innerText = `Subiendo (${currentIndex}/${totalFiles})...`;
@@ -95,7 +95,7 @@
             // Actualizar progreso de la subida
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
-                    const percent = Math.round((event.loaded / event.total) * 100);
+                    var percent = Math.round((event.loaded / event.total) * 100);
                     progressBar.value = percent;
                 }
             };
@@ -119,7 +119,7 @@
                 progressBarWrapper.innerText = `Error al subir ${file.name}.`;
             };
 
-            const formData = new FormData();
+            var formData = new FormData();
             formData.append('images[]', file);  // Solo se sube un archivo por petición
             formData.append('user_id', userId);
             xhr.send(formData);

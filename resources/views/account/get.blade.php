@@ -90,7 +90,7 @@
                 <i class="fa-solid fa-link mr-1" style="font-size:18px;"></i><a href="{{ $user->link }}" target="_blank" style="color:#f65807; font-size:16px; text-decoration:underline!important;">{{ $user->link }}</a>
             </p>
         @endif
-        <div class="buttons">
+        <div class="buttons mt-5">
             <button class="btn profile-edit-btn whatsapp_btn">WhatsApp</button>
             <button class="btn profile-edit-btn call_btn" style="margin-left:20px;">Llámame</button>
         </div>

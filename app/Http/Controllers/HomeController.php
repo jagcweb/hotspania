@@ -27,24 +27,54 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $users = User::whereHas('roles', function ($q) {
+        // Primero obtenemos usuarios con posición
+        $usersWithPosition = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })
             ->whereNotNull('active')
             ->whereNotNull('completed')
             ->whereNull('banned')
+            ->whereNotNull('position')
             ->whereHas('packageUser', function ($q) {
-                $q->whereHas('package', function ($query) {
-                    $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
-                });
+                $q->where('end_date', '>=', now())
+                  ->orderBy('end_date', 'desc');
             })
-            ->with(['images', 'packageUser.package'])
-            ->inRandomOrder()
+            ->with(['images', 'packageUser' => function($q) {
+                $q->where('end_date', '>=', now())
+                  ->orderBy('end_date', 'desc');
+            }])
+            ->orderBy('position')
             ->take(20)
             ->get();
 
-        $loadedUserIds = $users->pluck('id')->toArray();
+        // Luego obtenemos usuarios sin posición si aún no llegamos a 20
+        if ($usersWithPosition->count() < 20) {
+            $remaining = 20 - $usersWithPosition->count();
+            $usersWithoutPosition = User::whereHas('roles', function ($q) {
+                    $q->where('name', 'user');
+                })
+                ->whereNotNull('active')
+                ->whereNotNull('completed')
+                ->whereNull('banned')
+                ->whereNull('position')
+                ->whereHas('packageUser', function ($q) {
+                    $q->where('end_date', '>=', now())
+                      ->orderBy('end_date', 'desc');
+                })
+                ->with(['images', 'packageUser' => function($q) {
+                    $q->where('end_date', '>=', now())
+                      ->orderBy('end_date', 'desc');
+                }])
+                ->inRandomOrder()
+                ->take($remaining)
+                ->get();
 
+            $users = $usersWithPosition->concat($usersWithoutPosition);
+        } else {
+            $users = $usersWithPosition;
+        }
+
+        $loadedUserIds = $users->pluck('id')->toArray();
         return view('home', compact('users', 'loadedUserIds'));
     }
 
@@ -53,22 +83,54 @@ class HomeController extends Controller
         $perPage = 20;
         $loadedUsers = json_decode(request()->input('loaded_users', '[]'));
         
-        $users = User::whereHas('roles', function ($q) {
+        // Primero usuarios con posición
+        $usersWithPosition = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })
             ->whereNotNull('active')
             ->whereNotNull('completed')
             ->whereNull('banned')
-            ->whereHas('packageUser', function ($q) {
-                $q->whereHas('package', function ($query) {
-                    $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
-                });
-            })
+            ->whereNotNull('position')
             ->whereNotIn('id', $loadedUsers)
-            ->with(['images', 'packageUser.package'])
-            ->inRandomOrder()
+            ->whereHas('packageUser', function ($q) {
+                $q->where('end_date', '>=', now())
+                  ->orderBy('end_date', 'desc');
+            })
+            ->with(['images', 'packageUser' => function($q) {
+                $q->where('end_date', '>=', now())
+                  ->orderBy('end_date', 'desc');
+            }])
+            ->orderBy('position')
             ->take($perPage)
             ->get();
+
+        // Completar con usuarios sin posición si es necesario
+        if ($usersWithPosition->count() < $perPage) {
+            $remaining = $perPage - $usersWithPosition->count();
+            $usersWithoutPosition = User::whereHas('roles', function ($q) {
+                    $q->where('name', 'user');
+                })
+                ->whereNotNull('active')
+                ->whereNotNull('completed')
+                ->whereNull('banned')
+                ->whereNull('position')
+                ->whereNotIn('id', $loadedUsers)
+                ->whereHas('packageUser', function ($q) {
+                    $q->where('end_date', '>=', now())
+                      ->orderBy('end_date', 'desc');
+                })
+                ->with(['images', 'packageUser' => function($q) {
+                    $q->where('end_date', '>=', now())
+                      ->orderBy('end_date', 'desc');
+                }])
+                ->inRandomOrder()
+                ->take($remaining)
+                ->get();
+
+            $users = $usersWithPosition->concat($usersWithoutPosition);
+        } else {
+            $users = $usersWithPosition;
+        }
 
         $totalRemaining = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
@@ -77,9 +139,8 @@ class HomeController extends Controller
             ->whereNotNull('completed')
             ->whereNull('banned')
             ->whereHas('packageUser', function ($q) {
-                $q->whereHas('package', function ($query) {
-                    $query->whereRaw("DATE_ADD(package_users.created_at, INTERVAL packages.days DAY) >= ?", [Carbon::today()->toDateString()]);
-                });
+                $q->where('end_date', '>=', now())
+                  ->orderBy('end_date', 'desc');
             })
             ->whereNotIn('id', $loadedUsers)
             ->count();

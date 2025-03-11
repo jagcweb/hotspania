@@ -131,6 +131,12 @@
                                         >
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.users.getPositionals') }}" class="nav-link text-white"
+                                            ><i class="fa-solid fa-up-down-left-right"></i>
+                                            Posicionar Fichas Activas</a
+                                        >
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.users.getRequests') }}" class="nav-link text-white"
                                             ><i
                                                 class="fas fa-file-contract"

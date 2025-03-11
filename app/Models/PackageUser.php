@@ -9,8 +9,9 @@ class PackageUser extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'package_id'];
+    protected $fillable = ['user_id', 'package_id', 'start_date', 'end_date'];
     protected $table = 'package_users';
+    protected $dates = ['start_date', 'end_date'];
 
     public function package()
     {
