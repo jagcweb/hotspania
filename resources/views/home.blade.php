@@ -17,10 +17,8 @@
             </div>
             
             <!-- Add a spacer div for Android devices -->
-            @if(preg_match('/android/i', Request::header('User-Agent')))
-                <br><br><br>
-            @endif
-            <div class="container_mobile {{ preg_match('/android/i', Request::header('User-Agent')) ? 'mt-5' : 'mt-2' }}">
+            <br><br><br>
+            <div class="container_mobile mt-5">
                 <div class="gallery" id="gallery">
                     @include('partials.user-grid')
                 </div>
