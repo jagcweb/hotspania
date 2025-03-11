@@ -18,7 +18,7 @@
             
             <!-- Add a spacer div for Android devices -->
             @if(preg_match('/android/i', Request::header('User-Agent')))
-                <div style="height: 50px;"></div>
+                <br><br><br>
             @endif
             <div class="container_mobile {{ preg_match('/android/i', Request::header('User-Agent')) ? 'mt-5' : 'mt-2' }}">
                 <div class="gallery" id="gallery">
