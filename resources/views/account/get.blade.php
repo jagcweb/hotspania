@@ -30,7 +30,7 @@
 
             </div>
 
-            <div class="profile-stats">
+            <div class="profile-stats" style="display: none;">
 
                 <ul>
                     <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
@@ -87,7 +87,8 @@
     <div class="container">
         @if(!is_null($user->link))
             <p class="mt-5 w-100 text-center">
-                <i class="fa-solid fa-link mr-1" style="font-size:18px;"></i><a href="{{ $user->link }}" target="_blank" style="color:#f65807; font-size:16px; text-decoration:underline!important;">{{ $user->link }}</a>
+                <i class="fa-solid fa-link mr-1 link-icon"></i>
+                <a href="{{ $user->link }}" target="_blank" class="link-text">{{ $user->link }}</a>
             </p>
         @endif
         <div class="buttons mt-5">
@@ -564,6 +565,22 @@
         object-position: center;
     }
 
+    @media screen and (max-width: 640px) {
+        .img_profile {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            object-position: center;
+            margin: 0 auto;
+        }
+
+        .container {
+            width: 100%!importasnt;
+            margin: 0;
+            padding: 0;
+        }
+    }
+
     .container {
         max-width: 93.5rem;
         margin: 0 auto;
@@ -606,22 +623,18 @@
 
     .profile-image {
         float: left;
-        width: calc(33.333% - 1rem);
+        width: calc(50% - 1rem); /* Changed from 33.333% to 50% */
         display: flex;
         justify-content: center;
         align-items: center;
         margin-right: 3rem;
     }
 
-    .profile-image img {
-       
-    }
-
     .profile-user-settings,
     .profile-stats,
     .profile-bio {
         float: left;
-        width: calc(66.666% - 2rem);
+        width: calc(50% - 2rem); /* Changed from 66.666% to 50% */
     }
 
     .profile-user-settings {
@@ -959,14 +972,111 @@
     @supports (display: grid) {
         .profile {
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: minmax(280px, 1fr) 1fr; /* Changed from 2fr to 1fr */
             grid-template-rows: repeat(3, auto);
             grid-column-gap: 3rem;
-            align-items: center;
+            align-items: start;
         }
 
-        .profile-image {
-            grid-row: 1 / -1;
+        @media screen and (max-width: 640px) {
+            .profile {
+                display: grid;
+                grid-template-columns: 120px 1fr; /* Reduced width for image */
+                grid-gap: 0.5rem;
+                padding: 0.5rem;
+            }
+
+            .profile-image {
+                grid-row: 1 / 4; /* Extend to cover all rows */
+                width: 120px;
+                max-width: 120px;
+                margin: 0;
+                padding: 0;
+            }
+
+            .profile-image img {
+                width: 120px;
+                height: 180px; /* Maintain 2:3 ratio */
+                object-fit: cover;
+            }
+
+            .profile-user-settings,
+            .profile-stats,
+            .profile-bio {
+                grid-column: 2;
+                margin: 0;
+                padding: 0 0 0 0.5rem;
+                width: 100%;
+            }
+
+            .profile-bio p {
+                margin: 0.3rem 0;
+                line-height: 1.2;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .profile {
+                grid-template-columns: 100px 1fr;
+            }
+
+            .profile-image {
+                width: 100px;
+                max-width: 100px;
+            }
+
+            .profile-image img {
+                width: 100px;
+                height: 150px;
+            }
+        }
+
+        @media screen and (max-width: 320px) {
+            .profile {
+                grid-template-columns: 80px 1fr;
+                grid-gap: 0.3rem;
+            }
+
+            .profile-image {
+                width: 80px;
+                max-width: 80px;
+            }
+
+            .profile-image img {
+                width: 80px;
+                height: 120px;
+            }
+
+            .profile-bio p {
+                font-size: 1rem !important;
+                margin: 0.2rem 0;
+            }
+        }
+
+        @media screen and (max-width: 260px) {
+            .profile {
+                grid-template-columns: 60px 1fr;
+                grid-gap: 0.2rem;
+            }
+
+            .profile-image {
+                width: 60px;
+                max-width: 60px;
+            }
+
+            .profile-image img {
+                width: 60px;
+                height: 90px;
+            }
+
+            .profile-bio p {
+                font-size: 0.9rem !important;
+                margin: 0.1rem 0;
+            }
+
+            .profile-user-name {
+                font-size: 1rem;
+            }
         }
 
         .gallery {
@@ -1146,6 +1256,36 @@
     }
     }
 
+    .link-icon {
+        font-size: 18px;
+        color: #f65807!important;
+    }
+    
+    .link-text {
+        color: #f65807!important;
+        font-size: 16px;
+        text-decoration: underline !important;
+    }
+
+    @media screen and (max-width: 480px) {
+        .link-text { font-size: 14px !important; }
+        .link-icon { font-size: 16px !important; }
+    }
+
+    @media screen and (max-width: 380px) {
+        .link-text { font-size: 12px !important; }
+        .link-icon { font-size: 14px !important; }
+    }
+
+    @media screen and (max-width: 320px) {
+        .link-text { font-size: 11px !important; }
+        .link-icon { font-size: 13px !important; }
+    }
+
+    @media screen and (max-width: 260px) {
+        .link-text { font-size: 10px !important; }
+        .link-icon { font-size: 12px !important; }
+    }
 </style>
 
 

@@ -6,11 +6,11 @@
 @include('partial_msg')
 <div class="row">
     <div class="col-lg-12">
-        <div class="card">
-            <h5 class="w-100 text-center mt-2">Ordenar Fichas en <b>{{ ucfirst(\Cookie::get('city')) ?? 'Barcelona' }}</b></h5>
+        <div class="card mb-4">
+            <h5 class="w-100 text-center mt-2">Fichas Ordenadas en <b>{{ ucfirst(\Cookie::get('city')) ?? 'Barcelona' }}</b></h5>
             <div class="card-body">
                 <div class="row sortable-grid" id="sortable-grid">
-                    @foreach($users as $u)
+                    @foreach($orderedUsers as $u)
                         @if(\Cookie::get('city') != "todas")
                             @php 
                                 $city = \App\Models\City::where('name', \Cookie::get('city') ?? 'Barcelona')->first();
@@ -28,6 +28,44 @@
                             <div class="col-md-3 mb-4 sortable-item" data-id="{{ $u->id }}">
                                 <div class="image-container" data-user-id="{{ $u->id }}">
                                     <div class="position-badge">{{ $loop->index + 1 }}</div>
+                                    @if(is_object($frontimage))
+                                        @if(!is_null($frontimage->route_gif))
+                                            <img src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" class="img-fluid" alt="{{ $u->full_name }}">
+                                        @else
+                                            <img src="{{ route('home.imageget', ['filename' => $frontimage->route_frontimage]) }}" class="img-fluid" alt="{{ $u->full_name }}">
+                                        @endif
+                                    @else
+                                        <img src="{{ asset('images/user.jpg') }}" class="img-fluid" alt="Usuario sin imagen">
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h5 class="w-100 text-center mt-2">Fichas Sin Ordenar en <b>{{ ucfirst(\Cookie::get('city')) ?? 'Barcelona' }}</b></h5>
+            <div class="card-body">
+                <div class="row sortable-grid" id="unordered-grid">
+                    @foreach($unorderedUsers as $u)
+                        @if(\Cookie::get('city') != "todas")
+                            @php 
+                                $city = \App\Models\City::where('name', \Cookie::get('city') ?? 'Barcelona')->first();
+                                $city_user = \App\Models\CityUser::where('user_id', $u->id)->where('city_id', $city->id)->first(); 
+                            @endphp
+                        @else
+                            @php $city_user = null; @endphp
+                        @endif
+                        @if(is_object($city_user) || \Cookie::get('city') == "todas")
+                            @php 
+                                $frontimage = \App\Models\Image::where('user_id', $u->id)
+                                    ->whereNotNull('frontimage')
+                                    ->first();
+                            @endphp
+                            <div class="col-md-3 mb-4 sortable-item" data-id="{{ $u->id }}">
+                                <div class="image-container" data-user-id="{{ $u->id }}">
                                     @if(is_object($frontimage))
                                         @if(!is_null($frontimage->route_gif))
                                             <img src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" class="img-fluid" alt="{{ $u->full_name }}">
@@ -179,21 +217,57 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
 $(document).ready(function() {
-    const $grid = $('#sortable-grid');
+    const $orderedGrid = $('#sortable-grid');
+    const $unorderedGrid = $('#unordered-grid');
     let isProcessing = false;
+    const MAX_ORDERED_ITEMS = 12;
 
-    let sortable = new Sortable($grid[0], {
+    const commonOptions = {
         animation: 150,
         handle: '.image-container',
         ghostClass: 'sortable-ghost',
         chosenClass: 'sortable-chosen',
         dragClass: 'sortable-drag',
+        group: {
+            name: 'shared',
+            put: function(to, from, dragged) {
+                // Si es el grid ordenado, verificar el límite
+                if (to.el.id === 'sortable-grid') {
+                    return to.el.children.length < MAX_ORDERED_ITEMS;
+                }
+                // Si es el grid desordenado, siempre permitir
+                return true;
+            }
+        },
         disabled: false,
         
         onStart: function(evt) {
             if (isProcessing) return false;
             $('.image-container').css('pointer-events', 'none');
             evt.item.classList.add('dragging');
+        },
+        
+        onAdd: function(evt) {
+            if (evt.to === $unorderedGrid[0]) {
+                $(evt.item).find('.position-badge').remove();
+            } else if (evt.to === $orderedGrid[0]) {
+                if (!$(evt.item).find('.position-badge').length) {
+                    $(evt.item).find('.image-container').append('<div class="position-badge"></div>');
+                }
+                // Mostrar mensaje si se alcanzó el límite
+                if (evt.to.children.length >= MAX_ORDERED_ITEMS) {
+                    $('body').append(`
+                        <div style="z-index:999; position:fixed; top:10%; width:100%; display:flex; justify-content:center; align-items:center; min-height:50px; background:#ff9800; color:#fff; text-align:center; font-size:16px;">
+                            Has alcanzado el límite de ${MAX_ORDERED_ITEMS} fichas ordenadas
+                        </div>
+                    `);
+                    setTimeout(() => {
+                        $('div[style*="background:#ff9800"]').fadeOut(500, function() {
+                            $(this).remove();
+                        });
+                    }, 3000);
+                }
+            }
         },
         
         onChange: function(evt) {
@@ -214,16 +288,26 @@ $(document).ready(function() {
             
             $('.jumper div').css('background-color', '#F65807');
             
-            sortable.option("disabled", true);
+            orderedSortable.option("disabled", true);
+            unorderedSortable.option("disabled", true);
             
-            const items = $.map($grid.children(), function(el, index) {
+            // Preparar datos para enviar
+            const orderedItems = $.map($orderedGrid.children(), function(el, index) {
                 return {
                     id: $(el).data('id'),
                     position: index
                 };
             });
 
-            $('.position-badge').each(function(index) {
+            const unorderedItems = $.map($unorderedGrid.children(), function(el) {
+                return {
+                    id: $(el).data('id'),
+                    position: null
+                };
+            });
+
+            // Actualizar números de posición solo en el grid ordenado
+            $orderedGrid.find('.position-badge').each(function(index) {
                 $(this).text(index + 1);
             });
 
@@ -234,13 +318,14 @@ $(document).ready(function() {
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    data: JSON.stringify({ positions: items }),
+                    data: JSON.stringify({ 
+                        positions: [...orderedItems, ...unorderedItems]
+                    }),
                     contentType: 'application/json'
                 });
                 
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Mostrar mensaje de éxito
                 $('body').append(`
                     <div style="z-index:999; position:fixed; top:10%; width:100%; display:flex; justify-content:center; align-items:center; min-height:50px; background:green; color:#fff; text-align:center; font-size:16px;">
                         Posiciones actualizadas correctamente
@@ -254,7 +339,6 @@ $(document).ready(function() {
                 }, 3000);
                 
             } catch (error) {
-                // Mostrar mensaje de error
                 $('body').append(`
                     <div style="z-index:999; position:fixed; top:10%; width:100%; display:flex; justify-content:center; align-items:center; min-height:50px; background:red; color:#fff; text-align:center; font-size:16px;">
                         Error al actualizar las posiciones
@@ -277,13 +361,17 @@ $(document).ready(function() {
                 
                 $('.jumper div').css('background-color', '#F65807!important');
                 $('.image-container').css('pointer-events', 'auto');
-                sortable.option("disabled", false);
+                orderedSortable.option("disabled", false);
+                unorderedSortable.option("disabled", false);
                 isProcessing = false;
             }
         }
-    });
+    };
 
-    $grid.on('mousedown', '.image-container', function() {
+    let orderedSortable = new Sortable($orderedGrid[0], commonOptions);
+    let unorderedSortable = new Sortable($unorderedGrid[0], commonOptions);
+
+    $orderedGrid.on('mousedown', '.image-container', function() {
         $(this).find('.overlay').hide();
     });
 

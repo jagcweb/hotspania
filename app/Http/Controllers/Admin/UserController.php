@@ -302,7 +302,7 @@ class UserController extends Controller
 
     public function getPositionals()
     {
-        $users = User::whereHas('roles', function ($q) {
+        $baseQuery = User::whereHas('roles', function ($q) {
             $q->where('name', 'user');
         })
         ->whereNotNull('active')
@@ -314,11 +314,20 @@ class UserController extends Controller
         })
         ->whereHas('images', function($q) {
             $q->where('frontimage', 1);
-        })
-        ->orderBy('position')
-        ->get();
+        });
 
-        return view('admin.users.positions', compact('users'));
+        // Usuarios con posición asignada
+        $orderedUsers = (clone $baseQuery)
+            ->whereNotNull('position')
+            ->orderBy('position')
+            ->get();
+
+        // Usuarios sin posición asignada
+        $unorderedUsers = (clone $baseQuery)
+            ->whereNull('position')
+            ->get();
+
+        return view('admin.users.positions', compact('orderedUsers', 'unorderedUsers'));
     }
 
     public function updatePositions(Request $request)
@@ -326,7 +335,7 @@ class UserController extends Controller
         $positions = $request->get('positions');
         
         foreach ($positions as $position) {
-            if (isset($position['id']) && isset($position['position'])) {
+            if (isset($position['id'])) {
                 User::where('id', $position['id'])
                     ->update(['position' => $position['position']]);
             }
