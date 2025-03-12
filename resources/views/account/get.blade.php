@@ -1067,13 +1067,40 @@
             }
 
             .profile-image {
+                grid-row: 1 / span 3; /* Explicitly span 3 rows */
                 width: 100px;
                 max-width: 100px;
+                aspect-ratio: 2/3 !important;
+                margin: 0;
             }
 
             .profile-image img {
-                width: 100px;
-                height: 150px;
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                height: auto !important; /* Remove fixed height */
+            }
+        }
+
+        @media screen and (max-width: 420px) {
+            .profile {
+                grid-template-columns: 90px 1fr;
+                grid-gap: 0.3rem;
+            }
+
+            .profile-image {
+                grid-row: 1 / span 3; /* Explicitly span 3 rows */
+                width: 90px;
+                max-width: 90px;
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                height: auto !important; /* Remove fixed height */
             }
         }
 
