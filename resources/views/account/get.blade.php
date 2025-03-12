@@ -972,10 +972,56 @@
     @supports (display: grid) {
         .profile {
             display: grid;
-            grid-template-columns: minmax(280px, 1fr) 1fr; /* Changed from 2fr to 1fr */
-            grid-template-rows: repeat(3, auto);
+            grid-template-columns: minmax(280px, 1fr) 1fr;
+            grid-template-rows: min-content auto auto; /* Changed to explicit content sizing */
             grid-column-gap: 3rem;
             align-items: start;
+            padding: 1rem;
+        }
+
+        .profile-image {
+            grid-row: 1 / -1;
+            grid-column: 1;
+            width: 100%;
+            max-width: 380px;
+            align-self: start;
+            margin: 0;
+        }
+
+        .profile-user-settings,
+        .profile-stats,
+        .profile-bio {
+            grid-column: 2;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-user-settings {
+            grid-row: 1;
+        }
+
+        .profile-stats {
+            grid-row: 2;
+        }
+
+        .profile-bio {
+            grid-row: 3;
+            margin-top: 1rem;
+        }
+
+        /* Link styles with important flags */
+        .link-text {
+            color: #f65807 !important;
+            font-size: 16px !important;
+            text-decoration: underline !important;
+            display: inline-block !important;
+            word-break: break-all !important;
+        }
+
+        .link-icon {
+            color: #f65807 !important;
+            vertical-align: middle !important;
         }
 
         @media screen and (max-width: 640px) {
@@ -1038,18 +1084,40 @@
             }
 
             .profile-image {
+                grid-row: 1 / span 3; /* Explicitly span 3 rows */
                 width: 80px;
                 max-width: 80px;
+                aspect-ratio: 2/3 !important;
+                margin: 0;
             }
 
             .profile-image img {
-                width: 80px;
-                height: 120px;
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                height: auto !important; /* Remove fixed height */
+            }
+        }
+
+        @media screen and (max-width: 260px) {
+            .profile {
+                grid-template-columns: 60px 1fr;
+                grid-gap: 0.2rem;
             }
 
-            .profile-bio p {
-                font-size: 1rem !important;
-                margin: 0.2rem 0;
+            .profile-image {
+                grid-row: 1 / span 3; /* Explicitly span 3 rows */
+                width: 60px;
+                max-width: 60px;
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                height: auto !important; /* Remove fixed height */
             }
         }
 
