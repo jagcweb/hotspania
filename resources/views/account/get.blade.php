@@ -30,7 +30,7 @@
 
             </div>
 
-            <div class="profile-stats" style="display: none;">
+            <div class="profile-stats">
 
                 <ul>
                     <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
@@ -972,7 +972,7 @@
     @supports (display: grid) {
         .profile {
             display: grid;
-            grid-template-columns: minmax(280px, 1fr) 1fr;
+            grid-template-columns: minmax(280px, 0.4fr) 0.6fr; /* Changed ratio to 40/60 */
             grid-template-rows: min-content auto auto; /* Changed to explicit content sizing */
             grid-column-gap: 3rem;
             align-items: start;
@@ -986,6 +986,9 @@
             max-width: 380px;
             align-self: start;
             margin: 0;
+            display: flex;          /* Add flex display */
+            justify-content: center; /* Center horizontally */
+            align-items: center;    /* Center vertically */
         }
 
         .profile-user-settings,
@@ -1027,23 +1030,26 @@
         @media screen and (max-width: 640px) {
             .profile {
                 display: grid;
-                grid-template-columns: 120px 1fr; /* Reduced width for image */
+                grid-template-columns: minmax(120px, 0.4fr) 0.6fr; /* Changed to 40/60 ratio */
                 grid-gap: 0.5rem;
                 padding: 0.5rem;
             }
 
             .profile-image {
-                grid-row: 1 / 4; /* Extend to cover all rows */
-                width: 120px;
-                max-width: 120px;
+                width: 100%;
+                aspect-ratio: 2/3!important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 margin: 0;
-                padding: 0;
+                height: 100%;
             }
 
             .profile-image img {
-                width: 120px;
-                height: 180px; /* Maintain 2:3 ratio */
+                width: 100%;
+                aspect-ratio: 2/3 !important;
                 object-fit: cover;
+                
             }
 
             .profile-user-settings,
@@ -1054,14 +1060,63 @@
                 padding: 0 0 0 0.5rem;
                 width: 100%;
             }
-
-            .profile-bio p {
-                margin: 0.3rem 0;
-                line-height: 1.2;
-            }
         }
 
         @media screen and (max-width: 480px) {
+            .profile {
+                grid-template-columns: minmax(120px, 0.4fr) 0.6fr; /* Maintain 40/60 ratio */
+            }
+
+            .profile-image {
+                grid-row: 1 / span 3;
+                width: 100%;
+                max-width: none; /* Remove max-width constraint */
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                
+            }
+
+            .profile-user-settings,
+            .profile-stats,
+            .profile-bio {
+                padding-left: 1rem;
+            }
+        }
+
+        @media screen and (max-width: 420px) {
+            .profile {
+                grid-template-columns: minmax(150px, 1fr) 1fr; /* Changed from 100px to 150px */
+            }
+
+            .profile-image {
+                grid-row: 1 / span 3;
+                width: 100%;
+                max-width: none; /* Remove max-width constraint */
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                
+            }
+
+            .profile-user-settings,
+            .profile-stats,
+            .profile-bio {
+                padding-left: 1rem;
+            }
+        }
+
+        @media screen and (max-width: 320px) {
             .profile {
                 grid-template-columns: 100px 1fr;
             }
@@ -1078,51 +1133,7 @@
                 width: 100%;
                 aspect-ratio: 2/3 !important;
                 object-fit: cover;
-                height: auto !important; /* Remove fixed height */
-            }
-        }
-
-        @media screen and (max-width: 420px) {
-            .profile {
-                grid-template-columns: 90px 1fr;
-                grid-gap: 0.3rem;
-            }
-
-            .profile-image {
-                grid-row: 1 / span 3; /* Explicitly span 3 rows */
-                width: 90px;
-                max-width: 90px;
-                aspect-ratio: 2/3 !important;
-                margin: 0;
-            }
-
-            .profile-image img {
-                width: 100%;
-                aspect-ratio: 2/3 !important;
-                object-fit: cover;
-                height: auto !important; /* Remove fixed height */
-            }
-        }
-
-        @media screen and (max-width: 320px) {
-            .profile {
-                grid-template-columns: 80px 1fr;
-                grid-gap: 0.3rem;
-            }
-
-            .profile-image {
-                grid-row: 1 / span 3; /* Explicitly span 3 rows */
-                width: 80px;
-                max-width: 80px;
-                aspect-ratio: 2/3 !important;
-                margin: 0;
-            }
-
-            .profile-image img {
-                width: 100%;
-                aspect-ratio: 2/3 !important;
-                object-fit: cover;
-                height: auto !important; /* Remove fixed height */
+                 /* Remove fixed height */
             }
         }
 
@@ -1144,7 +1155,7 @@
                 width: 100%;
                 aspect-ratio: 2/3 !important;
                 object-fit: cover;
-                height: auto !important; /* Remove fixed height */
+                 /* Remove fixed height */
             }
         }
 
@@ -1204,12 +1215,10 @@
             margin-left: auto; /* Centra el elemento horizontalmente si es necesario */
             margin-right: auto;
             margin-top: 0; /* Ajusta según tu diseño */
-            height: 100%;
         }
 
         .profile-image img {
             width: 100%;
-            height: 100%;
             object-fit: cover; /* Mantiene el contenido visible sin distorsión */
             border-radius: 0; /* Quita el redondeo */
         }
@@ -1338,10 +1347,34 @@
         }
     }
 
+    @media screen and (max-width: 600px) {
+        .profile-stats{
+            margin-left: 0;
+        }
+        .profile-stats li {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
 
+        .profile-stat-count {
+            display: inline;
+            margin: 0;
+            font-size: 1.2rem;
+        }
 
-
-
+        .profile-stats ul {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+    }
 
     /* New media query for max-width < 1280px */
     @media (max-width: 1280px) {
