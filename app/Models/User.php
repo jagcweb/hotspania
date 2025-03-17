@@ -52,7 +52,9 @@ class User extends Authenticatable
         'email_verified_at',
         'completed',
         'link',
-        'position'
+        'position',
+        'available_time',
+        'available_until'
     ];
 
     /**

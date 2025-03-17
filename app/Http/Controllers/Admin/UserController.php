@@ -367,4 +367,34 @@ class UserController extends Controller
 
         return view('admin.users.login-records');
     }
+
+    public function makeAvailable(Request $request, $id)
+    {
+        try {
+            $decryptedId = \Crypt::decryptString($id);
+        } catch (\Exception $e) {
+            return back()->with('error', 'ID inválido');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'tiempo' => 'required|integer|min:1|max:3'
+        ]);
+
+        if ($validator->fails()) {
+            return back()->with('error', 'Datos inválidos');
+        }
+
+        $user = User::find($decryptedId);
+        
+        if(!$user) {
+            return back()->with('error', 'Usuario no encontrado');
+        }
+
+        $user->update([
+            'available_time' => $request->tiempo,
+            'available_until' => \Carbon\Carbon::now('Europe/Madrid')->addHours($request->tiempo)
+        ]);
+
+        return back()->with('exito', 'Usuario marcado como disponible por ' . $request->tiempo . ' horas');
+    }
 }

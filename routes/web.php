@@ -70,6 +70,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::post('city-apply', 'App\Http\Controllers\Admin\CityChangesController@apply')->name('admin.citychanges.apply');
 
     // User Management
+    
     Route::get('users/create', 'App\Http\Controllers\Admin\UserController@create')->name('admin.users.create');
     Route::get('users/edit/{id}', 'App\Http\Controllers\Admin\UserController@edit')->name('admin.users.edit');
     Route::post('users/save', 'App\Http\Controllers\Admin\UserController@save')->name('admin.users.save');
@@ -82,6 +83,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('users/getLoginRecords', 'App\Http\Controllers\Admin\UserController@getLoginRecords')->name('admin.users.getLoginRecords');
     Route::get('users/positions', 'App\Http\Controllers\Admin\UserController@getPositionals')->name('admin.users.getPositionals');
     Route::post('users/update-positions', 'App\Http\Controllers\Admin\UserController@updatePositions')->name('admin.users.updatePositions');
+    Route::post('users/make-available/{id}', 'App\Http\Controllers\Admin\UserController@makeAvailable')->name('admin.users.make_available');
 
     // Image Management
     Route::get('images-get/{id}/{name}/{filter}', 'App\Http\Controllers\Admin\ImageController@get')->name('admin.images.getFilter');

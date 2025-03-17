@@ -52,6 +52,9 @@
                                         <a title="Historial Paquete" href="#" data-toggle="modal" data-target="#historial-paquete-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
                                         </a>
+                                        <a title="Hacer disponible" href="#" data-toggle="modal" data-target="#hacer-disponible-{{$u->id}}" class="icon">
+                                            <i class="fa-solid fa-check"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -59,6 +62,7 @@
                             @include('modals.admin.modal_ver_perfil')
                             @include('modals.admin.user.modal_editar_status')
                             @include('modals.admin.modal_historial_paquete')
+                            @include('modals.admin.modal_hacer_disponible')
                         @endif
                     @endforeach
                 </div>
@@ -115,25 +119,32 @@
     }
 
     .overlay {
-        display: none;
+        display: none;  /* Oculto por defecto */
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 2;
+        display: none;  /* Aseguramos que esté oculto */
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 15px;  /* Aumentado el espacio entre iconos */
+        padding: 15px;  /* Aumentado el padding */
+        width: 80%;  /* Ancho relativo al contenedor */
     }
 
     .overlay.visible {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        display: grid;
     }
 
     .icon {
         color: white;
-        font-size: 24px;
-        margin: 10px 0;
+        font-size: 24px;  /* Iconos más grandes */
         transition: transform 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;  /* Espacio alrededor de los iconos */
     }
 
     .icon:hover {
@@ -148,16 +159,19 @@
 
 <script>
     $(document).ready(function() {
+        // Aseguramos que los overlays estén ocultos al cargar
+        $('.overlay').hide();
+        
         $('.image-container').hover(
             function() {
                 // Mouse enter
                 $(this).find('img').addClass('image-darkened');
-                $(this).find('.overlay').addClass('visible').fadeIn(300);
+                $(this).find('.overlay').addClass('visible').stop().fadeIn(300);
             },
             function() {
                 // Mouse leave
                 $(this).find('img').removeClass('image-darkened');
-                $(this).find('.overlay').removeClass('visible').fadeOut(300);
+                $(this).find('.overlay').removeClass('visible').stop().fadeOut(300);
             }
         );
     });

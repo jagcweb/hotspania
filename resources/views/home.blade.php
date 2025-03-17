@@ -9,15 +9,158 @@
         <!-- Content -->
         <article>
             <div class="section background-transparent">
-                <div class="line text-center">
-                    <h1
-                        class="text-white text-s-size-30 text-m-size-40 text-l-size-headline text-thin text-line-height-1">Las chicas</h1>
-                    <p class="margin-bottom-0 text-size-16 text-white">más calientes de tu zona</p>
+                <div class="stories-container">
+                    <div class="story-item">
+                        <div class="story-circle">
+                            <span class="circle-text">Disponibles</span>
+                        </div>
+                        <span class="story-text">Disponibles</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-circle">
+                            <span class="circle-text">LGTBI+</span>
+                        </div>
+                        <span class="story-text">LGTBI+</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-circle">
+                            <span class="circle-text">Nuevas</span>
+                        </div>
+                        <span class="story-text">Nuevas</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-circle">
+                            <span class="circle-text">Fotos</span>
+                        </div>
+                        <span class="story-text">Fotos</span>
+                    </div>
+                    <div class="story-item">
+                        <div class="story-circle">
+                            <span class="circle-text">Ranking</span>
+                        </div>
+                        <span class="story-text">Ranking</span>
+                    </div>
                 </div>
+
+                <style>
+                    .stories-container {
+                        display: flex;
+                        gap: 20px;
+                        padding: 20px 10px;
+                        overflow-x: auto;
+                        justify-content: center;
+                        width: auto;
+                    }
+
+                    .story-item {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 8px;
+                        min-width: fit-content;
+                    }
+        
+                    .story-circle {
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                        background: #f36e00;
+                        padding: 4px;
+                        border: 2px solid #808080;
+                        cursor: pointer;
+                        transition: transform 0.5s;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .circle-text {
+                        color: white;
+                        font-weight: bold;
+                        font-size: 12px;
+                    }
+        
+                    .story-circle:hover {
+                        transform: scale(1.1);
+                    }
+        
+                    .story-text {
+                        color: white;
+                        font-size: 12px;
+                        text-align: center;
+                    }
+
+                    @media (max-width: 768px) {
+                        .stories-container { 
+                            gap: 15px; 
+                            width: 100%;
+                            justify-content: space-around;
+                        }
+                        .story-circle {
+                            width: 70px;
+                            height: 70px;
+                        }
+                    }
+
+                    @media (max-width: 576px) {
+                        .stories-container { gap: 10px; }
+                        .story-circle {
+                            width: 60px;
+                            height: 60px;
+                        }
+                    }
+
+                    @media (max-width: 400px) {
+                        .stories-container { 
+                            gap: 8px;
+                            padding: 20px 5px;
+                        }
+                        .story-circle {
+                            width: 45px;
+                            height: 45px;
+                        }
+                        .circle-text {
+                            font-size: 8px;
+                        }
+                        .story-text {
+                            font-size: 8px;
+                        }
+                    }
+
+                    @media (max-width: 320px) {
+                        .stories-container { 
+                            gap: 5px;
+                            padding: 20px 2px;
+                        }
+                        .story-circle {
+                            width: 40px;
+                            height: 40px;
+                        }
+                        .circle-text {
+                            font-size: 7px;
+                        }
+                        .story-text {
+                            font-size: 7px;
+                        }
+                    }
+
+                    .availability-indicator {
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        width: 15px;
+                        height: 15px;
+                        background-color: #2ecc71;
+                        border-radius: 50%;
+                        border: 2px solid white;
+                        z-index: 2;
+                        box-shadow: 0 0 4px rgba(0,0,0,0.3);
+                    }
+                </style>
             </div>
-            
             <!-- Add a spacer div for Android devices -->
             <br><br><br>
+
             <div class="container_mobile mt-5">
                 <div class="gallery" id="gallery">
                     @include('partials.user-grid')
@@ -29,6 +172,7 @@
         </article>
     </main>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
