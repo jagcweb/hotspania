@@ -13,8 +13,7 @@
             $isAvailable = false;
             if ($user->available_until !== null) {
                 $now = \Carbon\Carbon::now('Europe/Madrid');
-                $availableUntil = \Carbon\Carbon::parse($user->available_until)->setTimezone('Europe/Madrid');
-                $endTime = $availableUntil->addHours($user->available_time);
+                $endTime = \Carbon\Carbon::parse($user->available_until)->setTimezone('Europe/Madrid');
                 $isAvailable = $now->lt($endTime);
             }
         @endphp
