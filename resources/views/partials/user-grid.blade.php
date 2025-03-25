@@ -21,7 +21,7 @@
         <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
             <div class="gallery-item image-hover-zoom" tabindex="0" data-user-id="{{ $user->id }}">
                 @if($isAvailable)
-                    <div class="availability-indicator"></div>
+                    <img src="{{ asset('images/llamas.gif') }}" class="flame-border" alt="Online">
                 @endif
                 <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage ?? $image->route]) }}"
                     class="gallery-image" alt="">
@@ -40,3 +40,15 @@
         </a>
     @endif
 @endforeach
+
+<style>
+.flame-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none; /* Permite que los clicks pasen a través de la imagen */
+}
+</style>
