@@ -26,6 +26,9 @@
             }
 
             // Seleccionar color aleatorio sin repetición
+            if (empty($availableColors)) {
+                $availableColors = range(1, 15);
+            }
             $randomIndex = array_rand($availableColors);
             $colorClass = 'flame-color-' . $availableColors[$randomIndex];
             unset($availableColors[$randomIndex]);
