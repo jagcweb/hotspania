@@ -302,26 +302,59 @@
       });
     </script>-->
 
-    <script>
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-consent-banner" style="position: fixed; bottom: 0; left: 0; right: 0; background-color: rgba(0,0,0,0.9); color: white; padding: 20px; display: none; z-index: 999999;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="mb-0 fs-5" style="font-size: 14px;">
+                        Utilizamos cookies para mejorar su experiencia en nuestro sitio web. Al continuar navegando, acepta nuestra 
+                        <a href="#" style="color: #F65807;">política de cookies</a>.
+                    </p>
+                </div>
+                <div class="col-md-4 text-right">
+                    <button id="accept-cookies" class="btn" style="background-color: #F65807; color: white;">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        $(function() {
-            var selectedClass = "";
-            $("p").click(function(){
-            selectedClass = $(this).attr("data-rel");
-            $("#portfolio").fadeTo(50, 0.1);
-                $("#portfolio div").not("."+selectedClass).fadeOut();
-            setTimeout(function() {
-                $("."+selectedClass).fadeIn();
-                $("#portfolio").fadeTo(50, 1);
-            }, 500);
-                
+    <script>
+        $(document).ready(function() {
+            // Cookie consent handling
+            function setCookie(name, value, days) {
+                var expires = "";
+                if (days) {
+                    var date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+            }
+
+            function getCookie(name) {
+                var nameEQ = name + "=";
+                var ca = document.cookie.split(';');
+                for(var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
+
+            // Show banner if consent cookie is not set
+            if (!getCookie('cookie-consent')) {
+                $('#cookie-consent-banner').fadeIn();
+            }
+
+            // Handle accept button click
+            $('#accept-cookies').click(function() {
+                setCookie('cookie-consent', 'accepted', 365);
+                $('#cookie-consent-banner').fadeOut();
             });
-        });
 
-    </script>
-
-    <script>
-        $( document ).ready(function() {
+            // Original document.ready code
             $(".btn-input2").click(function(){
                 $("#login").modal('toggle');
                 $("#register").modal('toggle');

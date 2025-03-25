@@ -1,3 +1,11 @@
+@php
+    // Al inicio del archivo, antes del foreach
+    $availableColors = session('availableColors', range(1, 15));
+    if (empty($availableColors)) {
+        $availableColors = range(1, 15);
+    }
+@endphp
+
 @foreach ($users as $i=>$user)
     @if(count($user->images) > 0)
         @php
@@ -16,12 +24,20 @@
                 $endTime = \Carbon\Carbon::parse($user->available_until)->setTimezone('Europe/Madrid');
                 $isAvailable = $now->lt($endTime);
             }
+
+            // Seleccionar color aleatorio sin repetición
+            $randomIndex = array_rand($availableColors);
+            $colorClass = 'flame-color-' . $availableColors[$randomIndex];
+            unset($availableColors[$randomIndex]);
+            
+            // Guardar los colores restantes en la sesión
+            session(['availableColors' => array_values($availableColors)]);
         @endphp
         
         <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
             <div class="gallery-item image-hover-zoom" tabindex="0" data-user-id="{{ $user->id }}">
-                @if($isAvailable)
-                    <img src="{{ asset('images/llamas.gif') }}" class="flame-border" alt="Online">
+                @if(!$isAvailable)
+                    <img src="{{ asset('images/llamas.gif') }}" class="flame-border {{ $colorClass }}" alt="Online">
                 @endif
                 <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage ?? $image->route]) }}"
                     class="gallery-image" alt="">
@@ -51,4 +67,21 @@
     z-index: 2;
     pointer-events: none; /* Permite que los clicks pasen a través de la imagen */
 }
+
+/* Variaciones de color usando filtros CSS */
+.flame-color-1 { filter: hue-rotate(0deg) saturate(100%) brightness(100%); }     /* Original */
+.flame-color-2 { filter: hue-rotate(30deg) saturate(150%) brightness(110%); }    /* Naranja cálido */
+.flame-color-3 { filter: hue-rotate(60deg) saturate(140%) brightness(120%); }    /* Amarillo */
+.flame-color-4 { filter: hue-rotate(120deg) saturate(150%) brightness(90%); }    /* Verde */
+.flame-color-5 { filter: hue-rotate(180deg) saturate(130%) brightness(100%); }   /* Turquesa */
+.flame-color-6 { filter: hue-rotate(240deg) saturate(160%) brightness(110%); }   /* Azul */
+.flame-color-7 { filter: hue-rotate(270deg) saturate(140%) brightness(100%); }   /* Púrpura */
+.flame-color-8 { filter: hue-rotate(300deg) saturate(150%) brightness(120%); }   /* Rosa */
+.flame-color-9 { filter: hue-rotate(330deg) saturate(170%) brightness(90%); }    /* Magenta */
+.flame-color-10 { filter: hue-rotate(15deg) saturate(200%) brightness(130%); }   /* Naranja brillante */
+.flame-color-11 { filter: hue-rotate(90deg) saturate(120%) brightness(140%); }   /* Verde lima */
+.flame-color-12 { filter: hue-rotate(150deg) saturate(180%) brightness(80%); }   /* Verde azulado */
+.flame-color-13 { filter: hue-rotate(200deg) saturate(160%) brightness(110%); }  /* Azul celeste */
+.flame-color-14 { filter: hue-rotate(290deg) saturate(130%) brightness(120%); }  /* Violeta */
+.flame-color-15 { filter: hue-rotate(320deg) saturate(190%) brightness(100%); }  /* Rosa intenso */
 </style>

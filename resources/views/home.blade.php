@@ -516,6 +516,7 @@ $(window).scroll(function() {
         text-align: center;
         padding: 10px 0; /* Espaciado dentro de la franja */
         height: 38px;
+        z-index: 3;
     }
 
     .franja p {
