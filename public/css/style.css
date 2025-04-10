@@ -52,7 +52,7 @@ nav.mask-pattern {
 }
 @media screen and (max-width: 640px) {
     nav {
-        padding: 16px 50px 30px 50px;
+        padding: 22px 30px 30px 10px;
         height: 50px;
     }
 

@@ -45,7 +45,7 @@
                 <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage ?? $image->route]) }}"
                     class="gallery-image" alt="">
                 <div class="franja">
-                    <p>{{ Str::limit($user->nickname, 10) }}</p>
+                    <p>{{ Str::limit($user->nickname, 11) }}</p>
                 </div>
                 <div class="gallery-item-info">
                     <ul>

@@ -44,6 +44,51 @@
         ::selection {
             background-color: #F65807; /* Change this to your desired background color */
         }
+
+        .search-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+    
+        .search-input {
+          margin-top:10px;
+          padding: 5px 10px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          margin-right: 10px;
+          width: 0;
+        }
+    
+        .search-toggle {
+          padding: 0.5rem 1rem;
+          display: flex;
+          align-items: center;
+        }
+    
+        .search-icon {
+          cursor: pointer;
+          font-size: 16px;
+        }
+        .city-dropdown .form-control {
+            font-size: 13px;
+        }
+        .city-dropdown .dropdown-item {
+            font-size: 13px;
+        }
+        .city-list .dropdown-item {
+            display: none;
+            font-size: 13px;
+        }
+        .city-list.searching .dropdown-item {
+            display: none; /* Todos ocultos por defecto cuando se busca */
+        }
+        .city-list.searching .dropdown-item.show {
+            display: block; /* Solo mostrar los que coinciden */
+        }
+        .city-dropdown {
+            min-width: 160px !important;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +106,103 @@
         <a href="{{ route('home') }}">
             <img class="img_logo" src="{{ asset('images/logo.png') }}" alt="Logo"/>
         </a>
+        @if(str_contains(url()->current(), '/home'))
+            <li class="nav-item search-container">
+                <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center">
+                    <a href="#" class="nav-link search-toggle">
+                        <i class="fas fa-magnifying-glass search-icon"></i>
+                    </a>
+                    <input type="text" name="search" class="search-input {{ !request('search') ? 'd-none' : '' }}" placeholder="Buscar nombre..." value="{{ request('search') }}">
+                    @if(request('search'))
+                        <a href="{{ url()->current() }}" class="nav-link">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    @endif
+                </form>
+            </li>
+
+            @php $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : ''; @endphp
+            <li class="nav-item" style="font-size:14px; margin-top:10px;">
+                <div class="dropdown">
+                    <button class="btn dropdown-toggle text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ ucfirst($selected_city) ?: 'Seleccionar ciudad' }}
+                    </button>
+                    <div class="dropdown-menu p-2 city-dropdown">
+                        <input type="text" class="form-control mb-2 city-search" placeholder="Buscar ciudad..." autocomplete="off">
+                        <div class="city-list">
+                            @php $cities = \App\Models\City::orderBy('id', 'asc')->get(); @endphp
+                            @foreach($cities as $c)
+                                <button type="button" class="dropdown-item">{{$c->name}}</button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </li>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Initialize dropdowns
+                    var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+                    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                        return new bootstrap.Dropdown(dropdownToggleEl)
+                    });
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!e.target.closest('.dropdown')) {
+                            dropdownList.forEach(dropdown => {
+                                dropdown.hide();
+                            });
+                        }
+                    });
+
+                    // City search functionality
+                    const citySearch = document.querySelector('.city-search');
+                    const cityList = document.querySelector('.city-list');
+                    const dropdownItems = document.querySelectorAll('.city-list .dropdown-item');
+
+                    if (citySearch) {
+                        citySearch.addEventListener('input', function() {
+                            const searchText = this.value.toLowerCase();
+                            
+                            // Si hay texto, añadir clase searching
+                            cityList.classList.toggle('searching', searchText.length > 0);
+                            
+                            dropdownItems.forEach(item => {
+                                const cityName = item.textContent.toLowerCase();
+                                const matches = cityName.includes(searchText);
+                                
+                                if (searchText.length > 0) {
+                                    item.style.display = matches ? 'block' : 'none';
+                                } else {
+                                    item.style.display = 'none';
+                                }
+                            });
+                        });
+
+                        // Prevent dropdown from closing when clicking the search input
+                        citySearch.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                        });
+                    }
+
+                    // Handle city selection
+                    dropdownItems.forEach(item => {
+                        item.addEventListener('click', function() {
+                            const cityName = this.textContent.trim().toLowerCase();
+                            
+                            // Set cookie with necessary attributes
+                            document.cookie = "selected_city=" + cityName + 
+                                "; path=/; SameSite=Lax; secure=true; max-age=2592000";
+                            
+                            // Mantener los parámetros actuales de la URL
+                            const currentUrl = new URL(window.location.href);
+                            window.location.href = currentUrl.href;
+                        });
+                    });
+                });
+            </script>
+        @endif
         <ul class="list">
             {{--<li><a class="text-white" href="#">Inicio</a></li>
             <li><a class="text-white" href="#">Mi cuenta</a></li>
@@ -363,6 +505,88 @@
             $('img, video, .gallery-image, .gallery-item').on('contextmenu', function(event) {
                 event.preventDefault();
             });
+
+            // Search
+
+            const $container = $('.search-container');
+            const $input = $('.search-input');
+            const $toggle = $('.search-toggle');
+
+            // Solo ocultamos el input si no hay búsqueda activa
+            if (!$input.val()) {
+                $input.addClass('d-none');
+            } else {
+                // Si hay búsqueda, mostramos el input con el ancho correcto
+                $input.css('width', '200px').css('opacity', 1);
+            }
+
+            $toggle.on('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if ($input.hasClass('d-none')) {
+                    $input.removeClass('d-none')
+                        .css('opacity', 0)
+                        .animate({
+                            width: '200px',
+                            opacity: 1
+                        }, 300, () => {
+                            $input.focus();
+                        });
+                }
+            });
+
+            $input.on('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    cerrarBusqueda();
+                } else if (e.key === 'Enter' && $input.val().trim() !== '') {
+                    console.log('Buscando:', $input.val());
+                }
+            });
+
+            $input.on('click', (e) => {
+                e.stopPropagation();
+            });
+
+            $(document).on('click', () => {
+                if ($input.val().trim() === '') {
+                    cerrarBusqueda();
+                }
+            });
+
+            const cerrarBusqueda = () => {
+                if (!$input.hasClass('d-none')) {
+                    $input.animate({
+                        width: '0',
+                        opacity: 0
+                    }, 300, () => {
+                        $input.val('').addClass('d-none');
+                    });
+                }
+            };
+
+            $('.city-dropdown li').on('click', function() {
+                const cityName = $(this).text().trim().toLowerCase();
+                $('.selected_city').val(cityName);
+                $('.formsubmit').submit();
+            });
+
+            function toggleMenu(icon, menu) {
+                $(icon).click(function (e) {
+                    e.stopPropagation();
+                    $(menu).toggle();
+                });
+
+                $(document).click(function (e) {
+                    if (!$(e.target).closest(icon + ', ' + menu).length) {
+                        $(menu).hide();
+                    }
+                });
+            }
+
+            toggleMenu('#bell-icon', '#bell-menu');
+            toggleMenu('#envelope-icon', '#envelope-menu');
+            toggleMenu('#user-icon', '#user-menu');
         });
     </script>
 </body>

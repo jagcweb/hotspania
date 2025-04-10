@@ -277,8 +277,13 @@ class UserController extends Controller
             'roles', function($q){
                 $q->where('name', 'user');
             })
-            ->whereNull('active')
-            ->get(); // Replace 0 with your pending user status value
+            ->whereNull('active');
+
+        if (request()->get('search')) {
+            $users = $users->where('nickname', 'like', '%' . request()->get('search') . '%');
+        }
+
+        $users = $users->get();
 
         return view('admin.users.pending', compact('users'));
     }
@@ -294,8 +299,13 @@ class UserController extends Controller
             'roles', function($q){
                 $q->where('name', 'user');
             })
-            ->where('active', 1)
-            ->get();
+            ->where('active', 1);
+
+        if (request()->get('search')) {
+            $users = $users->where('nickname', 'like', '%' . request()->get('search') . '%');
+        }
+
+        $users = $users->get();
 
         return view('admin.users.active', compact('users'));
     }
@@ -315,6 +325,10 @@ class UserController extends Controller
         ->whereHas('images', function($q) {
             $q->where('frontimage', 1);
         });
+
+        if (request()->get('search')) {
+            $baseQuery->where('nickname', 'like', '%' . request()->get('search') . '%');
+        }
 
         // Usuarios con posición asignada
         $orderedUsers = (clone $baseQuery)
@@ -368,8 +382,7 @@ class UserController extends Controller
         return view('admin.users.login-records');
     }
 
-    public function makeAvailable(Request $request, $id)
-    {
+    public function makeAvailable(Request $request, $id) {
         try {
             $decryptedId = \Crypt::decryptString($id);
         } catch (\Exception $e) {

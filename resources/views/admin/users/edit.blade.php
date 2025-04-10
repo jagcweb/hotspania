@@ -104,15 +104,32 @@
                             <label for="working_zone">Zona donde Trabajara</label>
                             <input type="text" class="form-control" id="working_zone" name="working_zone" required value="{{$user->working_zone}}">
                             </div>
-                        
+
                             <div class="form-group">
-                            <label for="service_location">Donde atendera?</label>
-                            <select class="form-control" id="service_location" name="service_location" required>
-                                <option value="{{$user->service_location}}" selected hidden>{{str_replace("_", " ", ucfirst($user->service_location))}}</option>
-                                <option value="piso_propio">Piso Propio</option>
-                                <option value="domicilio">Domicilio</option>
-                                <option value="hotel">Hoteles</option>
-                            </select>
+                                <label for="service_location">Donde atendera?</label>
+                                <div style="background:#f1f1f1; border:2px solid #aaa; padding:20px; min-height:80px;">
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="piso_propio" name="service_location[]" value="piso_propio"
+                                            {{ in_array('piso_propio', json_decode($user->service_location, true) ?? []) ? 'checked' : '' }}/>
+                                        <label class="form-check-label" for="piso_propio">
+                                            Piso Propio
+                                        </label>
+                                    </div>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="domicilio" name="service_location[]" value="domicilio"
+                                            {{ in_array('domicilio', json_decode($user->service_location, true) ?? []) ? 'checked' : '' }}/>
+                                        <label class="form-check-label" for="domicilio">
+                                            Domicilio
+                                        </label>
+                                    </div>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="hotel" name="service_location[]" value="hotel"
+                                            {{ in_array('hotel', json_decode($user->service_location, true) ?? []) ? 'checked' : '' }}/>
+                                        <label class="form-check-label" for="hotel">
+                                            Hoteles
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                         
                             <div class="form-group">

@@ -98,11 +98,29 @@
                         
                         <div class="form-group">
                             <label for="service_location">Donde atendera?</label>
-                            <select class="form-control" id="service_location" name="service_location" required>
-                                <option value="piso_propio" {{ old('service_location') == 'piso_propio' ? 'selected' : '' }}>Piso Propio</option>
-                                <option value="domicilio" {{ old('service_location') == 'domicilio' ? 'selected' : '' }}>Domicilio</option>
-                                <option value="hotel" {{ old('service_location') == 'hotel' ? 'selected' : '' }}>Hoteles</option>
-                            </select>
+                            <div style="background:#f1f1f1; border:2px solid #aaa; padding:20px; min-height:80px;">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="piso_propio" name="service_location[]" value="piso_propio"
+                                        {{ (is_array(old('service_location')) && in_array('piso_propio', old('service_location'))) ? 'checked' : '' }}/>
+                                    <label class="form-check-label" for="piso_propio">
+                                        Piso Propio
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="domicilio" name="service_location[]" value="domicilio"
+                                        {{ (is_array(old('service_location')) && in_array('domicilio', old('service_location'))) ? 'checked' : '' }}/>
+                                    <label class="form-check-label" for="domicilio">
+                                        Domicilio
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="hotel" name="service_location[]" value="hotel"
+                                        {{ (is_array(old('service_location')) && in_array('hotel', old('service_location'))) ? 'checked' : '' }}/>
+                                    <label class="form-check-label" for="hotel">
+                                        Hoteles
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="form-group">

@@ -33,24 +33,28 @@
 
             <div class="profile-stats">
 
+                @php
+                    $totalVisits = $images->sum('visits') ?? 0;
+                    $totalLikes = $images->sum('likes') ?? 0;
+                @endphp
                 <ul>
                     <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
-                    <li><span class="profile-stat-count">43534</span> visitas</li>
-                    <li><span class="profile-stat-count">3678</span> me gusta</li>
+                    <li><span class="profile-stat-count">{{ $totalVisits }}</span> visitas</li>
+                    <li><span class="profile-stat-count">{{ $totalLikes }}</span> me gusta</li>
                 </ul>
 
             </div>
 
             <div class="profile-bio mt-3">
 
-                <p style="font-size:16px;">{{ \Auth::user()->working_zone ?? '' }} - Barcelona</p>
+                <p style="font-size:16px;" class="text-justify">{{ \Auth::user()->working_zone ?? '' }} - Barcelona</p>
                 <p class="mt-2"></p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->age }} Años</p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->weight }} KG</p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->height }} CM</p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->bust }} - {{ \Auth::user()->waist }} - {{ \Auth::user()->hip }}</p>
-                <p style="font-size:16px; color:#fff;">Fuma: {{ \Auth::user()->is_smoker === 1 ? 'Si' : 'No' }}</p>
-                <p style="font-size:16px; color:#fff;">
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->age }} Años</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->weight }} KG</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->height }} CM</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->bust }} - {{ \Auth::user()->waist }} - {{ \Auth::user()->hip }}</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ \Auth::user()->is_smoker === 1 ? 'Si' : 'No' }}</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">
                     @if(\Auth::user()->start_day == "fulltime" && \Auth::user()->end_day == "fulltime")
                     Todos los días
                     @else
@@ -84,12 +88,58 @@
 
         </div>
         <!-- End of profile section -->
-
     </div>
+
+    @php
+        $isAvailable = false;
+        if (\Auth::user()->available_until !== null) {
+            $now = \Carbon\Carbon::now('Europe/Madrid');
+            $endTime = \Carbon\Carbon::parse(\Auth::user()->available_until)->setTimezone('Europe/Madrid');
+            $isAvailable = $now->lt($endTime);
+        }
+    @endphp
+    @if(!$isAvailable)
+        <p class="text-center w-100 text-danger" style="font-size: 18px;">No disponible.</p>
+    @else
+        <p class="text-center w-100 text-success" style="font-size: 18px;">
+            ¡Disponible! Tiempo restante: 
+            <span id="countdown"></span>
+        </p>
+        <script>
+            function updateCountdown() {
+                const endTime = new Date("{{ \Auth::user()->available_until }}").getTime();
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById("countdown").innerHTML = 
+                    hours.toString().padStart(2,'0') + ":" +
+                    minutes.toString().padStart(2,'0') + ":" + 
+                    seconds.toString().padStart(2,'0');
+
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById("countdown").innerHTML = "EXPIRADO";
+                    location.reload();
+                }
+            }
+
+            updateCountdown();
+            const x = setInterval(updateCountdown, 1000);
+        </script>
+    @endif
 
     <div class="container mt-5 container_mobile">
         @php $u = \Auth::user(); @endphp
-        <a title="Subir fotos" href="{{ route('account.edit-data') }}" data-target="#subir-fotos-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+        <a title="Anúnciate" href="javascript:void(0);" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Anúnciate
+            <i class="fa-solid fa-rocket ml-1"></i>
+        </a>
+        @include('modals.admin.modal_asignar_paquete')
+        <a title="Subir fotos" href="{{ route('account.edit-data') }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
             Modificar datos
             <i class="fa-solid fa-user-pen ml-1"></i>
         </a>
@@ -97,7 +147,19 @@
             Subir fotos
             <i class="fa-solid fa-upload ml-1"></i>
         </a>
+        <a title="Hacer cuenta visible" href="{{ route('account.visible', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            @if(!is_null(\Auth::user()->visible))
+                Cuenta: Visible <i class="fa-solid fa-eye-slash ml-1"></i>
+            @else
+                Cuenta: NO visible <i class="fa-solid fa-eye ml-1"></i>
+            @endif
+        </a>
         @include('modals.admin.fotos.modal_subir_fotos')
+        <a title="Ponte disponible" href="javascript:void(0);" data-toggle="modal" data-target="#hacer-disponible-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Ponte disponible
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </a>
+        @include('modals.admin.modal_hacer_disponible')
         <hr>
         <h2 class="w-100 text-center text-white" style="font-size: 20px;">Aquí solo aparecerán las imágenes aprobadas.</h2>
         <div class="gallery" id="gallery">
@@ -128,7 +190,9 @@
 
                                 <ul>
                                     <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
-                                            class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                            class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
+                                    <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
+                                            class="fas fa-heart" aria-hidden="true"></i> {{ $image->likes ?? 0 }}</li>
                                 </ul>
 
                             </div>
@@ -174,7 +238,9 @@
 
                                     <ul>
                                         <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
-                                                class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
+                                                class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
+                                        <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
+                                                class="fas fa-heart" aria-hidden="true"></i> {{ $image->likes ?? 0 }}</li>
                                     </ul>
 
                                 </div>

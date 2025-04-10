@@ -11,45 +11,67 @@
         <div class="profile">
 
             <div class="profile-image">
+                <div class="image-container">
+                    @php
+                        $isAvailable = false;
+                        if ($user->available_until !== null) {
+                            $now = \Carbon\Carbon::now('Europe/Madrid');
+                            $endTime = \Carbon\Carbon::parse($user->available_until)->setTimezone('Europe/Madrid');
+                            $isAvailable = $now->lt($endTime);
+                        }
 
-                @if(is_object($frontimage))
-                    @if(!is_null($frontimage->route_gif))
-                    <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
-                @else
-                    <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
-                @endif
-                @else
-                    <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
-                @endif
+                        $colorClass = 'flame-color-' . rand(1, 15);
+                    @endphp
 
+                    @if($isAvailable)
+                        <img src="{{ asset('images/llamas.gif') }}" class="flame-border-profile {{ $colorClass }}" alt="Online">
+                    @endif
+
+                    @if(is_object($frontimage))
+                        @if(!is_null($frontimage->route_gif))
+                        <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                    @else
+                        <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                    @endif
+                    @else
+                        <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
+                    @endif
+                </div>
             </div>
 
             <div class="profile-user-settings">
 
                 <h1 class="profile-user-name text-white">{{ $user->nickname }}</h1>
+                @if($isAvailable)
+                    <small class="availability-text" style="margin-top: -10px; margin-left:2px;">Disponible ahora</small>
+                @endif
 
             </div>
 
             <div class="profile-stats">
 
+                @php
+                    $totalVisits = $images->sum('visits') ?? 0;
+                    $totalLikes = $images->sum('likes') ?? 0;
+                @endphp
                 <ul>
                     <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
-                    <li><span class="profile-stat-count">43534</span> visitas</li>
-                    <li><span class="profile-stat-count">3678</span> me gusta</li>
+                    <li><span class="profile-stat-count">{{ $totalVisits }}</span> visitas</li>
+                    <li><span class="profile-stat-count">{{ $totalLikes }}</span> me gusta</li>
                 </ul>
 
             </div>
 
             <div class="profile-bio mt-3">
 
-                <p style="font-size:16px;">{{ $user->working_zone ?? '' }} - Barcelona</p>
+                <p style="font-size:16px;" class="text-justify">{{ $user->working_zone ?? '' }} - Barcelona</p>
                 <p class="mt-2"></p>
-                <p style="font-size:16px; color:#fff;">{{ $user->age }} Años</p>
-                <p style="font-size:16px; color:#fff;">{{ $user->weight }} KG</p>
-                <p style="font-size:16px; color:#fff;">{{ $user->height }} CM</p>
-                <p style="font-size:16px; color:#fff;">{{ $user->bust }} - {{ $user->waist }} - {{ $user->hip }}</p>
-                <p style="font-size:16px; color:#fff;">Fuma: {{ $user->is_smoker === 1 ? 'Si' : 'No' }}</p>
-                <p style="font-size:16px; color:#fff;">
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->age }} Años</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->weight }} KG</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->height }} CM</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->bust }} - {{ $user->waist }} - {{ $user->hip }}</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ $user->is_smoker === 1 ? 'Si' : 'No' }}</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">
                     @if($user->start_day == "fulltime" && $user->end_day == "fulltime")
                     Todos los días
                     @else
@@ -105,9 +127,10 @@
             @foreach ($images->take(8) as $i=>$image)
                 @php
                     $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
+                    $hasLike = in_array($image->id, $likedImages ?? []);
                 @endphp
                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    <div class="gallery-item image-hover-zoom" tabindex="0">
+                    <div class="gallery-item image-hover-zoom {{ $hasLike ? 'has-like' : '' }}" tabindex="0" data-id="{{ $image->id }}">
                         <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
                             class="gallery-image" alt="" loading="lazy">
                         @if(!is_null($image->frontimage))
@@ -121,11 +144,10 @@
                         <div class="gallery-item-info">
 
                             <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
-                                {{--
-                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
+                                <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
+                                        class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
+                                <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
+                                        class="fas fa-heart" aria-hidden="true"></i> {{ $image->likes ?? 0 }}</li>
                             </ul>
 
                         </div>
@@ -169,17 +191,21 @@
 <!-- Modal Structure -->
 <div id="contentModal" style="display: none;">
     <span id="closeBtn">&times;</span>
+    <span id="prevBtn" class="nav-arrow">&#10094;</span>
+    <span id="nextBtn" class="nav-arrow">&#10095;</span>
     
-    <!-- Flechas de navegación -->
-    <span id="prevBtn" class="nav-arrow">&#10094;</span> <!-- Flecha izquierda -->
-    <span id="nextBtn" class="nav-arrow">&#10095;</span> <!-- Flecha derecha -->
+    <!-- Añadir un contenedor para la imagen/video -->
+    <div class="modal-content-wrapper">
+        <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
+        <video autoplay crossorigin="anonymous" id="modalVideo" style="display:none;">
+            <source src="" type="">
+            Your browser does not support the video tag.
+        </video>
+        <!-- Modificar el div del corazón permanente para que sea clickeable -->
+        <div id="permanentHeart" class="permanent-heart" style="cursor: pointer;">❤️</div>
+    </div>
     
-    <!-- Contenido dinámico: imagen o video -->
-    <img id="modalImage" src="" alt="Imagen ampliada" style="display:none;">
-    <video autoplay crossorigin="anonymous" id="modalVideo" style="display:none;">
-        <source src="" type="">
-        Your browser does not support the video tag.
-    </video>
+    <div id="floatingHeart" class="floating-heart">🤍</div>
 </div>
 
 <!-- Barra Sticky -->
@@ -315,15 +341,84 @@
         background-color: rgba(0, 0, 0, 0.8);
     }
 
+    /* Estilo para el corazón flotante */
+    .floating-heart {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 150px;
+        opacity: 0;
+        z-index: 1002;
+        pointer-events: none;
+        transition: all 0.5s ease;
+    }
+
+    .floating-heart.show {
+        animation: heartBeat 1s ease-in-out;
+    }
+
+    @keyframes heartBeat {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* Actualizar el estilo del corazón permanente */
+    .permanent-heart {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+        font-size: 30px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1002;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        pointer-events: none;
+    }
+
+    .permanent-heart.active {
+        opacity: 1;
+        color: #ff4444;
+    }
+
+    /* Añadir estilos para el wrapper */
+    .modal-content-wrapper {
+        position: relative;
+        display: inline-block;
+        max-width: 80%;
+        max-height: 80vh;
+    }
+
+    /* Actualizar estilos del modal y sus elementos */
+    #modalImage, #modalVideo {
+        max-width: 100%;
+        max-height: 80vh;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .permanent-heart {
+        /* ...existing styles... */
+        pointer-events: auto; /* Permitir interacción con el elemento */
+    }
 
 </style>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 <script>
     $(document).ready(function() {
         let currentIndex = 0; 
         window.contentList = []; // Hacemos contentList global
         let isModalActive = false;
+        
+        // Add this at the top of your script
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         
         // Función para inicializar/actualizar contentList
         function updateContentList() {
@@ -342,9 +437,32 @@
         // Inicializar contentList con las imágenes existentes
         updateContentList();
 
+        // Añadir esta función al inicio
+        function checkInitialLikes() {
+            $('.gallery-item').each(function() {
+                let imageId = $(this).data('id');
+                if (Cookies.get('image_like_' + imageId)) {
+                    $(this).addClass('has-like');
+                }
+            });
+        }
+
         function loadContent(index) {
             let content = window.contentList[index];
             $('#modalVideo')[0].pause();
+
+            let imageId = $(content.element).data('id');
+            
+            // Verificar el estado del like
+            $.get(`/account/check-like/${imageId}`, function(response) {
+                if(response.hasLiked) {
+                    $('#permanentHeart').addClass('active');
+                    $('#floatingHeart').html('❤️');
+                } else {
+                    $('#permanentHeart').removeClass('active');
+                    $('#floatingHeart').html('🤍');
+                }
+            });
 
             if (content.type === 'image') {
                 $('#modalImage').attr('src', content.src).show();
@@ -362,7 +480,23 @@
         }
 
         $(document).on('click', '.gallery-item', function() {
-            updateContentList(); // Actualizar lista antes de abrir modal
+            let imageId = $(this).data('id');
+            let thisItem = $(this);
+            // Make AJAX call to increment visits
+            $.ajax({
+                url: `/account/load/show/${imageId}`,
+                method: 'GET',
+                }).done(function (response){
+                    if(response.success) {
+                        let visitsElement = thisItem.find('.gallery-item-likes');
+                        if(visitsElement.length) {
+                            visitsElement.html(`<span class="visually-hidden">Visitas:</span><i class="fas fa-eye" aria-hidden="true"></i> ${response.visits}`);
+                        }
+                    }
+                });
+            
+            // Continue with existing modal code...
+            updateContentList();
             currentIndex = findContentIndex(this);
             loadContent(currentIndex);
             $('#contentModal').fadeIn();
@@ -397,7 +531,7 @@
         // Cerrar el modal si se hace clic fuera del contenido
         $('#contentModal').on('mousedown', function(e) {
             // Si el clic es fuera de la imagen/video y de los botones, cerramos el modal
-            if (!$(e.target).closest('#modalImage, #modalVideo, #prevBtn, #nextBtn, #closeBtn').length && isModalActive) {
+            if (!$(e.target).closest('#modalImage, #modalVideo, #prevBtn, #nextBtn, #closeBtn, #permanentHeart').length && isModalActive) {
                 $('#contentModal').fadeOut();
                 $('#modalVideo')[0].pause(); // Detener el video si está reproduciéndose
                 isModalActive = false; // Desactivar el modal
@@ -418,7 +552,7 @@
 
         // Detectar si el clic fue dentro del contenido del modal (imagen o video)
         $('#contentModal').on('mousedown', function(e) {
-            if ($(e.target).is('#modalImage') || $(e.target).is('#modalVideo')) {
+            if ($(e.target).is('#modalImage') || $(e.target).is('#modalVideo') || $(e.target).is('#permanentHeart')) {
                 // Mark that the click was inside the content
                 isInsideContent = true;
             } else {
@@ -428,17 +562,10 @@
 
         // Si se hace clic fuera del contenido, cerrar el modal
         $('#contentModal').on('mouseup', function(e) {
-            if (!isInsideContent && !$(e.target).closest('#prevBtn, #nextBtn, #modalImage, #modalVideo').length) {
+            if (!isInsideContent && !$(e.target).closest('#prevBtn, #nextBtn, #modalImage, #modalVideo, #permanentHeart').length) {
                 $('#contentModal').fadeOut();
                 $('#modalVideo')[0].pause(); // Detener el video
                 isModalActive = false; // Desactivar el modal
-            }
-        });
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                'Accept': 'application/json'
             }
         });
 
@@ -520,6 +647,80 @@
                 updateContentList();
             }
         }
+
+        // Detectar doble click en la imagen o video
+        $('#modalImage, #modalVideo').on('dblclick', function() {
+            let currentItem = window.contentList[currentIndex];
+            let imageId = $(currentItem.element).data('id');
+            const heart = $('#floatingHeart');
+            
+            // Siempre mostrar corazón blanco en doble tap
+            heart.html('🤍');
+            heart.addClass('show');
+            setTimeout(() => heart.removeClass('show'), 1000);
+            
+            // Verificar si ya tiene like
+            let hasLike = $(currentItem.element).hasClass('has-like');
+            if (!hasLike) {
+                $.ajax({
+                    url: `/account/load/like/${imageId}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if(response.success) {
+                            let likesElement = $(currentItem.element).find('.gallery-item-comments');
+                            if(likesElement.length) {
+                                likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                            }
+                            
+                            $('#permanentHeart').addClass('active');
+                            $('#floatingHeart').html('🤍');
+                            
+                            if (!response.isAuthenticated) {
+                                Cookies.set('image_like_' + imageId, 'true', { expires: 365 });
+                            }
+
+                            $(currentItem.element).addClass('has-like');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Llamar a la función cuando se carga la página
+        checkInitialLikes();
+
+        // Agregar el evento click para el corazón permanente
+        $('#permanentHeart').on('click', function(e) {
+            e.stopPropagation();
+            let currentItem = window.contentList[currentIndex];
+            let imageId = $(currentItem.element).data('id');
+            
+            // Solo proceder si tiene like
+            if (!$(this).hasClass('active')) return;
+
+            $.ajax({
+                url: `/account/remove-like/${imageId}`,
+                method: 'GET',
+                success: function(response) {
+                    if(response.success) {
+                        let likesElement = $(currentItem.element).find('.gallery-item-comments');
+                        if(likesElement.length) {
+                            likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                        }
+                        
+                        $('#permanentHeart').removeClass('active');
+                        $('#floatingHeart').html('🤍');
+                        
+                        // Remover la clase has-like del elemento de la galería
+                        $(currentItem.element).removeClass('has-like');
+                        
+                        if (!response.isAuthenticated) {
+                            Cookies.remove('image_like_' + imageId);
+                        }
+                    }
+                }
+            });
+        });
     });
 </script>
 
@@ -628,6 +829,12 @@
         justify-content: center;
         align-items: center;
         margin-right: 3rem;
+    }
+
+    .profile-image .image-container {
+        position: relative;
+        width: 280px;
+        height: 420px; /* Ajusta esto según el aspect ratio 2/3 que necesitas */
     }
 
     .profile-user-settings,
@@ -767,7 +974,7 @@
         position: relative;
         aspect-ratio: 2 / 3; /* Mantiene proporción 3:2 */
         overflow: hidden; /* Oculta contenido excedente */
-        display: flex;
+        display: flex; /* Cambiado a flex */
         justify-content: center; /* Centra el contenido horizontalmente */
         align-items: center; /* Centra el contenido verticalmente */
         background-color: #000; /* Fondo visible mientras carga la imagen */
@@ -1414,6 +1621,52 @@
         .link-text { font-size: 10px !important; }
         .link-icon { font-size: 12px !important; }
     }
+
+    .flame-border-profile {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    /* Variaciones de color usando filtros CSS */
+    .flame-color-1 { filter: hue-rotate(0deg) saturate(100%) brightness(100%); }
+    .flame-color-2 { filter: hue-rotate(30deg) saturate(150%) brightness(110%); }
+    .flame-color-3 { filter: hue-rotate(60deg) saturate(140%) brightness(120%); }
+    .flame-color-4 { filter: hue-rotate(120deg) saturate(150%) brightness(90%); }
+    .flame-color-5 { filter: hue-rotate(180deg) saturate(130%) brightness(100%); }
+    .flame-color-6 { filter: hue-rotate(240deg) saturate(160%) brightness(110%); }
+    .flame-color-7 { filter: hue-rotate(270deg) saturate(140%) brightness(100%); }
+    .flame-color-8 { filter: hue-rotate(300deg) saturate(150%) brightness(120%); }
+    .flame-color-9 { filter: hue-rotate(330deg) saturate(170%) brightness(90%); }
+    .flame-color-10 { filter: hue-rotate(15deg) saturate(200%) brightness(130%); }
+    .flame-color-11 { filter: hue-rotate(90deg) saturate(120%) brightness(140%); }
+    .flame-color-12 { filter: hue-rotate(150deg) saturate(180%) brightness(80%); }
+    .flame-color-13 { filter: hue-rotate(200deg) saturate(160%) brightness(110%); }
+    .flame-color-14 { filter: hue-rotate(290deg) saturate(130%) brightness(120%); }
+    .flame-color-15 { filter: hue-rotate(320deg) saturate(190%) brightness(100%); }
+
+    .availability-text {
+        display: block;
+        color: #F65807;
+        font-size: 1.4rem;
+        margin-top: 0.5rem;
+    }
+
+    .text-justify {
+        text-align: justify;
+    }
+    
+    .profile-bio p {
+        text-align: justify;
+    }
+
+    .profile-user-name {
+        text-align: justify;
+    }
 </style>
 
 
@@ -1433,7 +1686,7 @@
             if (inputStr[i] === ' ') {
                 outputStr += '%20';
             } else {
-                outputStr += inputStr[i];
+                outputStr[i];
             }
         }
 

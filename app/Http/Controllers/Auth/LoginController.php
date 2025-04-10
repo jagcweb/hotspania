@@ -54,7 +54,7 @@ class LoginController extends Controller
         }*/
 
         if ($user->getRoleNames()[0] == 'admin') {
-            return redirect()->route('admin.citychanges');
+            return redirect()->route('admin.users.getActive');
         } else {
             if (!is_null($user->banned)) {
                 \Auth::logout();

@@ -25,8 +25,11 @@
                                     ->whereNotNull('frontimage')
                                     ->first();
                             @endphp
-                            <div class="col-md-3 mb-4 sortable-item" data-id="{{ $u->id }}">
+                            <div class="col-md-1 mb-4 sortable-item" data-id="{{ $u->id }}">
                                 <div class="image-container" data-user-id="{{ $u->id }}">
+                                    <div class="franja">
+                                        <p>{{ Str::limit($u->nickname, 11) }}</p>
+                                    </div>
                                     <div class="position-badge">{{ $loop->index + 1 }}</div>
                                     @if(is_object($frontimage))
                                         @if(!is_null($frontimage->route_gif))
@@ -64,8 +67,11 @@
                                     ->whereNotNull('frontimage')
                                     ->first();
                             @endphp
-                            <div class="col-md-3 mb-4 sortable-item" data-id="{{ $u->id }}">
+                            <div class="col-md-1 mb-4 sortable-item" data-id="{{ $u->id }}">
                                 <div class="image-container" data-user-id="{{ $u->id }}">
+                                    <div class="franja">
+                                        <p>{{ Str::limit($u->nickname, 11) }}</p>
+                                    </div>
                                     @if(is_object($frontimage))
                                         @if(!is_null($frontimage->route_gif))
                                             <img src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" class="img-fluid" alt="{{ $u->full_name }}">
@@ -92,9 +98,29 @@
 </div>
 
 <style>
+    .franja {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(40, 40, 40, 0.5);
+        color: white;
+        text-align: center;
+        padding: 5px 0;
+        height: 30px; /* Reducido de 38px a 30px */
+        z-index: 3;
+    }
+
+    .franja p {
+        margin: 0;
+        line-height: 20px;
+        font-size: 16px; /* Reducido de 20px a 16px */
+        color: white;
+    }
+    
     .image-container {
         position: relative;
-        flex: 1 0 calc(25%);
+        flex: 1 0 calc(8.33%); /* 100% / 12 columnas */
         margin: 0;
         color: #fff;
         cursor: pointer;
@@ -104,23 +130,24 @@
         justify-content: center;
         align-items: center;
         background-color: #000;
-        max-width: 180px;
+        max-width: 150px; /* Ajustado para 12 columnas */
     }
 
-    .col-md-3 {
+    .col-md-1 {
         display: flex;
         padding: 0;
         margin: 0;
-        max-width: 180px;
+        max-width: 150px;
+        justify-content: center;
     }
 
-    .row {
+    .row, .sortable-grid {
         margin: 0;
         padding: 0;
         display: flex;
         flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 0;
+        justify-content: flex-start; /* Alinear a la izquierda */
+        gap: 0; /* Sin espacio entre fichas */
     }
 
     .card-body {
@@ -152,8 +179,8 @@
 
     .icon {
         color: white;
-        font-size: 24px;
-        margin: 10px 0;
+        font-size: 20px;  /* Reducido de 24px a 20px */
+        margin: 8px 0;    /* Reducido de 10px a 8px */
         transition: transform 0.2s ease;
     }
 
@@ -200,12 +227,6 @@
     
     .sortable-ghost {
         opacity: 0.4;
-    }
-
-    .sortable-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
     }
 
     .sortable-chosen {

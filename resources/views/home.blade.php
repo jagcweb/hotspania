@@ -10,36 +10,36 @@
         <article>
             <div class="section background-transparent">
                 <div class="stories-container">
-                    <div class="story-item">
+                    <a href="{{ route('home', ['filter' => 'disponibles']) }}" class="story-item">
                         <div class="story-circle">
                             <span class="circle-text">Disponibles</span>
                         </div>
                         <span class="story-text">Disponibles</span>
-                    </div>
-                    <div class="story-item">
+                    </a>
+                    <a href="{{ route('home', ['filter' => 'lgtbi']) }}" class="story-item">
                         <div class="story-circle">
                             <span class="circle-text">LGTBI+</span>
                         </div>
                         <span class="story-text">LGTBI+</span>
-                    </div>
-                    <div class="story-item">
+                    </a>
+                    <a href="{{ route('home', ['filter' => 'nuevas']) }}" class="story-item">
                         <div class="story-circle">
                             <span class="circle-text">Nuevas</span>
                         </div>
                         <span class="story-text">Nuevas</span>
-                    </div>
+                    </a>
                     <div class="story-item">
                         <div class="story-circle">
                             <span class="circle-text">Fotos</span>
                         </div>
                         <span class="story-text">Fotos</span>
                     </div>
-                    <div class="story-item">
+                    <a href="{{ route('home', ['filter' => 'ranking']) }}" class="story-item">
                         <div class="story-circle">
                             <span class="circle-text">Ranking</span>
                         </div>
                         <span class="story-text">Ranking</span>
-                    </div>
+                    </a>
                 </div>
 
                 <style>
@@ -165,7 +165,7 @@
                 <div class="gallery" id="gallery">
                     @include('partials.user-grid')
                 </div>
-                <div id="loading" style="display: block; text-align: center; padding: 20px; margin: 20px 0;">
+                <div id="loading" style="display: {{ count($users) >= 20 ? 'none' : 'none' }}; text-align: center; padding: 20px; margin: 20px 0;">
                     <div class="modern-loader"></div>
                 </div>
             </div>
@@ -204,8 +204,16 @@ function isElementInViewport(el) {
 const loadMoreUsers = () => {
     if (isLoading || !hasMore) return;
     
+    const galleryItems = document.querySelectorAll('.gallery-item').length;
+    if (galleryItems < 20) {
+        loading.style.display = 'none';
+        return;
+    }
+    
     isLoading = true;
-    loading.style.display = 'block';
+    if (hasMore) {
+        loading.style.display = 'block';
+    }
 
     $.ajax({
         url: `/home/load-more/${page + 1}`,
@@ -222,9 +230,7 @@ const loadMoreUsers = () => {
             } else {
                 hasMore = false;
             }
-            if (!hasMore) {
-                loading.style.display = 'none';
-            }
+            loading.style.display = hasMore ? 'block' : 'none';
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);
@@ -233,12 +239,16 @@ const loadMoreUsers = () => {
         },
         complete: function() {
             isLoading = false;
+            if (!hasMore) {
+                loading.style.display = 'none';
+            }
         }
     });
 };
 
 $(window).scroll(function() {
-    if (isElementInViewport(loading) && !isLoading && hasMore) {
+    const galleryItems = document.querySelectorAll('.gallery-item').length;
+    if (isElementInViewport(loading) && !isLoading && hasMore && galleryItems >= 20) {
         loadMoreUsers();
     }
 });

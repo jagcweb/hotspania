@@ -14,11 +14,10 @@
             @endif
             <div class="gallery-item-info">
                 <ul>
-                    <li class="gallery-item-likes">
-                        <span class="visually-hidden">Likes:</span>
-                        <i class="fas fa-eye" aria-hidden="true"></i> 
-                        {{56 * ($i+2)}}
-                    </li>
+                    <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
+                            class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
+                    <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
+                            class="fas fa-heart" aria-hidden="true"></i> {{ $image->likes ?? 0 }}</li>
                 </ul>
             </div>
         </div>

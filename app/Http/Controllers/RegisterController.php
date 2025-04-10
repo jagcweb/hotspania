@@ -73,7 +73,7 @@ class RegisterController extends Controller
                     'phone' => $request->phone,
                     'is_smoker' => $request->smoker,
                     'working_zone' => $request->working_zone,
-                    'service_location' => $request->service_location,
+                    'service_location' => json_encode($request->service_location, JSON_FORCE_OBJECT),
                     'gender' => $request->gender,
                     'dni' => Str::random(8),
                     'dni_file' => Str::random(30),

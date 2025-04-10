@@ -43,6 +43,11 @@ Route::get('/home/load-more/{page}', [App\Http\Controllers\HomeController::class
 //AccountController
 Route::get('/account', [App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
 Route::get('/account/edit', [App\Http\Controllers\AccountController::class, 'edit'])->name('account.edit');
+Route::post('/account/assign-package', [App\Http\Controllers\AccountController::class, 'assignPackage'])->name('account.assign_package');
+Route::post('account/make-available/{id}',  [App\Http\Controllers\AccountController::class, 'makeAvailable'])->name('account.make_available');
+Route::get('/account/visible/{id}', [App\Http\Controllers\AccountController::class, 'visibleAccount'])->name('account.visible');
+Route::get('/account/load/show/{id}', [App\Http\Controllers\AccountController::class, 'show'])->name('account.show')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+Route::get('/account/load/like/{id}', [App\Http\Controllers\AccountController::class, 'like'])->name('account.like')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/account/edit/edit-data', [App\Http\Controllers\AccountController::class, 'editData'])->name('account.edit-data');
 Route::post('/account/edit/update', [App\Http\Controllers\AccountController::class, 'update'])->name('account.update');
 Route::get('/account/{nickname}', [App\Http\Controllers\AccountController::class, 'get'])->name('account.get');
@@ -54,6 +59,8 @@ Route::get('/account/load-more/{page}/{userId}', [App\Http\Controllers\AccountCo
     ->name('account.loadMore');
 
 Route::post('/account/upload-images', [App\Http\Controllers\AccountController::class, 'upload'])->name('account.images.upload');
+Route::get('/account/check-like/{id}', [App\Http\Controllers\AccountController::class, 'checkLike']);
+Route::get('/account/remove-like/{id}', [App\Http\Controllers\AccountController::class, 'removeLike'])->name('account.removeLike');
 
 //RegistersController
 Route::middleware('guest')->group(function () {

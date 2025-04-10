@@ -6,22 +6,35 @@
                 <h4 class="modal-title" id="myCenterModalLabel">Subir fotos {{ $u->full_name }}</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             </div>
-            <div class="modal-body p-4">
-                <form id="upload-form" action="{{ route('admin.images.upload') }}" method="POST" enctype="multipart/form-data" autocomplete="off">
-                    @csrf
-                    <div class="form-group">
-                        <label for="image">Imágenes o vídeos</label>
-                        <input type="file" class="form-control image_upload" id="image" name="images[]" multiple accept=".jpeg,.png,.jpg,.gif,.webp,.mp4,.mov,.avi,.wmv,.avchd,.webm,.flv">
-                        <input type="text" id="user_id" name="user_id" value="{{$u->id}}" hidden/>
-                    </div>
 
-                    @if (Request::is('account/edit*'))
-                    <button type="submit" id="upload-btn" class="btn" style="background:#f36e00; color:#fff;">Subir imágenes</button>
-                    @else
-                    <button type="submit" id="upload-btn" class="btn btn-primary">Subir imágenes</button>
-                    @endif
-                    <div id="progress-container"></div> 
-                </form>
+            <div class="modal-body p-4">
+                @php 
+                    $last_image = \App\Models\Image::where('user_id', $u->id)->latest()->first();
+                    $last_image_date = is_object($last_image) ? \Carbon\Carbon::parse($last_image->created_at) : \Carbon\Carbon::parse('2024-01-01');
+                @endphp
+
+                {{ $last_image_date->diffInDays() }} días desde la última subida de imágenes o vídeos.
+                @if($last_image_date->diffInDays() < 30)
+                    <div class="alert alert-warning" role="alert">
+                        <strong>¡Atención!</strong> Solo puedes subir imágenes o vídeos cada 30 días. La última subida fue el {{ $last_image_date->format('d/m/Y') }}.
+                    </div>
+                @else
+                 <form id="upload-form" action="{{ route('admin.images.upload') }}" method="POST" enctype="multipart/form-data" autocomplete="off">
+                        @csrf
+                        <div class="form-group">
+                            <label for="image">Imágenes o vídeos (máximo 10 archivos)</label>
+                            <input type="file" class="form-control image_upload" id="image" name="images[]" multiple accept=".jpeg,.png,.jpg,.gif,.webp,.mp4,.mov,.avi,.wmv,.avchd,.webm,.flv">
+                            <input type="text" id="user_id" name="user_id" value="{{$u->id}}" hidden/>
+                        </div>
+
+                        @if (Request::is('account/edit*'))
+                        <button type="submit" id="upload-btn" class="btn" style="background:#f36e00; color:#fff;">Subir imágenes</button>
+                        @else
+                        <button type="submit" id="upload-btn" class="btn btn-primary">Subir imágenes</button>
+                        @endif
+                        <div id="progress-container"></div> 
+                    </form>
+                @endif
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -69,6 +82,15 @@
 
     // Obtener el token CSRF del meta tag
     var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Agregar validación al seleccionar archivos
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 10) {
+            alert('Solo puedes seleccionar un máximo de 10 archivos.');
+            this.value = ''; // Limpiar la selección
+            return;
+        }
+    });
 
     // Función que maneja la subida de cada archivo
     async function uploadFile(file, userId, currentIndex, totalFiles) {
@@ -128,57 +150,62 @@
 
     // Evento para manejar el clic del botón y subir los archivos
     uploadButton.addEventListener('click', async () => {
-    if (fileInput.files.length === 0) {
-        alert('Selecciona al menos un archivo antes de enviar.');
-        return;
-    }
-
-    // Deshabilitar el botón y actualizar el mensaje
-    uploadButton.disabled = true;
-    uploadButton.innerText = `Subiendo ${fileInput.files.length} archivos, por favor espere...`;
-
-    // Crear o reutilizar el mensaje dinámico
-    let messageElement = document.getElementById('upload-message');
-    if (!messageElement) {
-        messageElement = document.createElement('p');
-        messageElement.id = 'upload-message';
-        messageElement.style.color = 'green';
-        messageElement.style.fontSize = '15px';
-        progressContainer.parentNode.insertBefore(messageElement, progressContainer);
-    }
-
-    // Iterar sobre los archivos seleccionados y subirlos
-    const files = fileInput.files;
-    try {
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            await uploadFile(file, userId, i + 1, files.length); // Subir cada archivo de forma individual
+        if (fileInput.files.length === 0) {
+            alert('Selecciona al menos un archivo antes de enviar.');
+            return;
         }
-
-        // Mensaje de éxito
         
-        if(window.location.pathname.includes("/account/edit")) {
-            messageElement.innerText = 'Todos los archivos fueron subidos exitosamente como pendiente de aprobación del administrador. Recargando la página...';
-
-            setTimeout(() => {
-            window.location.reload();
-        }, 2500);
-        } else {
-            messageElement.innerText = 'Todos los archivos fueron subidos exitosamente. Recargando la página...';
-
-            setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+        if (fileInput.files.length > 10) {
+            alert('Solo puedes subir un máximo de 10 archivos.');
+            return;
         }
 
-    } catch (error) {
-        // Mensaje de error
-        messageElement.innerText = 'Error al subir los archivos. Por favor, inténtalo de nuevo.';
-        console.error(error);
-    } finally {
+        // Deshabilitar el botón y actualizar el mensaje
         uploadButton.disabled = true;
-        uploadButton.innerText = 'Archivos subidos';
-    }
-});
+        uploadButton.innerText = `Subiendo ${fileInput.files.length} archivos, por favor espere...`;
+
+        // Crear o reutilizar el mensaje dinámico
+        let messageElement = document.getElementById('upload-message');
+        if (!messageElement) {
+            messageElement = document.createElement('p');
+            messageElement.id = 'upload-message';
+            messageElement.style.color = 'green';
+            messageElement.style.fontSize = '15px';
+            progressContainer.parentNode.insertBefore(messageElement, progressContainer);
+        }
+
+        // Iterar sobre los archivos seleccionados y subirlos
+        const files = fileInput.files;
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                await uploadFile(file, userId, i + 1, files.length); // Subir cada archivo de forma individual
+            }
+
+            // Mensaje de éxito
+            
+            if(window.location.pathname.includes("/account/edit")) {
+                messageElement.innerText = 'Todos los archivos fueron subidos exitosamente como pendiente de aprobación del administrador. Recargando la página...';
+
+                setTimeout(() => {
+                window.location.reload();
+            }, 2500);
+            } else {
+                messageElement.innerText = 'Todos los archivos fueron subidos exitosamente. Recargando la página...';
+
+                setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+            }
+
+        } catch (error) {
+            // Mensaje de error
+            messageElement.innerText = 'Error al subir los archivos. Por favor, inténtalo de nuevo.';
+            console.error(error);
+        } finally {
+            uploadButton.disabled = true;
+            uploadButton.innerText = 'Archivos subidos';
+        }
+    });
 
 </script>

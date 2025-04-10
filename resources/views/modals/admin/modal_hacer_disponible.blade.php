@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-light">
-                <h4 class="modal-title" id="myCenterModalLabel">Hacer disponible {{ $u->full_name }}</h4>
+                <h4 class="modal-title" id="myCenterModalLabel">Hacer disponible @if(!str_contains(request()->fullUrl(), 'account/edit')) {{ $u->full_name }} @endif</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             </div>
             <div class="modal-body p-4">
@@ -21,7 +21,7 @@
                 @endphp
 
                 @if ($canMakeAvailable)
-                    <form action="{{ route('admin.users.make_available', ['id' => \Crypt::encryptString($u->id)]) }}" method="POST">
+                    <form method="POST" action="{{ str_contains(request()->fullUrl(), 'account/edit') ? route('account.make_available', ['id' => \Crypt::encryptString($u->id)]) : route('admin.users.make_available', ['id' => \Crypt::encryptString($u->id)]) }}">
                         @csrf
                         <div class="form-group">
                             <label for="tiempo">Tiempo</label>
@@ -33,7 +33,8 @@
                             </select>
                         </div>
                         <div class="text-right">
-                            <button type="submit" class="btn btn-sm btn-dark waves-effect waves-dark w-100">Confirmar</button>
+                            <input type="submit" class="btn btn-sm btn-dark waves-effect waves-dark w-100" 
+                            style="line-height: 10px;" value="Guardar"/>
                         </div>
                     </form>
                 @else

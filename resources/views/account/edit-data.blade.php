@@ -16,14 +16,6 @@
                         <label for="nickname">Apodo ("nombre fantasía")</label>
                         <input type="text" class="form-control" id="nickname" name="nickname" value="{{ \Auth::user()->nickname }}" required>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="date_of_birth">Fecha de Nacimiento</label>
-                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ \Auth::user()->date_of_birth }}" required 
-                        onkeydown="showAlert(event)" onpaste="showAlert(event)"
-                        >
-    
-                    </div>
                 
                     <div class="form-group">
                         <label for="whatsapp_number">Nº teléfono WhatsApp</label>
@@ -64,13 +56,32 @@
                         <input type="text" class="form-control" id="working_zone" name="working_zone" value="{{ \Auth::user()->working_zone }}" required>
                     </div>
                     
+
                     <div class="form-group">
-                        <label for="service_location">Lugar de atención</label>
-                        <select class="form-control" id="service_location" name="service_location" required>
-                            <option class="option" value="piso_propio" {{ \Auth::user()->service_location == 'piso_propio' ? 'selected' : '' }}>Piso Propio</option>
-                            <option class="option" value="domicilio" {{ \Auth::user()->service_location == 'domicilio' ? 'selected' : '' }}>Domicilio</option>
-                            <option class="option" value="hotel" {{ \Auth::user()->service_location == 'hotel' ? 'selected' : '' }}>Hoteles</option>
-                        </select>
+                        <label for="service_location">Donde atendera?</label>
+                        <div style="background:#f1f1f1; border:2px solid #aaa; padding:20px; min-height:80px;">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="piso_propio" name="service_location[]" value="piso_propio"
+                                    {{ in_array('piso_propio', json_decode(\Auth::user()->service_location, true) ?? []) ? 'checked' : '' }}/>
+                                <label class="form-check-label" for="piso_propio">
+                                    Piso Propio
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="domicilio" name="service_location[]" value="domicilio"
+                                    {{ in_array('domicilio', json_decode(\Auth::user()->service_location, true) ?? []) ? 'checked' : '' }}/>
+                                <label class="form-check-label" for="domicilio">
+                                    Domicilio
+                                </label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="hotel" name="service_location[]" value="hotel"
+                                    {{ in_array('hotel', json_decode(\Auth::user()->service_location, true) ?? []) ? 'checked' : '' }}/>
+                                <label class="form-check-label" for="hotel">
+                                    Hoteles
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="form-group">

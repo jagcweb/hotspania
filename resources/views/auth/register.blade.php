@@ -107,12 +107,30 @@
                                         </div>
                                         
                                         <div class="form-group">
-                                            <label for="service_location">Lugar de atención</label>
-                                            <select class="form-control" id="service_location" name="service_location" required>
-                                                <option class="option" value="piso_propio" {{ old('service_location') == 'piso_propio' ? 'selected' : '' }}>Piso Propio</option>
-                                                <option class="option" value="domicilio" {{ old('service_location') == 'domicilio' ? 'selected' : '' }}>Domicilio</option>
-                                                <option class="option" value="hotel" {{ old('service_location') == 'hotel' ? 'selected' : '' }}>Hoteles</option>
-                                            </select>
+                                            <label for="service_location">Donde atendera?</label>
+                                            <div style="background:#f1f1f1; border:2px solid #aaa; padding:20px; min-height:80px;">
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="checkbox" id="piso_propio" name="service_location[]" value="piso_propio"
+                                                        {{ (is_array(old('service_location')) && in_array('piso_propio', old('service_location'))) ? 'checked' : '' }}/>
+                                                    <label class="form-check-label" for="piso_propio">
+                                                        Piso Propio
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="checkbox" id="domicilio" name="service_location[]" value="domicilio"
+                                                        {{ (is_array(old('service_location')) && in_array('domicilio', old('service_location'))) ? 'checked' : '' }}/>
+                                                    <label class="form-check-label" for="domicilio">
+                                                        Domicilio
+                                                    </label>
+                                                </div>
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="checkbox" id="hotel" name="service_location[]" value="hotel"
+                                                        {{ (is_array(old('service_location')) && in_array('hotel', old('service_location'))) ? 'checked' : '' }}/>
+                                                    <label class="form-check-label" for="hotel">
+                                                        Hoteles
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                         
                                         <div class="form-group">
@@ -484,9 +502,11 @@
 
                 case 'working_zone':
                 case 'service_location':
-                    valid = value.length > 0;
-                    errorMessage = valid ? '' : 'Este campo es requerido.';
+                    const locationCheckboxes = document.querySelectorAll('input[name="service_location[]"]:checked');
+                    valid = locationCheckboxes.length > 0;
+                    errorMessage = valid ? '' : 'Debe seleccionar al menos una ubicación de servicio.';
                     break;
+
 
                 case 'gender':
                     valid = ['hombre', 'mujer', 'otro'].includes(value);

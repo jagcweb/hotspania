@@ -25,8 +25,11 @@
                                     ->whereNotNull('frontimage')
                                     ->first();
                             @endphp
-                            <div class="col-md-3 mb-4">
+                            <div class="col-md-1 mb-4">
                                 <div class="image-container">
+                                    <div class="franja">
+                                        <p>{{ Str::limit($u->nickname, 11) }}</p>
+                                    </div>
                                     @if(is_object($frontimage))
                                         @if(!is_null($frontimage->route_gif))
                                             <img src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" class="img-fluid" alt="{{ $u->full_name }}">
@@ -72,10 +75,30 @@
 </div>
 
 <style>
+    .franja {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(40, 40, 40, 0.5);
+        color: white;
+        text-align: center;
+        padding: 5px 0;
+        height: 30px; /* Reducido de 38px a 30px */
+        z-index: 3;
+    }
+
+    .franja p {
+        margin: 0;
+        line-height: 20px;
+        font-size: 16px; /* Reducido de 20px a 16px */
+        color: white;
+    }
+
     .image-container {
         position: relative;
-        flex: 1 0 calc(25%); /* Eliminado el margen del cálculo */
-        margin: 0; /* Eliminado el margen */
+        flex: 1 0 calc(8.33%); /* 100% / 12 columnas */
+        margin: 0;
         color: #fff;
         cursor: pointer;
         aspect-ratio: 2 / 3;
@@ -84,28 +107,27 @@
         justify-content: center;
         align-items: center;
         background-color: #000;
-        max-width: 180px; /* Ajustado el ancho máximo */
+        max-width: 150px; /* Ajustado para 12 columnas */
     }
 
-    /* Eliminamos los estilos de espaciado de la columna */
-    .col-md-3 {
+    /* Ajustamos el tamaño de la columna */
+    .col-md-1 {
         display: flex;
         padding: 0;
         margin: 0;
-        max-width: 180px;
+        max-width: 150px;
+        justify-content: center;
     }
 
-    /* Ajustamos el contenedor de la fila */
     .row {
         margin: 0;
         padding: 0;
         display: flex;
         flex-wrap: wrap;
-        justify-content: flex-start; /* Cambiado a flex-start para que no haya espacios */
-        gap: 0; /* Aseguramos que no haya espacio entre elementos */
+        justify-content: flex-start; /* Alinear a la izquierda */
+        gap: 0; /* Sin espacio entre fichas */
     }
 
-    /* Ajustamos el contenedor principal */
     .card-body {
         padding: 0;
     }
@@ -139,12 +161,12 @@
 
     .icon {
         color: white;
-        font-size: 24px;  /* Iconos más grandes */
+        font-size: 20px;  /* Reducido de 24px a 20px */
         transition: transform 0.2s ease;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 8px;  /* Espacio alrededor de los iconos */
+        padding: 6px;  /* Reducido de 8px a 6px */
     }
 
     .icon:hover {

@@ -20,11 +20,18 @@ class Image extends Model
         'frontimage',
         'watermarked',
         'vision_data',
-        'route_frontimage'
+        'route_frontimage',
+        'visits',
+        'likes'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(ImageLike::class);
     }
 }

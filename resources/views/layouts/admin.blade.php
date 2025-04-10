@@ -273,12 +273,23 @@
                         </button>
                         <div class="collapse navbar-collapse" id="navbarNav">
                             <ul class="navbar-nav ml-left">
-                                <li class="nav-item search-container">
-                                    <a href="#" class="nav-link search-toggle">
-                                        <i class="fas fa-magnifying-glass search-icon"></i>
-                                    </a>
-                                    <input type="text" class="search-input d-none" placeholder="Buscar...">
-                                </li>
+                                @if(str_contains(url()->current(), '/getActive') || 
+                                    str_contains(url()->current(), '/getPending') || 
+                                    str_contains(url()->current(), '/positions'))
+                                    <li class="nav-item search-container">
+                                        <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center">
+                                            <a href="#" class="nav-link search-toggle">
+                                                <i class="fas fa-magnifying-glass search-icon"></i>
+                                            </a>
+                                            <input type="text" name="search" class="search-input {{ !request('search') ? 'd-none' : '' }}" placeholder="Buscar ficha..." value="{{ request('search') }}">
+                                            @if(request('search'))
+                                                <a href="{{ url()->current() }}" class="nav-link">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            @endif
+                                        </form>
+                                    </li>
+                                @endif
                                 <li class="nav-item city-menu">
                                     <span class="nav-link">Ciudades <i class="fas fa-chevron-down"></i></span>
                                     @php $cities = \App\Models\City::orderBy('name', 'asc')->get(); @endphp
@@ -458,13 +469,19 @@
                                 const $container = $('.search-container');
                                 const $input = $('.search-input');
                                 const $toggle = $('.search-toggle');
-                        
-                                $input.addClass('d-none');
-                        
+
+                                // Solo ocultamos el input si no hay búsqueda activa
+                                if (!$input.val()) {
+                                    $input.addClass('d-none');
+                                } else {
+                                    // Si hay búsqueda, mostramos el input con el ancho correcto
+                                    $input.css('width', '200px').css('opacity', 1);
+                                }
+
                                 $toggle.on('click', (e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                        
+
                                     if ($input.hasClass('d-none')) {
                                         $input.removeClass('d-none')
                                             .css('opacity', 0)
@@ -476,7 +493,7 @@
                                             });
                                     }
                                 });
-                        
+
                                 $input.on('keydown', (e) => {
                                     if (e.key === 'Escape') {
                                         cerrarBusqueda();

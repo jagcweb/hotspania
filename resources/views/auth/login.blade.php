@@ -51,7 +51,16 @@
                 Regístrate gratis
             </button>
             <hr>
-            <button class="btn acceder mt-4" id="log">
+            @php $cities = \App\Models\City::orderBy('id', 'asc')->get(); @endphp
+            <select class="form-control" id="city_id" name="city" style="border: 2px solid #f76e08;" required autocomplete="off">
+                <option hidden selected disabled>
+                    Escoge una ciudad...
+                </option>
+                @foreach($cities as $c)
+                    <option value="{{strtolower($c->name)}}">{{$c->name}}</option>
+                @endforeach
+            </select>
+            <button class="btn acceder mt-4" id="log" disabled>
                 Acceder
             </button>
           </div>
@@ -319,6 +328,22 @@
     transform: scale(0.9);
     }
 
+    .acceder:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        border-color: #666;
+    }
+
+    .acceder:disabled:hover {
+        background-color: transparent;
+        color: #f1f1f1;
+        box-shadow: 0 2px 0 2px #000;
+    }
+
+    .acceder:disabled:before {
+        display: none;
+    }
+
     li{
         list-style: none;
     }
@@ -369,6 +394,34 @@
 </style>
 
 <script>
+    // Función para obtener el valor de una cookie
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Al cargar la página, verificar si existe la cookie
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedCity = getCookie('selected_city');
+        if (savedCity) {
+            const citySelect = document.getElementById('city_id');
+            citySelect.value = savedCity;
+            document.getElementById('log').disabled = false;
+        }
+    });
+
+    document.getElementById('city_id').addEventListener('change', function() {
+        const citySelect = document.getElementById('city_id');
+        const selectedCity = citySelect.value;
+        document.getElementById('log').disabled = !selectedCity;
+        
+        // Guardar cookie con el nombre de la ciudad (expira en 30 días)
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+        document.cookie = `selected_city=${selectedCity}; expires=${expirationDate.toUTCString()}; path=/`;
+    });
+
     document.getElementById('registerButton').addEventListener('click', function() {
         window.location.href = '/register/paso-1';
     });

@@ -71,7 +71,7 @@ class User extends Authenticatable
     }
 
     public function cities(){
-        return $this->hasMany('App\Models\City', 'user_id','id');
+        return $this->belongsToMany(City::class, 'city_users');
     }
 
     public function packageUser(){

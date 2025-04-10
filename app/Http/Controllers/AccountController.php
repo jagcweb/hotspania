@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use App\Models\User;
 use App\Models\City;
 use App\Models\Image;
@@ -29,6 +30,14 @@ use CV\Opencv;
 use Google\Cloud\AIPlatform\V1\PredictionServiceClient;
 use GuzzleHttp\Client;
 use Google\Auth\Credentials\ServiceAccountCredentials;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Validator;
+use App\models\ImageLike;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use App\Models\Package;
+use App\Models\PackageUser;
+use App\Models\PackageUserHistory;
 
 class AccountController extends Controller
 {
@@ -39,14 +48,211 @@ class AccountController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('logged')->except(['get', 'loadMore']);
+        $this->middleware('logged')->except(['get', 'loadMore', 'show', 'like', 'checkLike', 'removeLike']); // Añadir 'checkLike' a las excepciones
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
+    public function makeAvailable(Request $request, $id) {
+        try {
+            $decryptedId = \Crypt::decryptString($id);
+        } catch (\Exception $e) {
+            return back()->with('error', 'ID inválido');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'tiempo' => 'required|integer|min:1|max:3'
+        ]);
+
+        if ($validator->fails()) {
+            return back()->with('error', 'Datos inválidos');
+        }
+
+        $user = User::find($decryptedId);
+        
+        if(!$user) {
+            return back()->with('error', 'Usuario no encontrado');
+        }
+
+        $user->update([
+            'available_time' => $request->tiempo,
+            'available_until' => \Carbon\Carbon::now('Europe/Madrid')->addHours($request->tiempo)
+        ]);
+
+        return back()->with('exito', 'Marcado como disponible por ' . $request->tiempo . ' horas');
+    }
+
+    public function assignPackage(Request $request) {
+        $user_id = \Auth::user()->id;
+        $package = Package::findOrFail($request->get('package_id'));
+        
+        // Obtener el último paquete del usuario
+        $lastPackage = PackageUser::where('user_id', $user_id)
+            ->orderBy('end_date', 'desc')
+            ->first();
+
+        $startDate = null;
+        if ($lastPackage && $lastPackage->end_date > now()) {
+            // Si hay un paquete activo, el nuevo empezará cuando termine el último
+            $startDate = $lastPackage->end_date;
+        } else {
+            // Si no hay paquetes activos, empieza hoy
+            $startDate = now()->startOfDay();
+        }
+
+        $pack_user = new PackageUser();
+        $pack_user->package_id = $package->id;
+        $pack_user->user_id = $user_id;
+        $pack_user->start_date = $startDate;
+        $pack_user->end_date = $startDate->copy()->addDays($package->days);
+        $pack_user->save();
+
+        // Guardar en historial
+        $pack_history = new PackageUserHistory();
+        $pack_history->package_id = $package->id;
+        $pack_history->user_id = $user_id;
+        $pack_history->save();
+
+        return back()->with('exito', 'Paquete asignado.');
+    }
+
+
+    public function visibleAccount($id) {
+        $id = \Crypt::decryptString($id);
+        $user = User::find($id);
+        $user->visible = $user->visible == 1 ? null : 1;
+        $user->updated_at = \Carbon\Carbon::now();
+        $user->update();
+
+        $message = $user->visible == 1 ? 'Cuenta visible.' : 'Cuenta oculta.';
+        return back()->with('exito', $message);
+    }
+
+    public function show($id) {
+        $image = Image::find($id);
+        
+        if (!$image) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Imagen no encontrada'
+            ], 404);
+        }
+
+        $cookieName = 'image_visit_' . $id;
+        
+        if (!Cookie::has($cookieName)) {
+            $image->visits = ($image->visits ?? 0) + 1;
+            $image->save();
+            
+            // Crear cookie que dura 10 minutos
+            Cookie::queue($cookieName, 'visited', 10);
+        }
+
+        return response()->json([
+            'success' => true,
+            'visits' => $image->visits
+        ]);
+    }
+
+    public function like($id) {
+        $image = Image::find($id);
+        
+        if (!$image) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Imagen no encontrada'
+            ], 404);
+        }
+
+        $hasLiked = false;
+        if (Auth::check()) {
+            $existingLike = ImageLike::where('image_id', $id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if (!$existingLike) {
+                ImageLike::create([
+                    'image_id' => $id,
+                    'user_id' => Auth::id()
+                ]);
+                $hasLiked = true;
+            }
+        } else {
+            $guestId = Cookie::get('guest_id') ?? Str::random(40);
+            $existingLike = ImageLike::where('image_id', $id)
+                ->where('guest_id', $guestId)
+                ->first();
+
+            if (!$existingLike) {
+                ImageLike::create([
+                    'image_id' => $id,
+                    'guest_id' => $guestId
+                ]);
+                $hasLiked = true;
+                Cookie::queue('guest_id', $guestId, 525600);
+            }
+        }
+
+        if ($hasLiked) {
+            $image->increment('likes');
+        }
+
+        return response()->json([
+            'success' => true,
+            'likes' => $image->likes,
+            'hasLiked' => true,
+            'isAuthenticated' => Auth::check()
+        ])->cookie('image_like_' . $id, 'true', 525600); // Añadir cookie específica del like
+    }
+
+    public function checkLike($id)
+    {
+        if (Auth::check()) {
+            $hasLiked = ImageLike::where('image_id', $id)
+                ->where('user_id', Auth::id())
+                ->exists();
+        } else {
+            $guestId = Cookie::get('guest_id');
+            $hasLiked = $guestId ? ImageLike::where('image_id', $id)
+                ->where('guest_id', $guestId)
+                ->exists() : Cookie::get('image_like_' . $id) === 'true';
+        }
+
+        return response()->json(['hasLiked' => $hasLiked]);
+    }
+
+    public function removeLike($id)
+    {
+        $image = Image::find($id);
+        
+        if (!$image) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Imagen no encontrada'
+            ], 404);
+        }
+
+        if (Auth::check()) {
+            ImageLike::where('image_id', $id)
+                ->where('user_id', Auth::id())
+                ->delete();
+        } else {
+            $guestId = Cookie::get('guest_id');
+            if ($guestId) {
+                ImageLike::where('image_id', $id)
+                    ->where('guest_id', $guestId)
+                    ->delete();
+            }
+        }
+
+        $image->decrement('likes');
+
+        return response()->json([
+            'success' => true,
+            'likes' => $image->likes,
+            'hasLiked' => false,
+            'isAuthenticated' => Auth::check()
+        ]);
+    }
+
     public function index(){
         $images = Image::where('user_id', \Auth::user()->id)->where('status', 'approved')->whereNotNull('visible')->paginate(9);
 
@@ -81,15 +287,15 @@ class AccountController extends Controller
 
     public function update(Request $request){
         $request->validate([
-            'nickname' => 'required|string|max:255|unique:users,nickname,' . \Auth::id(),
-            'date_of_birth' => 'required|date',
+            'nickname' => 'required|string|max:255|unique:users,nickname,' . \Auth::id() . ',id',
             'whatsapp' => 'required|string|max:20',
             'phone' => 'required|string|max:20',
             'smoker' => 'required|boolean',
             'city' => 'required|array',
             'city.*' => 'exists:cities,id',
             'working_zone' => 'required|string|max:255',
-            'service_location' => 'required|in:piso_propio,domicilio,hotel',
+            'service_location' => 'required|array',
+            'service_location.*' => 'required|string|in:piso_propio,domicilio,hotel',
             'gender' => 'required|in:mujer,hombre,lgbti',
             'height' => 'required|integer|min:100|max:250',
             'weight' => 'required|integer|min:30|max:200',
@@ -128,7 +334,6 @@ class AccountController extends Controller
             'working_zone' => $request->working_zone,
             'service_location' => $request->service_location,
             'gender' => $request->gender,
-            'date_of_birth' => $request->date_of_birth,
             'height' => $request->height,
             'weight' => $request->weight,
             'bust' => $request->bust,
@@ -141,7 +346,7 @@ class AccountController extends Controller
             'link' => $request->link,
         ]);
 
-        return redirect()->back()->with('exito', 'Perfil actualizado correctamente.');
+        return redirect()->route('account.edit')->with('exito', 'Perfil actualizado correctamente.');
     }
 
     public function get($nickname) {
@@ -164,10 +369,28 @@ class AccountController extends Controller
 
         \Log::info('Total images for user ' . $user->id . ': ' . $images->count());
 
+        // Obtener los likes para todas las imágenes
+        $likedImages = [];
+        if (Auth::check()) {
+            $likedImages = ImageLike::where('user_id', Auth::id())
+                ->whereIn('image_id', $images->pluck('id'))
+                ->pluck('image_id')
+                ->toArray();
+        } else {
+            $guestId = Cookie::get('guest_id');
+            if ($guestId) {
+                $likedImages = ImageLike::where('guest_id', $guestId)
+                    ->whereIn('image_id', $images->pluck('id'))
+                    ->pluck('image_id')
+                    ->toArray();
+            }
+        }
+
         return view('account.get', [
             'user' => $user,
             'images' => $images,
-            'frontimage' => $frontimage
+            'frontimage' => $frontimage,
+            'likedImages' => $likedImages
         ]);
     }
 

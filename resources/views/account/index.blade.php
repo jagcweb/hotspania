@@ -53,24 +53,28 @@
 
             <div class="profile-stats">
 
+                @php
+                    $totalVisits = $images->sum('visits') ?? 0;
+                    $totalLikes = $images->sum('likes') ?? 0;
+                @endphp
                 <ul>
                     <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
-                    <li><span class="profile-stat-count">43534</span> visitas</li>
-                    <li><span class="profile-stat-count">3678</span> me gusta</li>
+                    <li><span class="profile-stat-count">{{ $totalVisits }}</span> visitas</li>
+                    <li><span class="profile-stat-count">{{ $totalLikes }}</span> me gusta</li>
                 </ul>
 
             </div>
 
             <div class="profile-bio mt-3">
 
-                <p style="font-size:16px;">{{ \Auth::user()->working_zone ?? '' }} - Barcelona</p>
+                <p style="font-size:16px;" class="text-justify">{{ \Auth::user()->working_zone ?? '' }} - Barcelona</p>
                 <p class="mt-2"></p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->age }} Años</p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->weight }} KG</p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->height }} CM</p>
-                <p style="font-size:16px; color:#fff;">{{ \Auth::user()->bust }} - {{ \Auth::user()->waist }} - {{ \Auth::user()->hip }}</p>
-                <p style="font-size:16px; color:#fff;">Fuma: {{ \Auth::user()->is_smoker === 1 ? 'Si' : 'No' }}</p>
-                <p style="font-size:16px; color:#fff;">
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->age }} Años</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->weight }} KG</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->height }} CM</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->bust }} - {{ \Auth::user()->waist }} - {{ \Auth::user()->hip }}</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ \Auth::user()->is_smoker === 1 ? 'Si' : 'No' }}</p>
+                <p style="font-size:16px; color:#fff;" class="text-justify">
                     @if(\Auth::user()->start_day == "fulltime" && \Auth::user()->end_day == "fulltime")
                     Todos los días
                     @else
@@ -133,11 +137,10 @@
                         <div class="gallery-item-info">
 
                             <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}</li>
-                                {{--
-                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
+                                <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
+                                        class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
+                                <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
+                                        class="fas fa-heart" aria-hidden="true"></i> {{ $image->likes ?? 0 }}</li>
                             </ul>
 
                         </div>

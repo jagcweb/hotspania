@@ -25,49 +25,82 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
-    {
-        // Primero obtenemos usuarios con posición
-        $usersWithPosition = User::whereHas('roles', function ($q) {
-                $q->where('name', 'user');
-            })
-            ->whereNotNull('active')
-            ->whereNotNull('completed')
-            ->whereNull('banned')
-            ->whereNotNull('position')
-            ->whereHas('packageUser', function ($q) {
-                $q->where('end_date', '>=', now())
-                  ->orderBy('end_date', 'desc');
-            })
+    public function index(Request $request) {
+        $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : null;
+
+        $query = User::whereHas('roles', function ($q) {
+            $q->where('name', 'user');
+        })
+        ->whereNotNull('active')
+        ->whereNotNull('completed')
+        ->whereNull('banned')
+        ->whereNotNull('visible')
+        ->whereHas('packageUser', function ($q) {
+            $q->where('end_date', '>=', now())
+              ->orderBy('end_date', 'desc');
+        });
+
+        // Filtrar por ciudad si hay una seleccionada
+        if (!empty($selected_city)) {
+            $query->whereHas('cities', function($q) use ($selected_city) {
+                $q->where('name', $selected_city);
+            });
+        }
+
+        // Add search condition if search parameter exists
+        if ($request->has('search')) {
+            $query->where('nickname', 'like', '%' . $request->search . '%');
+        }
+
+        $orderByPosition = true;
+        switch ($request->get('filter')) {
+            case 'disponibles':
+                //$query->where('available', true);
+                break;
+            case 'lgtbi':
+                $query->where('gender', 'lgtbi');
+                break;
+            case 'nuevas':
+                $orderByPosition = false;
+                break;
+            case 'ranking':
+                //$query->orderBy('visits', 'desc');
+                break;
+        }
+
+        // Get users with position
+        $usersWithPosition = clone $query;
+        $usersWithPosition = $usersWithPosition->whereNotNull('position')
             ->with(['images', 'packageUser' => function($q) {
                 $q->where('end_date', '>=', now())
                   ->orderBy('end_date', 'desc');
-            }])
-            ->orderBy('position')
-            ->take(20)
-            ->get();
+            }]);
+            
+        if ($orderByPosition) {
+            $usersWithPosition = $usersWithPosition->orderBy('position');
+        } else {
+            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
+        }
+        
+        $usersWithPosition = $usersWithPosition->take(20)->get();
 
-        // Luego obtenemos usuarios sin posición si aún no llegamos a 20
+        // Get users without position if needed
         if ($usersWithPosition->count() < 20) {
             $remaining = 20 - $usersWithPosition->count();
-            $usersWithoutPosition = User::whereHas('roles', function ($q) {
-                    $q->where('name', 'user');
-                })
-                ->whereNotNull('active')
-                ->whereNotNull('completed')
-                ->whereNull('banned')
-                ->whereNull('position')
-                ->whereHas('packageUser', function ($q) {
-                    $q->where('end_date', '>=', now())
-                      ->orderBy('end_date', 'desc');
-                })
+            $usersWithoutPosition = clone $query;
+            $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
                 ->with(['images', 'packageUser' => function($q) {
                     $q->where('end_date', '>=', now())
                       ->orderBy('end_date', 'desc');
-                }])
-                ->inRandomOrder()
-                ->take($remaining)
-                ->get();
+                }]);
+            
+            if (!$orderByPosition) {
+                $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
+            } else {
+                $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
+            }
+            
+            $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
 
             $users = $usersWithPosition->concat($usersWithoutPosition);
         } else {
@@ -75,57 +108,91 @@ class HomeController extends Controller
         }
 
         $loadedUserIds = $users->pluck('id')->toArray();
-        return view('home', compact('users', 'loadedUserIds'));
+        return view('home', compact('users', 'loadedUserIds', 'selected_city'));
     }
 
     public function loadMore($page)
     {
         $perPage = 20;
         $loadedUsers = json_decode(request()->input('loaded_users', '[]'));
+        $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : null;
         
-        // Primero usuarios con posición
-        $usersWithPosition = User::whereHas('roles', function ($q) {
+        $query = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })
             ->whereNotNull('active')
             ->whereNotNull('completed')
             ->whereNull('banned')
-            ->whereNotNull('position')
+            ->whereNotNull('visible')
             ->whereNotIn('id', $loadedUsers)
             ->whereHas('packageUser', function ($q) {
                 $q->where('end_date', '>=', now())
                   ->orderBy('end_date', 'desc');
-            })
+            });
+
+        // Filtrar por ciudad si hay una seleccionada
+        if (!empty($selected_city)) {
+            $query->whereHas('cities', function($q) use ($selected_city) {
+                $q->where('name', $selected_city);
+            });
+        }
+
+        // Add search condition if search parameter exists
+        if (request()->has('search')) {
+            $query->where('nickname', 'like', '%' . request()->search . '%');
+        }
+
+        $orderByPosition = true;
+        switch (request()->get('filter')) {
+            case 'disponibles':
+                //$query->where('available', true);
+                break;
+            case 'lgtbi':
+                $query->where('gender', 'lgtbi');
+                break;
+            case 'nuevas':
+                $orderByPosition = false;
+                break;
+            case 'ranking':
+                //$query->orderBy('visits', 'desc');
+                break;
+        }
+
+        $query->whereNorNull('visible');
+
+        // Primero usuarios con posición
+        $usersWithPosition = clone $query;
+        $usersWithPosition = $usersWithPosition->whereNotNull('position')
             ->with(['images', 'packageUser' => function($q) {
                 $q->where('end_date', '>=', now())
                   ->orderBy('end_date', 'desc');
-            }])
-            ->orderBy('position')
-            ->take($perPage)
-            ->get();
+            }]);
+            
+        if ($orderByPosition) {
+            $usersWithPosition = $usersWithPosition->orderBy('position');
+        } else {
+            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
+        }
+        
+        $usersWithPosition = $usersWithPosition->take($perPage)->get();
 
         // Completar con usuarios sin posición si es necesario
         if ($usersWithPosition->count() < $perPage) {
             $remaining = $perPage - $usersWithPosition->count();
-            $usersWithoutPosition = User::whereHas('roles', function ($q) {
-                    $q->where('name', 'user');
-                })
-                ->whereNotNull('active')
-                ->whereNotNull('completed')
-                ->whereNull('banned')
-                ->whereNull('position')
-                ->whereNotIn('id', $loadedUsers)
-                ->whereHas('packageUser', function ($q) {
-                    $q->where('end_date', '>=', now())
-                      ->orderBy('end_date', 'desc');
-                })
+            $usersWithoutPosition = clone $query;
+            $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
                 ->with(['images', 'packageUser' => function($q) {
                     $q->where('end_date', '>=', now())
                       ->orderBy('end_date', 'desc');
-                }])
-                ->inRandomOrder()
-                ->take($remaining)
-                ->get();
+                }]);
+            
+            if (!$orderByPosition) {
+                $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
+            } else {
+                $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
+            }
+            
+            $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
 
             $users = $usersWithPosition->concat($usersWithoutPosition);
         } else {
