@@ -158,7 +158,7 @@ class HomeController extends Controller
                 break;
         }
 
-        $query->whereNorNull('visible');
+        $query->whereNotNull('visible');
 
         // Primero usuarios con posición
         $usersWithPosition = clone $query;
