@@ -6,7 +6,27 @@
 
 <main role="main">
 
-    <div class="container">
+    <div id="miDiv" class="container">
+    <script>
+        function actualizarClaseSegunAnchoPantalla() {
+            const div = document.getElementById('miDiv');
+            if (window.innerWidth > 768) {
+                div.style.marginLeft = '';
+                div.style.marginRight = ''; 
+                div.classList.add('container');
+            } else {
+                div.classList.remove('container');
+                div.style.marginLeft = '10px';
+                div.style.marginRight = '10px';
+            }
+        }
+        
+        // Ejecutar al cargar la página
+        actualizarClaseSegunAnchoPantalla();
+        
+        // Ejecutar al redimensionar la ventana
+        window.addEventListener('resize', actualizarClaseSegunAnchoPantalla);
+    </script>
 
         <div class="profile">
 
@@ -584,6 +604,21 @@
         object-position: center;
     }
 
+    @media screen and (max-width: 640px) {
+        .img_profile {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            object-position: center;
+            margin: 0 auto;
+        }
+
+        .container {
+            width: 100%!importasnt;
+            margin: 0;
+            padding: 0;
+        }
+    }
 
     .container {
         max-width: 93.5rem;
@@ -627,22 +662,24 @@
 
     .profile-image {
         float: left;
-        width: calc(33.333% - 1rem);
+        width: calc(50% - 1rem); /* Changed from 33.333% to 50% */
         display: flex;
         justify-content: center;
         align-items: center;
         margin-right: 3rem;
     }
 
-    .profile-image img {
-       
+    .profile-image .image-container {
+        position: relative;
+        width: 280px;
+        height: 420px; /* Ajusta esto según el aspect ratio 2/3 que necesitas */
     }
 
     .profile-user-settings,
     .profile-stats,
     .profile-bio {
         float: left;
-        width: calc(66.666% - 2rem);
+        width: calc(50% - 2rem); /* Changed from 66.666% to 50% */
     }
 
     .profile-user-settings {
@@ -754,7 +791,7 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        margin-top: 2rem;
+        
     }
 
     .buttons button {
@@ -775,7 +812,7 @@
         position: relative;
         aspect-ratio: 2 / 3; /* Mantiene proporción 3:2 */
         overflow: hidden; /* Oculta contenido excedente */
-        display: flex;
+        display: flex; /* Cambiado a flex */
         justify-content: center; /* Centra el contenido horizontalmente */
         align-items: center; /* Centra el contenido verticalmente */
         background-color: #000; /* Fondo visible mientras carga la imagen */
@@ -831,6 +868,52 @@
         border-radius: 50%;
         margin: 0 auto;
         animation: loader 500ms linear infinite;
+    }
+
+    /* Nuevo loader más moderno */
+    .modern-loader {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin: 0 auto;
+        position: relative;
+        border: 3px solid transparent;
+        border-top-color: #F65807;
+        animation: spin 1s linear infinite;
+    }
+
+    .modern-loader:before, .modern-loader:after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        border: 3px solid transparent;
+    }
+
+    .modern-loader:before {
+        top: -12px;
+        left: -12px;
+        right: -12px;
+        bottom: -12px;
+        border-top-color: #F65807;
+        animation: spin 2s linear infinite;
+    }
+
+    .modern-loader:after {
+        top: 6px;
+        left: 6px;
+        right: 6px;
+        bottom: 6px;
+        border-top-color: #F65807;
+        animation: spin 3s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     /* Media Query */
@@ -934,19 +1017,224 @@
     @supports (display: grid) {
         .profile {
             display: grid;
-            grid-template-columns: 1fr 2fr;
-            grid-template-rows: repeat(3, auto);
+            grid-template-columns: minmax(280px, 0.4fr) 0.6fr; /* Changed ratio to 40/60 */
+            grid-template-rows: min-content auto auto; /* Changed to explicit content sizing */
             grid-column-gap: 3rem;
-            align-items: center;
+            align-items: start;
+            padding: 1rem;
         }
 
         .profile-image {
             grid-row: 1 / -1;
+            grid-column: 1;
+            width: 100%;
+            max-width: 380px;
+            align-self: start;
+            margin: 0;
+            display: flex;          /* Add flex display */
+            justify-content: center; /* Center horizontally */
+            align-items: center;    /* Center vertically */
+        }
+
+        .profile-user-settings,
+        .profile-stats,
+        .profile-bio {
+            grid-column: 2;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile-user-settings {
+            grid-row: 1;
+        }
+
+        .profile-stats {
+            grid-row: 2;
+        }
+
+        .profile-bio {
+            grid-row: 3;
+            margin-top: 1rem;
+        }
+
+        /* Link styles with important flags */
+        .link-text {
+            color: #f65807 !important;
+            font-size: 16px !important;
+            text-decoration: underline !important;
+            display: inline-block !important;
+            word-break: break-all !important;
+        }
+
+        .link-icon {
+            color: #f65807 !important;
+            vertical-align: middle !important;
+        }
+
+        @media screen and (max-width: 640px) {
+            .profile {
+                display: grid;
+                grid-template-columns: minmax(120px, 0.4fr) 0.6fr; /* Changed to 40/60 ratio */
+                grid-gap: 0.5rem;
+                padding: 0.5rem;
+            }
+
+            .profile-image {
+                width: 100%;
+                aspect-ratio: 2/3!important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 0;
+                height: 100%;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                
+            }
+
+            .profile-user-settings,
+            .profile-stats,
+            .profile-bio {
+                grid-column: 2;
+                margin: 0;
+                padding: 0 0 0 0.5rem;
+                width: 100%;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .profile-image .image-container {
+                height: auto;
+            }
+            .profile {
+                grid-template-columns: minmax(120px, 0.38fr) 0.62fr; /* Maintain 40/60 ratio */
+            }
+
+            .profile-image {
+                grid-row: 1 / span 3;
+                width: 100%;
+                max-width: none;
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                
+            }
+
+            .profile-user-settings,
+            .profile-stats,
+            .profile-bio {
+                padding-left: 1rem;
+            }
+        }
+
+        @media screen and (max-width: 420px) {
+
+            .profile-image {
+                grid-row: 1 / span 3;
+                width: 100%;
+                max-width: none; /* Remove max-width constraint */
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                
+            }
+
+            .profile-user-settings,
+            .profile-stats,
+            .profile-bio {
+                padding-left: 1rem;
+            }
+        }
+
+        @media screen and (max-width: 360px) {
+            .profile {
+                grid-template-columns: minmax(100px, 0.38fr) 0.62fr; /* Maintain 40/60 ratio */
+            }
+        }
+
+        @media screen and (max-width: 320px) {
+            .profile-image {
+                grid-row: 1 / span 3; /* Explicitly span 3 rows */
+                width: 100px;
+                max-width: 100px;
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                 /* Remove fixed height */
+            }
+        }
+
+        @media screen and (max-width: 260px) {
+            .profile {
+                grid-template-columns: 60px 1fr;
+                grid-gap: 0.2rem;
+            }
+
+            .profile-image {
+                grid-row: 1 / span 3; /* Explicitly span 3 rows */
+                width: 60px;
+                max-width: 60px;
+                aspect-ratio: 2/3 !important;
+                margin: 0;
+            }
+
+            .profile-image img {
+                width: 100%;
+                aspect-ratio: 2/3 !important;
+                object-fit: cover;
+                 /* Remove fixed height */
+            }
+        }
+
+        @media screen and (max-width: 260px) {
+            .profile {
+                grid-template-columns: 60px 1fr;
+                grid-gap: 0.2rem;
+            }
+
+            .profile-image {
+                width: 60px;
+                max-width: 60px;
+            }
+
+            .profile-image img {
+                width: 60px;
+                height: 90px;
+            }
+
+            .profile-bio p {
+                font-size: 0.9rem !important;
+                margin: 0.1rem 0;
+            }
+
+            .profile-user-name {
+                font-size: 1rem;
+            }
         }
 
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); 
             height: auto;
         }
 
@@ -974,12 +1262,10 @@
             margin-left: auto; /* Centra el elemento horizontalmente si es necesario */
             margin-right: auto;
             margin-top: 0; /* Ajusta según tu diseño */
-            height: 100%;
         }
 
         .profile-image img {
             width: 100%;
-            height: 100%;
             object-fit: cover; /* Mantiene el contenido visible sin distorsión */
             border-radius: 0; /* Quita el redondeo */
         }
@@ -1021,7 +1307,7 @@
         }
 
         .profile-edit-btn {
-            order: 1;                          /* Los botones se ponen debajo del nombre */
+            order: 1;
             margin-top: 1rem;
             text-align: center;
         }
@@ -1108,9 +1394,34 @@
         }
     }
 
+    @media screen and (max-width: 600px) {
+        .profile-stats{
+            margin-left: 0;
+        }
+        .profile-stats li {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
 
+        .profile-stat-count {
+            display: inline;
+            margin: 0;
+            font-size: 1.2rem;
+        }
 
-
+        .profile-stats ul {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+    }
 
     /* New media query for max-width < 1280px */
     @media (max-width: 1280px) {
@@ -1120,6 +1431,82 @@
     }
     }
 
+    .link-icon {
+        font-size: 18px;
+        color: #f65807!important;
+    }
+    
+    .link-text {
+        color: #f65807!important;
+        font-size: 16px;
+        text-decoration: underline !important;
+    }
+
+    @media screen and (max-width: 480px) {
+        .link-text { font-size: 14px !important; }
+        .link-icon { font-size: 16px !important; }
+    }
+
+    @media screen and (max-width: 380px) {
+        .link-text { font-size: 12px !important; }
+        .link-icon { font-size: 14px !important; }
+    }
+
+    @media screen and (max-width: 320px) {
+        .link-text { font-size: 11px !important; }
+        .link-icon { font-size: 13px !important; }
+    }
+
+    @media screen and (max-width: 260px) {
+        .link-text { font-size: 10px !important; }
+        .link-icon { font-size: 12px !important; }
+    }
+
+    .flame-border-profile {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    /* Variaciones de color usando filtros CSS */
+    .flame-color-1 { filter: hue-rotate(0deg) saturate(100%) brightness(100%); }
+    .flame-color-2 { filter: hue-rotate(30deg) saturate(150%) brightness(110%); }
+    .flame-color-3 { filter: hue-rotate(60deg) saturate(140%) brightness(120%); }
+    .flame-color-4 { filter: hue-rotate(120deg) saturate(150%) brightness(90%); }
+    .flame-color-5 { filter: hue-rotate(180deg) saturate(130%) brightness(100%); }
+    .flame-color-6 { filter: hue-rotate(240deg) saturate(160%) brightness(110%); }
+    .flame-color-7 { filter: hue-rotate(270deg) saturate(140%) brightness(100%); }
+    .flame-color-8 { filter: hue-rotate(300deg) saturate(150%) brightness(120%); }
+    .flame-color-9 { filter: hue-rotate(330deg) saturate(170%) brightness(90%); }
+    .flame-color-10 { filter: hue-rotate(15deg) saturate(200%) brightness(130%); }
+    .flame-color-11 { filter: hue-rotate(90deg) saturate(120%) brightness(140%); }
+    .flame-color-12 { filter: hue-rotate(150deg) saturate(180%) brightness(80%); }
+    .flame-color-13 { filter: hue-rotate(200deg) saturate(160%) brightness(110%); }
+    .flame-color-14 { filter: hue-rotate(290deg) saturate(130%) brightness(120%); }
+    .flame-color-15 { filter: hue-rotate(320deg) saturate(190%) brightness(100%); }
+
+    .availability-text {
+        display: block;
+        color: #F65807;
+        font-size: 1.4rem;
+        margin-top: 0.5rem;
+    }
+
+    .text-justify {
+        text-align: justify;
+    }
+    
+    .profile-bio p {
+        text-align: justify;
+    }
+
+    .profile-user-name {
+        text-align: justify;
+    }
 </style>
 <script>
     document.getElementById('profile-edit-btn').addEventListener('click', function() {

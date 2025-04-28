@@ -4,10 +4,9 @@
 
 @section('content')
 
-<div class="row">
-    <div class="col-lg-12">
+<div class="">
+    <div class="">
         <div class="card">
-            <h5 class="w-100 text-center mt-2">Fichas Pendientes en <b>{{ ucfirst(\Cookie::get('city')) ?? 'Barcelona' }}</b></h5>
             <div class="card-body">
                 <div class="row">
                     @foreach($users as $u)
@@ -25,7 +24,7 @@
                                     ->whereNotNull('frontimage')
                                     ->first();
                             @endphp
-                            <div class="col-md-1 mb-4">
+                            <div class="col-md-1">
                                 <div class="image-container">
                                     <div class="franja">
                                         <p>{{ Str::limit($u->nickname, 11) }}</p>

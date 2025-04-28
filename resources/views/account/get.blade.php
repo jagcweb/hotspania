@@ -5,8 +5,27 @@
 @section('content')
 
 <main role="main">
-
-    <div class="container">
+    <div id="miDiv" class="container">
+    <script>
+        function actualizarClaseSegunAnchoPantalla() {
+            const div = document.getElementById('miDiv');
+            if (window.innerWidth > 768) {
+                div.style.marginLeft = '';
+                div.style.marginRight = ''; 
+                div.classList.add('container');
+            } else {
+                div.classList.remove('container');
+                div.style.marginLeft = '10px';
+                div.style.marginRight = '10px';
+            }
+        }
+        
+        // Ejecutar al cargar la página
+        actualizarClaseSegunAnchoPantalla();
+        
+        // Ejecutar al redimensionar la ventana
+        window.addEventListener('resize', actualizarClaseSegunAnchoPantalla);
+    </script>
 
         <div class="profile">
 
@@ -39,65 +58,68 @@
                 </div>
             </div>
 
-            <div class="profile-user-settings">
+            <div style="width: 100%; display: flex; justify-content: flex-start; align-items: center; flex-direction: column;">
 
-                <h1 class="profile-user-name text-white">{{ $user->nickname }}</h1>
-                @if($isAvailable)
-                    <small class="availability-text" style="margin-top: -10px; margin-left:2px;">Disponible ahora</small>
-                @endif
+                <div class="profile-user-settings">
 
-            </div>
-
-            <div class="profile-stats">
-
-                @php
-                    $totalVisits = $images->sum('visits') ?? 0;
-                    $totalLikes = $images->sum('likes') ?? 0;
-                @endphp
-                <ul>
-                    <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
-                    <li><span class="profile-stat-count">{{ $totalVisits }}</span> visitas</li>
-                    <li><span class="profile-stat-count">{{ $totalLikes }}</span> me gusta</li>
-                </ul>
-
-            </div>
-
-            <div class="profile-bio mt-3">
-
-                <p style="font-size:16px;" class="text-justify">{{ $user->working_zone ?? '' }} - Barcelona</p>
-                <p class="mt-2"></p>
-                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->age }} Años</p>
-                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->weight }} KG</p>
-                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->height }} CM</p>
-                <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->bust }} - {{ $user->waist }} - {{ $user->hip }}</p>
-                <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ $user->is_smoker === 1 ? 'Si' : 'No' }}</p>
-                <p style="font-size:16px; color:#fff;" class="text-justify">
-                    @if($user->start_day == "fulltime" && $user->end_day == "fulltime")
-                    Todos los días
-                    @else
-                    {{ ucfirst($user->start_day) }} a {{ ucfirst($user->end_day) }}
+                    <h1 class="profile-user-name text-white">{{ $user->nickname }}</h1>
+                    @if($isAvailable)
+                        <small class="availability-text" style="margin-top: -10px; margin-left:2px;">Disponible ahora</small>
                     @endif
-                </p>
-                <p style="font-size:16px; color:#fff;">
-                    Horario: 
-                    @if($user->start_time == 0 && $user->end_time == 0 || $user->start_time == "fulltime" && $user->end_time == "fulltime")
-                    Todo el día
-                    @else
-                        @if($user->start_time == 0)
-                            00
+
+                </div>
+
+                <div class="profile-stats">
+
+                    @php
+                        $totalVisits = $images->sum('visits') ?? 0;
+                        $totalLikes = $images->sum('likes') ?? 0;
+                    @endphp
+                    <ul>
+                        <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
+                        <li><span class="profile-stat-count">{{ $totalVisits }}</span> visitas</li>
+                        <li><span class="profile-stat-count">{{ $totalLikes }}</span> me gusta</li>
+                    </ul>
+
+                </div>
+
+                <div class="profile-bio mt-3">
+
+                    <p style="font-size:16px;" class="text-justify">{{ $user->working_zone ?? '' }} - Barcelona</p>
+                    <p class="mt-2"></p>
+                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->age }} Años</p>
+                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->weight }} KG</p>
+                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->height }} CM</p>
+                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->bust }} - {{ $user->waist }} - {{ $user->hip }}</p>
+                    <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ $user->is_smoker === 1 ? 'Si' : 'No' }}</p>
+                    <p style="font-size:16px; color:#fff;" class="text-justify">
+                        @if($user->start_day == "fulltime" && $user->end_day == "fulltime")
+                        Todos los días
                         @else
-                            {{ $user->start_time }}
-                        @endif 
-                        
-                        a 
-                        
-                        @if($user->end_time == 0)
-                            00
+                        {{ ucfirst($user->start_day) }} a {{ ucfirst($user->end_day) }}
+                        @endif
+                    </p>
+                    <p style="font-size:16px; color:#fff;">
+                        Horario: 
+                        @if($user->start_time == 0 && $user->end_time == 0 || $user->start_time == "fulltime" && $user->end_time == "fulltime")
+                        Todo el día
                         @else
-                            {{ $user->end_time }}
+                            @if($user->start_time == 0)
+                                00
+                            @else
+                                {{ $user->start_time }}
+                            @endif 
+                            
+                            a 
+                            
+                            @if($user->end_time == 0)
+                                00
+                            @else
+                                {{ $user->end_time }}
+                            @endif 
                         @endif 
-                    @endif 
-                </p>
+                    </p>
+                </div>
             </div>
 
         </div>
@@ -1270,14 +1292,17 @@
         }
 
         @media screen and (max-width: 480px) {
+            .profile-image .image-container {
+                height: auto;
+            }
             .profile {
-                grid-template-columns: minmax(120px, 0.4fr) 0.6fr; /* Maintain 40/60 ratio */
+                grid-template-columns: minmax(120px, 0.38fr) 0.62fr; /* Maintain 40/60 ratio */
             }
 
             .profile-image {
                 grid-row: 1 / span 3;
                 width: 100%;
-                max-width: none; /* Remove max-width constraint */
+                max-width: none;
                 aspect-ratio: 2/3 !important;
                 margin: 0;
             }
@@ -1297,9 +1322,6 @@
         }
 
         @media screen and (max-width: 420px) {
-            .profile {
-                grid-template-columns: minmax(150px, 1fr) 1fr; /* Changed from 100px to 150px */
-            }
 
             .profile-image {
                 grid-row: 1 / span 3;
@@ -1323,11 +1345,13 @@
             }
         }
 
-        @media screen and (max-width: 320px) {
+        @media screen and (max-width: 360px) {
             .profile {
-                grid-template-columns: 100px 1fr;
+                grid-template-columns: minmax(100px, 0.38fr) 0.62fr; /* Maintain 40/60 ratio */
             }
+        }
 
+        @media screen and (max-width: 320px) {
             .profile-image {
                 grid-row: 1 / span 3; /* Explicitly span 3 rows */
                 width: 100px;
@@ -1467,7 +1491,7 @@
         }
 
         .profile-edit-btn {
-            order: 1;                          /* Los botones se ponen debajo del nombre */
+            order: 1;
             margin-top: 1rem;
             text-align: center;
         }

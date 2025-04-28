@@ -49,8 +49,9 @@ class UserController extends Controller
             'phone' => 'required|string|max:20',
             'smoker' => 'required|boolean', // Assuming a boolean field for smoker
             'working_zone' => 'required|string',
-            'service_location' => 'required|string',
-            'gender' => 'required|in:hombre,mujer,otro',
+            'service_location' => 'required|array',
+            'service_location.*' => 'string',
+            'gender' => 'required|in:hombre,mujer,lgbti',
             'height' => 'required|numeric', // Ajusta el rango según tus necesidades
             'weight' => 'required|numeric', // Ajusta el rango según tus necesidades
             'bust' => 'required|numeric',
@@ -154,8 +155,9 @@ class UserController extends Controller
             'phone' => 'required|string|max:20',
             'smoker' => 'required|boolean', // Assuming a boolean field for smoker
             'working_zone' => 'required|string',
-            'service_location' => 'required|string',
-            'gender' => 'required|in:hombre,mujer,otro',
+            'service_location' => 'required|array',
+            'service_location.*' => 'string',
+            'gender' => 'required|in:hombre,mujer,lgbti',
             'height' => 'required|numeric', // Ajusta el rango según tus necesidades
             'weight' => 'required|numeric', // Ajusta el rango según tus necesidades
             'bust' => 'required|numeric',

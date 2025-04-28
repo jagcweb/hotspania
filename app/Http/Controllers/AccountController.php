@@ -32,7 +32,7 @@ use GuzzleHttp\Client;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Validator;
-use App\models\ImageLike;
+use App\Models\ImageLike;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\Package;

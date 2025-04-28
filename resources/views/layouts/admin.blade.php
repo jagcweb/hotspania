@@ -97,10 +97,10 @@
                         <li class="menu-title mt-2"></li>
 
                         <li>
-                            <a href="{{route('admin.citychanges')}}" class="text-white">
+                            <a href="{{route('admin.citychanges')}}" style="color: {{ Request::routeIs('admin.users.create') ? '#f36e00' : '#FFFFFF' }}">
                                 <i class="fa-solid fa-tree-city"></i>
 
-                                <span>Cambiar de ciudad</span>
+                                <span>Cambiar <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;de ciudad</span>
                             </a>
                         </li>
 
@@ -110,42 +110,40 @@
 
                                 <span>Fichas</span>
                             </a>
-                            <div class="collapse" id="fichas">
+                            <div class="collapse {{ str_contains(url()->current(), '/admin/users/') ? 'show' : '' }}" id="fichas">
                                 <ul class="nav-second-level">
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.users.create') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.users.create') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.create') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fas fa-plus"></i>
                                             Crear</a
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.users.getPending') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.users.getPending') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getPending') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fas fa-list-alt"></i>
                                             Fichas pendientes</a
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.users.getActive') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.users.getActive') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getActive') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fas fa-list-check"></i>
                                             Fichas activas</a
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.users.getPositionals') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.users.getPositionals') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getPositionals') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fa-solid fa-up-down-left-right"></i>
                                             Posicionar Fichas Activas</a
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.users.getRequests') }}" class="nav-link text-white"
-                                            ><i
-                                                class="fas fa-file-contract"
-                                            ></i>
+                                        <a href="{{ route('admin.users.getRequests') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getRequests') ? '#f36e00' : '#FFFFFF' }}"
+                                            ><i class="fas fa-file-contract"></i>
                                             Peticiones</a
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.users.getLoginRecords') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.users.getLoginRecords') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getLoginRecords') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fas fa-history"></i>
                                             Login records</a
                                         >
@@ -161,10 +159,10 @@
 
                                 <span>Utilidades</span>
                             </a>
-                            <div class="collapse" id="utilidades">
+                            <div class="collapse {{ str_contains(url()->current(), '/admin/utilities/') ? 'show' : '' }}" id="utilidades">
                                 <ul class="nav-second-level">
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.utilities.zones') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.utilities.zones') }}" class="nav-link" style="color: {{ Request::routeIs('admin.utilities.zones') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i
                                                 class="fas fa-map-marker-alt"
                                             ></i>
@@ -172,18 +170,18 @@
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.utilities.tags') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.utilities.tags') }}" class="nav-link" style="color: {{ Request::routeIs('admin.utilities.tags') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fas fa-tags"></i> Tags</a
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ route('admin.utilities.packages') }}" class="nav-link text-white"
+                                        <a href="{{ route('admin.utilities.packages') }}" class="nav-link" style="color: {{ Request::routeIs('admin.utilities.packages') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fas fa-archive"></i>
                                             Paquetes</a
                                         >
                                     </li>
                                     <li class="nav-item">
-                                        <a href="#" class="nav-link text-white"
+                                        <a href="#" class="nav-link" style="color: {{ Request::routeIs('admin.utilities.news') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fas fa-newspaper"></i>
                                             Noticias</a
                                         >
@@ -261,8 +259,8 @@
                     </ul>
                 </div>
 
-                <div class="col-md-10" style="min-height:93vh; height:auto; padding:25px; background: #1d1d1d;">
-                    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+                <div class="col-md-10" style="min-height:93vh; height:auto; padding:0; padding-bottom:25px; background: #1d1d1d;">
+                    <nav class="navbar navbar-expand-sm navbar-light bg-light" style="height: 50px;">
                         <button
                             type="button"
                             class="navbar-toggler"
@@ -553,7 +551,7 @@
                 
                     @include('partial_msg')
                 
-                    <div class="container mt-3" style="max-width: 100% !important;">@yield('content')</div>
+                    <div class="mt-2" style="width: 100% !important;">@yield('content')</div>
                 </div>
             </div>
 

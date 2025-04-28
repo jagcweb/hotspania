@@ -4,8 +4,8 @@
 
 @section('content')
 @include('partial_msg')
-<div class="row">
-    <div class="col-lg-12">
+<div class="">
+    <div class="">
         <div class="card mb-4">
             <h5 class="w-100 text-center mt-2">Fichas Ordenadas en <b>{{ ucfirst(\Cookie::get('city')) ?? 'Barcelona' }}</b></h5>
             <div class="card-body">
@@ -25,7 +25,7 @@
                                     ->whereNotNull('frontimage')
                                     ->first();
                             @endphp
-                            <div class="col-md-1 mb-4 sortable-item" data-id="{{ $u->id }}">
+                            <div class="col-md-1 sortable-item" data-id="{{ $u->id }}">
                                 <div class="image-container" data-user-id="{{ $u->id }}">
                                     <div class="franja">
                                         <p>{{ Str::limit($u->nickname, 11) }}</p>
@@ -67,7 +67,7 @@
                                     ->whereNotNull('frontimage')
                                     ->first();
                             @endphp
-                            <div class="col-md-1 mb-4 sortable-item" data-id="{{ $u->id }}">
+                            <div class="col-md-1 sortable-item" data-id="{{ $u->id }}">
                                 <div class="image-container" data-user-id="{{ $u->id }}">
                                     <div class="franja">
                                         <p>{{ Str::limit($u->nickname, 11) }}</p>
