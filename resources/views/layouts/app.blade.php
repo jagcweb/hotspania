@@ -220,18 +220,25 @@
                 @else
                   <a href="{{ route('account.index') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
                 @endif
-                  @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
-                  @if(is_object($frontimage))
+                @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
+                @if(is_object($frontimage))
                     @if(!is_null($frontimage->route_gif))
                       <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
                     @else
                       <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
                     @endif
-                  @else
+                @else
                     <img src="{{ asset('images/user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; border-radius:9999px;"/>
-                  @endif
-                  <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
+                @endif
+                    <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
                 </a>
+               @else
+                @if(!str_contains(url()->current(), '/login') && !str_contains(url()->current(), '/register'))
+                    <a title="Anúnciate" href="{{ route('user.register', ['step' => 1]) }}" class="btn btn-primary mt-2" style="background:#f36e00!important; color:#fff;min-width: 100px;min-height: 35px;display: flex;align-items: center;justify-content: center;font-size: 13px;">
+                        Anúnciate
+                        <i class="fa-solid fa-rocket ml-1"></i>
+                    </a>
+                @endif
               @endif
             </li>
           </form>

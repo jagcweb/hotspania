@@ -51,6 +51,27 @@ class AccountController extends Controller
         $this->middleware('logged')->except(['get', 'loadMore', 'show', 'like', 'checkLike', 'removeLike']); // Añadir 'checkLike' a las excepciones
     }
 
+    public function makeUnavailable($id) {
+        try {
+            $decryptedId = \Crypt::decryptString($id);
+        } catch (\Exception $e) {
+            return back()->with('error', 'ID inválido');
+        }
+
+        $user = User::find($decryptedId);
+        
+        if(!$user) {
+            return back()->with('error', 'Usuario no encontrado');
+        }
+
+        $user->update([
+            'available_time' => NULL,
+            'available_until' => NULL
+        ]);
+
+        return back()->with('exito', 'Disponibilidad apagada.');
+    }
+
     public function makeAvailable(Request $request, $id) {
         try {
             $decryptedId = \Crypt::decryptString($id);

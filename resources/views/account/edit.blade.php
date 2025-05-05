@@ -174,11 +174,31 @@
             @endif
         </a>
         @include('modals.admin.fotos.modal_subir_fotos')
+
+        @php
+            $canMakeAvailable = true;
+            if ($u->available_until !== null) {
+                $now = \Carbon\Carbon::now('Europe/Madrid');
+                $startTime = $now;
+                $endTime = \Carbon\Carbon::parse($u->available_until)->setTimezone('Europe/Madrid');
+                
+                if ($now->lt($endTime)) {
+                    $canMakeAvailable = false;
+                    $remainingMinutes = $now->diffInMinutes($endTime);
+                }
+            }
+        @endphp
         <a title="Ponte disponible" href="javascript:void(0);" data-toggle="modal" data-target="#hacer-disponible-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
             Ponte disponible
             <i class="fa-solid fa-wand-magic-sparkles"></i>
         </a>
         @include('modals.admin.modal_hacer_disponible')
+        @if (!$canMakeAvailable)
+        <a title="Apagar disponibilidad" href="{{ route('account.make_unavailable', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Apagar disponibilidad
+            <i class="fa-solid fa-power-off"></i>
+        </a>
+        @endif
         <hr>
         <h2 class="w-100 text-center text-white" style="font-size: 20px;">Aquí solo aparecerán las imágenes aprobadas.</h2>
         <div class="gallery" id="gallery">

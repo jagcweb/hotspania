@@ -45,6 +45,7 @@ Route::get('/account', [App\Http\Controllers\AccountController::class, 'index'])
 Route::get('/account/edit', [App\Http\Controllers\AccountController::class, 'edit'])->name('account.edit');
 Route::post('/account/assign-package', [App\Http\Controllers\AccountController::class, 'assignPackage'])->name('account.assign_package');
 Route::post('account/make-available/{id}',  [App\Http\Controllers\AccountController::class, 'makeAvailable'])->name('account.make_available');
+Route::get('account/make-unavailable/{id}',  [App\Http\Controllers\AccountController::class, 'makeUnavailable'])->name('account.make_unavailable');
 Route::get('/account/visible/{id}', [App\Http\Controllers\AccountController::class, 'visibleAccount'])->name('account.visible');
 Route::get('/account/load/show/{id}', [App\Http\Controllers\AccountController::class, 'show'])->name('account.show')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/account/load/like/{id}', [App\Http\Controllers\AccountController::class, 'like'])->name('account.like')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
@@ -91,6 +92,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('users/positions', 'App\Http\Controllers\Admin\UserController@getPositionals')->name('admin.users.getPositionals');
     Route::post('users/update-positions', 'App\Http\Controllers\Admin\UserController@updatePositions')->name('admin.users.updatePositions');
     Route::post('users/make-available/{id}', 'App\Http\Controllers\Admin\UserController@makeAvailable')->name('admin.users.make_available');
+    Route::get('users/make-unavailable/{id}', 'App\Http\Controllers\Admin\UserController@makeUnavailable')->name('admin.users.make_unavailable');
 
     // Image Management
     Route::get('images-get/{id}/{name}/{filter}', 'App\Http\Controllers\Admin\ImageController@get')->name('admin.images.getFilter');

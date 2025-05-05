@@ -43,6 +43,30 @@
                         <br>
                         <small>Desde ahora hasta: {{ $endTime->format('H:i') }}</small>
                     </div>
+
+                    <form method="POST" action="{{ str_contains(request()->fullUrl(), 'account/edit') ? route('account.make_available', ['id' => \Crypt::encryptString($u->id)]) : route('admin.users.make_available', ['id' => \Crypt::encryptString($u->id)]) }}">
+                        @csrf
+                        <div class="form-group">
+                            <label for="tiempo">Tiempo</label>
+                            <select class="form-control" id="tiempo" name="tiempo">
+                                <option value="" hidden selected disabled>Seleccionar un tiempo...</option>
+                                <option value="1">1 hora</option>
+                                <option value="2">2 horas</option>
+                                <option value="3">3 horas</option>
+                            </select>
+                        </div>
+                        <div class="text-right">
+                            <input type="submit" class="btn btn-sm btn-dark waves-effect waves-dark w-100" 
+                            style="line-height: 10px;" value="Guardar"/>
+                        </div>
+                    </form>
+
+                    <hr>
+                    
+                    <a class="btn btn-sm btn-dark w-100" style="background:#2a2a2a; color:#fff;" 
+                    href="{{ str_contains(request()->fullUrl(), 'account/edit') ? route('account.make_unavailable', ['id' => \Crypt::encryptString($u->id)]) : route('admin.users.make_unavailable', ['id' => \Crypt::encryptString($u->id)]) }}">
+                    Apagar disponibilidad</a>
+
                 @endif
 
                 @if ($u->available_until !== null && $endTime->isPast())

@@ -384,6 +384,27 @@ class UserController extends Controller
         return view('admin.users.login-records');
     }
 
+    public function makeUnavailable($id) {
+        try {
+            $decryptedId = \Crypt::decryptString($id);
+        } catch (\Exception $e) {
+            return back()->with('error', 'ID inválido');
+        }
+
+        $user = User::find($decryptedId);
+        
+        if(!$user) {
+            return back()->with('error', 'Usuario no encontrado');
+        }
+
+        $user->update([
+            'available_time' => NULL,
+            'available_until' => NULL
+        ]);
+
+        return back()->with('exito', 'Disponibilidad apagada.');
+    }
+
     public function makeAvailable(Request $request, $id) {
         try {
             $decryptedId = \Crypt::decryptString($id);

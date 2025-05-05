@@ -7,7 +7,7 @@
 <h1 class="w-100 text-center text-white">Editar mis Datos (Última actualización: {{ \Carbon\Carbon::parse(\Auth::user()->updated_at)->format('d/m/Y H:i') }})</h1>
 @include('partial_msg')
 <div class="row justify-content-center">
-    <div class="col-md-10">
+    <div class="col-md-10 col-xs-12 col-sm-12">
         <div class="card" style="background: white; border: none; padding: 20px;">
             <form method="POST" action="{{ route('account.update') }}" autocomplete="off">
                 @csrf
@@ -93,29 +93,28 @@
                         </select>
                     </div>
                     
-                    <div class="row row_atributes">
-                        <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-6 form-group">
                             <label for="height">Altura (cm)</label>
                             <input type="number" class="form-control" id="height" name="height" value="{{ \Auth::user()->height }}" required>
                         </div>
                     
-                    
-                        <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        <div class="col-md-6 col-sm-6 col-6 form-group">
                             <label for="weight">Peso (kg)</label>
                             <input type="number" class="form-control" id="weight" name="weight" value="{{ \Auth::user()->weight }}" required>
                         </div>
                         
-                        <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                        <div class="col-md-4 col-sm-4 col-4 form-group">
                             <label for="bust">Busto (cm)</label>
                             <input type="number" class="form-control" id="bust" name="bust" value="{{ \Auth::user()->bust }}" >
                         </div>
                         
-                        <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                        <div class="col-md-4 col-sm-4 col-4 form-group">
                             <label for="waist">Cintura (cm)</label>
                             <input type="number" class="form-control" id="waist" name="waist" value="{{ \Auth::user()->waist }}" >
                         </div>
                         
-                        <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                        <div class="col-md-4 col-sm-4 col-4 form-group">
                             <label for="hip">Cadera (cm)</label>
                             <input type="number" class="form-control" id="hip" name="hip" value="{{ \Auth::user()->hip }}" >
                         </div>
@@ -225,6 +224,12 @@
     .form-check-input:focus {
         border-color: #f36e00;
         box-shadow: 0 0 0 0.25rem rgba(243, 110, 0, 0.25);
+    }
+
+    @media (max-width: 768px) {
+        .card {
+            width: 100%;
+        }
     }
 </style>
 

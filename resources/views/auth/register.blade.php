@@ -108,7 +108,7 @@
                                         
                                         <div class="form-group">
                                             <label for="service_location">Donde atendera?</label>
-                                            <div style="background:#f1f1f1; border:2px solid #aaa; padding:20px; min-height:80px;">
+                                            <div style="background:transparent; border:2px solid #aaa; padding:20px; min-height:80px;">
                                                 <div class="form-check mt-2">
                                                     <input class="form-check-input" type="checkbox" id="piso_propio" name="service_location[]" value="piso_propio"
                                                         {{ (is_array(old('service_location')) && in_array('piso_propio', old('service_location'))) ? 'checked' : '' }}/>
