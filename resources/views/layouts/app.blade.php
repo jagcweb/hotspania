@@ -16,7 +16,6 @@
     <title>@yield('title') | {{ config('app.name', 'Hotspania') }}</title>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -37,6 +36,8 @@
     <link rel="stylesheet" href="{{ asset('css/lightbox.css') }}">
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+    <script src="{{ asset('js/app.js') }}" defer></script>
     <style>
         .modal {
             z-index: 99999999999999;
@@ -125,7 +126,7 @@
             <li class="nav-item" style="font-size:14px; margin-top:10px;">
                 <div class="dropdown">
                     <button class="btn dropdown-toggle text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ ucfirst($selected_city) ?: 'Seleccionar ciudad' }}
+                        {{ ucfirst($selected_city) ?: 'Ciudad' }}
                     </button>
                     <div class="dropdown-menu p-2 city-dropdown">
                         <input type="text" class="form-control mb-2 city-search" placeholder="Buscar ciudad..." autocomplete="off">
@@ -467,6 +468,7 @@
             </div>
         </div>
     </div>
+      
 
     <script>
         $(document).ready(function() {

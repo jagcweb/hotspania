@@ -158,8 +158,6 @@
                     }
                 </style>
             </div>
-            <!-- Add a spacer div for Android devices -->
-            <br><br><br>
 
             <div class="container_mobile mt-5">
                 <div class="gallery" id="gallery">
@@ -555,7 +553,6 @@ $(window).scroll(function() {
 
         .container_mobile {
             margin: 0 !important;
-            margin-top: 20px !important;
             padding: 0 !important;
             width: 100% !important;
         }

@@ -3452,7 +3452,8 @@ nav.background-transparent-hightlight.fixed .aside-nav > ul > li.active-item > a
       padding: 0;
     }
     .section  { 
-      padding: 5rem 1.25rem;
+      padding: 0;
+      padding-top: 50px;
     }
     .section-top-padding  { 
       padding: 5rem 1.25rem 0  1.25rem;

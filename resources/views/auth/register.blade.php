@@ -3,6 +3,9 @@
 @section('title') Registrarse @endsection
 @section('content')
 
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
 <div class="main-div">
     <div class="form-div">
         <div class="d-flex flex-column align-items-center align-content-center justify-content-center">
@@ -40,7 +43,7 @@
                 </li>
             </ul>
             @if($step == 1)
-                <form method="POST" action="{{ route('user.save', ['step' => 'step-1', 'id' => NULL]) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('user.save', ['step' => 'step-1', 'id' => NULL]) }}" enctype="multipart/form-data" autocomplete="off">
                     @csrf
                     
                     <section id="step-1" class="form-step">
@@ -49,8 +52,13 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <label for="nickname">Apodo ("nombre fantasía")</label>
+                                            <label for="nickname">Nombre</label>
                                             <input type="text" class="form-control" id="nickname" name="nickname" value="{{ old('nickname') }}" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="age">Edad</label>
+                                            <input type="number" class="form-control" id="age" name="age" value="{{ old('age') }}" min="18" max="99" required>
                                         </div>
                                         
                                         <div class="form-group">
@@ -62,49 +70,159 @@
                                         </div>
                                     
                                         
-                                        
-                                        <div class="form-group">
-                                            <label for="age">Edad (imposibilidad de cambiarlo después)</label>
-                                            <input type="number" class="form-control" id="age" name="age" value="{{ old('age') }}" min="18" max="99" required>
+                                        <div class="row row_atributes">
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="whatsapp_number">Nº teléfono WhatsApp</label>
+                                                    <input type="tel" class="form-control" id="whatsapp_number" name="whatsapp" value="{{ old('whatsapp') }}" required>
+                                                </div>
+                                            </div>
+                                                
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="phone">Nº teléfono Llamadas</label>
+                                                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ old('phone') }}" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                
+                                        <div class="row row_atributes">
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <label for="weight">Peso (kg)</label>
+                                                <input type="number" class="form-control" id="weight" name="weight" value="{{ old('weight') }}" required>
+                                            </div>
+
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <label for="height">Altura (cm)</label>
+                                                <input type="number" class="form-control" id="height" name="height" value="{{ old('height') }}" required>
+                                            </div>
+                                            
+                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                                                <label for="bust">Busto (cm)</label>
+                                                <input type="number" class="form-control" id="bust" name="bust" value="{{ old('bust') }}" >
+                                            </div>
+                                            
+                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                                                <label for="waist">Cintura (cm)</label>
+                                                <input type="number" class="form-control" id="waist" name="waist" value="{{ old('waist') }}" >
+                                            </div>
+                                            
+                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                                                <label for="hip">Cadera (cm)</label>
+                                                <input type="number" class="form-control" id="hip" name="hip" value="{{ old('hip') }}" >
+                                            </div>
                                         </div>
                                         
-                                        <div class="form-group">
-                                            <label for="whatsapp_number">Nº teléfono WhatsApp</label>
-                                            <input type="tel" class="form-control" id="whatsapp_number" name="whatsapp" value="{{ old('whatsapp') }}" required>
+                                        <div class="row row_atributes">
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="smoker">¿Fumas?</label>
+                                                    <select class="form-control" id="smoker" name="smoker" required>
+                                                        <option class="option" value="0" {{ old('smoker') == 0 ? 'selected' : '' }}>No</option>
+                                                        <option class="option" value="1" {{ old('smoker') == 1 ? 'selected' : '' }}>Sí</option>
+                                                    </select>
+                                                </div>    
+                                            </div>
+
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="gender">Género</label>
+                                                    <select class="form-control" id="gender" name="gender" required>
+                                                        <option class="option" value="mujer" {{ old('gender') == 'mujer' ? 'selected' : '' }}>Mujer</option>
+                                                        <option class="option" value="hombre" {{ old('gender') == 'hombre' ? 'selected' : '' }}>Hombre</option>
+                                                        <option class="option" value="lgbti" {{ old('gender') == 'lgbti' ? 'selected' : '' }}>LGTBI+</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>   
+                                        
+                                        <div class="row row_atributes">
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="start_day">Dia de Inicio</label>
+                                                    <select class="form-control" id="start_day" name="start_day" required>
+                                                        <option class="option" value="lunes" {{ old('start_day') == 'lunes' ? 'selected' : '' }}>Lunes</option>
+                                                        <option class="option" value="martes" {{ old('start_day') == 'martes' ? 'selected' : '' }}>Martes</option>
+                                                        <option class="option" value="miercoles" {{ old('start_day') == 'miercoles' ? 'selected' : '' }}>Miércoles</option>
+                                                        <option class="option" value="jueves" {{ old('start_day') == 'jueves' ? 'selected' : '' }}>Jueves</option>
+                                                        <option class="option" value="viernes" {{ old('start_day') == 'viernes' ? 'selected' : '' }}>Viernes</option>
+                                                        <option class="option" value="sabado" {{ old('start_day') == 'sabado' ? 'selected' : '' }}>Sabado</option>
+                                                        <option class="option" value="domingo" {{ old('start_day') == 'domingo' ? 'selected' : '' }}>Domingo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="end_day">Dia de Fin</label>
+                                                    <select class="form-control" id="end_day" name="end_day" required>
+                                                        <option class="option" value="lunes" {{ old('end_day') == 'lunes' ? 'selected' : '' }}>Lunes</option>
+                                                        <option class="option" value="martes" {{ old('end_day') == 'martes' ? 'selected' : '' }}>Martes</option>
+                                                        <option class="option" value="miercoles" {{ old('end_day') == 'miercoles' ? 'selected' : '' }}>Miércoles</option>
+                                                        <option class="option" value="jueves" {{ old('end_day') == 'jueves' ? 'selected' : '' }}>Jueves</option>
+                                                        <option class="option" value="viernes" {{ old('end_day') == 'viernes' ? 'selected' : '' }}>Viernes</option>
+                                                        <option class="option" value="sabado" {{ old('end_day') == 'sabado' ? 'selected' : '' }}>Sabado</option>
+                                                        <option class="option" value="domingo" {{ old('end_day') == 'domingo' ? 'selected' : '' }}>Domingo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" id="fulltime" name="fulltime_time" value="1" {{ old('fulltime_time') ? 'checked' : '' }}/>
+                                            <label class="form-check-label" for="fulltime">
+                                                ¿Horario 24h? (fulltime)
+                                            </label>  
                                         </div>
                                         
-                                        <div class="form-group">
-                                            <label for="phone">Nº teléfono Llamadas</label>
-                                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ old('phone') }}" required>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="smoker">¿Fumas?</label>
-                                            <select class="form-control" id="smoker" name="smoker" required>
-                                                <option class="option" value="0" {{ old('smoker') == 0 ? 'selected' : '' }}>No</option>
-                                                <option class="option" value="1" {{ old('smoker') == 1 ? 'selected' : '' }}>Sí</option>
-                                            </select>
-                                        </div>          
-                                    
-                                        <div class="form-group">
-                                            <label for="cities">Ciudades</label>
-                                            <div style="background:transparent; border:2px solid #aaa; padding:20px; min-height:80px;">
-                                                @foreach ($cities->sortBy('name') as $c)
-                                                    <div class="form-check mt-2">
-                                                        <input class="form-check-input" type="checkbox" id="{{$c->id}}" name="city[]" value="{{$c->id}}"
-                                                            {{ (is_array(old('city')) && in_array($c->id, old('city'))) ? 'checked' : '' }}/>
-                                                        <label class="form-check-label" for="{{$c->id}}">
-                                                            {{$c->name}}
-                                                        </label>  
-                                                    </div>
-                                                @endforeach
+                                        <div class="row row_atributes">
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group {{ old('fulltime_time') ? 'd-none' : '' }}" id="start_time_div">
+                                                    <label for="start_time">Hora de Inicio</label>
+                                                    <select class="form-control" id="start_time" name="start_time">
+                                                        <option class="option" disabled {{ old('start_time') === null ? 'selected' : '' }} hidden>Selecciona una hora inicio</option>
+                                                        @for ($i = 0; $i <= 23; $i++)
+                                                            <option class="option" value="{{ $i }}" {{ old('start_time') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                                        @endfor
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group {{ old('fulltime_time') ? 'd-none' : '' }}" id="end_time_div">
+                                                    <label for="end_time">Hora de Fin</label>
+                                                    <select class="form-control" id="end_time" name="end_time">
+                                                        <option class="option" disabled {{ old('start_time') === null ? 'selected' : '' }} hidden>Selecciona una hora fin</option>
+                                                        @for ($i = 0; $i <= 23; $i++)
+                                                            <option class="option" value="{{ $i }}" {{ old('end_time') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                                        @endfor
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     
-                                        <div class="form-group">
-                                            <label for="working_zone">Zona de trabajo</label>
-                                            <input type="text" class="form-control" id="working_zone" name="working_zone" value="{{ old('working_zone') }}" required>
+                                        <div class="row row_atributes">
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="cities">Ciudades</label>
+                                                    <select id="ciudades" name="city[]" multiple required>
+                                                        @foreach ($cities->sortBy('name') as $c)
+                                                            <option value="{{ $c->id }}" {{ (is_array(old('city')) && in_array($c->id, old('city'))) ? 'selected' : '' }}>
+                                                                {{ $c->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                                <div class="form-group">
+                                                    <label for="working_zone">Zona de trabajo</label>
+                                                    <input type="text" class="form-control" id="working_zone" name="working_zone" value="{{ old('working_zone') }}" required>
+                                                </div>
+                                            </div>
                                         </div>
+
                                         
                                         <div class="form-group">
                                             <label for="service_location">Donde atendera?</label>
@@ -131,96 +249,6 @@
                                                     </label>
                                                 </div>
                                             </div>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="gender">Género</label>
-                                            <select class="form-control" id="gender" name="gender" required>
-                                                <option class="option" value="mujer" {{ old('gender') == 'mujer' ? 'selected' : '' }}>Mujer</option>
-                                                <option class="option" value="hombre" {{ old('gender') == 'hombre' ? 'selected' : '' }}>Hombre</option>
-                                                <option class="option" value="lgbti" {{ old('gender') == 'lgbti' ? 'selected' : '' }}>LGTBI+</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="row row_atributes">
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
-                                                <label for="height">Altura (cm)</label>
-                                                <input type="number" class="form-control" id="height" name="height" value="{{ old('height') }}" required>
-                                            </div>
-                                        
-                                        
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
-                                                <label for="weight">Peso (kg)</label>
-                                                <input type="number" class="form-control" id="weight" name="weight" value="{{ old('weight') }}" required>
-                                            </div>
-                                            
-                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                                                <label for="bust">Busto (cm)</label>
-                                                <input type="number" class="form-control" id="bust" name="bust" value="{{ old('bust') }}" >
-                                            </div>
-                                            
-                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                                                <label for="waist">Cintura (cm)</label>
-                                                <input type="number" class="form-control" id="waist" name="waist" value="{{ old('waist') }}" >
-                                            </div>
-                                            
-                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                                                <label for="hip">Cadera (cm)</label>
-                                                <input type="number" class="form-control" id="hip" name="hip" value="{{ old('hip') }}" >
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="start_day">Dia de Inicio</label>
-                                            <select class="form-control" id="start_day" name="start_day" required>
-                                                <option class="option" value="lunes" {{ old('start_day') == 'lunes' ? 'selected' : '' }}>Lunes</option>
-                                                <option class="option" value="martes" {{ old('start_day') == 'martes' ? 'selected' : '' }}>Martes</option>
-                                                <option class="option" value="miercoles" {{ old('start_day') == 'miercoles' ? 'selected' : '' }}>Miércoles</option>
-                                                <option class="option" value="jueves" {{ old('start_day') == 'jueves' ? 'selected' : '' }}>Jueves</option>
-                                                <option class="option" value="viernes" {{ old('start_day') == 'viernes' ? 'selected' : '' }}>Viernes</option>
-                                                <option class="option" value="sabado" {{ old('start_day') == 'sabado' ? 'selected' : '' }}>Sabado</option>
-                                                <option class="option" value="domingo" {{ old('start_day') == 'domingo' ? 'selected' : '' }}>Domingo</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="end_day">Dia de Fin</label>
-                                            <select class="form-control" id="end_day" name="end_day" required>
-                                                <option class="option" value="lunes" {{ old('end_day') == 'lunes' ? 'selected' : '' }}>Lunes</option>
-                                                <option class="option" value="martes" {{ old('end_day') == 'martes' ? 'selected' : '' }}>Martes</option>
-                                                <option class="option" value="miercoles" {{ old('end_day') == 'miercoles' ? 'selected' : '' }}>Miércoles</option>
-                                                <option class="option" value="jueves" {{ old('end_day') == 'jueves' ? 'selected' : '' }}>Jueves</option>
-                                                <option class="option" value="viernes" {{ old('end_day') == 'viernes' ? 'selected' : '' }}>Viernes</option>
-                                                <option class="option" value="sabado" {{ old('end_day') == 'sabado' ? 'selected' : '' }}>Sabado</option>
-                                                <option class="option" value="domingo" {{ old('end_day') == 'domingo' ? 'selected' : '' }}>Domingo</option>
-                                            </select>
-                                        </div>
-                                    
-                                        <div class="form-check mt-2">
-                                            <input class="form-check-input" type="checkbox" id="fulltime" name="fulltime_time" value="1" {{ old('fulltime_time') ? 'checked' : '' }}/>
-                                            <label class="form-check-label" for="fulltime">
-                                                ¿Horario 24h? (fulltime)
-                                            </label>  
-                                        </div>
-                                        
-                                        <div class="form-group {{ old('fulltime_time') ? 'd-none' : '' }}" id="start_time_div">
-                                            <label for="start_time">Hora de Inicio</label>
-                                            <select class="form-control" id="start_time" name="start_time">
-                                                <option class="option" disabled {{ old('start_time') === null ? 'selected' : '' }} hidden>Selecciona una hora inicio</option>
-                                                @for ($i = 0; $i <= 23; $i++)
-                                                    <option class="option" value="{{ $i }}" {{ old('start_time') == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                                @endfor
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="form-group {{ old('fulltime_time') ? 'd-none' : '' }}" id="end_time_div">
-                                            <label for="end_time">Hora de Fin</label>
-                                            <select class="form-control" id="end_time" name="end_time">
-                                                <option class="option" disabled {{ old('start_time') === null ? 'selected' : '' }} hidden>Selecciona una hora fin</option>
-                                                @for ($i = 0; $i <= 23; $i++)
-                                                    <option class="option" value="{{ $i }}" {{ old('end_time') == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                                @endfor
-                                            </select>
                                         </div>
 
                                         <div class="form-group">
@@ -297,6 +325,28 @@
         event.preventDefault(); // Evita que se escriba en el campo
         alert("Por favor, seleccione la fecha en el calendario.");
     }
+</script>
+
+<script>
+    const heightInput = document.getElementById('height');
+    const weightInput = document.getElementById('weight');
+    const bustInput = document.getElementById('bust');
+    const waistInput = document.getElementById('waist');
+    const hipInput = document.getElementById('hip');
+
+    // Function to limit input to 3 characters
+    const limitToThreeChars = (e) => {
+        if (e.target.value.length > 3) {
+            e.target.value = e.target.value.slice(0, 3);
+        }
+    };
+
+    // Add event listeners for input
+    [heightInput, weightInput, bustInput, waistInput, hipInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', limitToThreeChars);
+        }
+    });
 </script>
 
 <script>
@@ -445,12 +495,27 @@
     // Validations and AJAX
  
     document.addEventListener('DOMContentLoaded', () => {
+        const tomSelect = new TomSelect('#ciudades', {
+            placeholder: 'Selecciona ciudades',
+            plugins: ['remove_button'],
+            onChange: function(value) {
+                // Si hay alguna opción seleccionada, ocultamos el placeholder
+                if (value.length > 0) {
+                    $('#ciudades').siblings('.choices').find('.choices__placeholder').hide();
+                } else {
+                    // Si no hay selección, mostramos el placeholder
+                    $('#ciudades').siblings('.choices').find('.choices__placeholder').show();
+                }
+            },
+
+        });
         const validateField = (field) => {
             const value = field.value.trim();
             let valid = true;
             let errorMessage = '';
 
-            // Validations based on field type
+            console.log(field.id, value);
+
             switch (field.id) {
                 case 'full_name':
                     valid = value.length > 0 && value.length <= 255;
@@ -513,15 +578,17 @@
                     errorMessage = valid ? '' : 'El género es requerido y debe ser uno de los siguientes: hombre, mujer, otro.';
                     break;
 
-                case 'height':
-                case 'weight':
-                case 'bust':
-                case 'waist':
-                case 'hip':
-                    const numericValue = parseFloat(value);
-                    valid = !isNaN(numericValue) && numericValue <= 300;
-                    errorMessage = valid ? '' : 'Este campo es requerido y debe ser un número menor o igual a 300.';
-                    break;
+                    case 'height':
+                    case 'weight':
+                    case 'bust':
+                    case 'waist':
+                    case 'hip':
+                        const numericValue = value.trim();
+                        
+                        valid = numericValue.length <= 3 && !isNaN(numericValue) && numericValue <= 300;
+                        
+                        errorMessage = valid ? '' : 'Este campo es requerido, debe ser un número menor o igual a 300, y no debe tener más de 3 caracteres.';
+                        break;
 
                 case 'start_day':
                 case 'end_day':
@@ -556,14 +623,15 @@
                     errorMessage = valid ? '' : 'El ID de usuario es requerido y debe ser un número.';
                     break;
 
-                case 'city':
-                    const cityCheckboxes = document.querySelectorAll('input[name="city[]"]:checked'); // Adjust this selector based on your HTML structure
-                    valid = cityCheckboxes.length > 0; // Check if at least one city is selected
+                case 'ciudades':
+                    const selectedCities = document.querySelector('#ciudades').TomSelect.selectedItems;
+                    valid = selectedCities.length > 0;
                     errorMessage = valid ? '' : 'Se debe seleccionar al menos una ciudad.';
-                    break;
+                break;
 
                 // Add additional validations as needed
             }
+            
 
             // Show alert if there's an error and the input is not empty
             if (!valid && errorMessage && value.length > 0) {
@@ -578,14 +646,7 @@
             return valid;
         };
 
-        document.querySelectorAll('input').forEach(field => {
-            field.addEventListener('change', () => {
-                validateField(field);
-                checkRequiredFields(field.closest('.form-step').id);
-            });
-        });
-    
-        // Function to check required fields for the next button
+            // Function to check required fields for the next button
         const checkRequiredFields = (stepId) => {
             const requiredFields = document.querySelectorAll(`#${stepId} [required]`);
     
@@ -610,6 +671,13 @@
             nextButton.disabled = !allFilled;
             nextButton.classList.toggle('disabled', !allFilled);
         };
+
+        document.querySelectorAll('input, select').forEach(field => {
+            field.addEventListener('change', () => {
+                validateField(field);
+                checkRequiredFields(field.closest('.form-step').id);
+            });
+        });
     });
     </script>
     
@@ -1045,6 +1113,22 @@
 
     .option {
         color:#000!important;
+    }
+</style>
+
+<style>
+    .ts-wrapper.multi .ts-control > div {
+        background-color: #F65807 !important;
+        color: white !important;
+    }
+
+    .ts-control {
+        background: #252525!important;
+        
+    }
+
+    #ciudades-ts-control {
+        color: #f1f1f1 !important;
     }
 </style>
 
