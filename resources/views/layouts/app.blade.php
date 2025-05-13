@@ -103,7 +103,7 @@
     </div>  
     <!-- ***** Preloader End ***** -->
 
-    <nav>
+    <nav style="z-index: 10;">
         <a href="{{ route('home') }}">
             <img class="img_logo" src="{{ asset('images/logo.png') }}" alt="Logo"/>
         </a>

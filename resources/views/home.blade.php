@@ -219,29 +219,45 @@ const loadMoreUsers = () => {
         data: {
             loaded_users: JSON.stringify(loadedUserIds)
         },
+        beforeSend: function() {
+            alert('Enviando solicitud AJAX a: /home/load-more/' + (page + 1));
+            alert('loadedUserIds: ' + JSON.stringify(loadedUserIds));
+        },
         success: function(response) {
-            if (response.html && response.html.trim()) {
-                gallery.insertAdjacentHTML('beforeend', response.html);
-                loadedUserIds = response.loadedUsers; // Actualizar los IDs cargados
-                page++;
-                hasMore = response.hasMore;
-            } else {
+            alert('Respuesta recibida');
+
+            try {
+                alert('response.html: ' + response.html);
+                if (response.html && response.html.trim()) {
+                    gallery.insertAdjacentHTML('beforeend', response.html);
+                    loadedUserIds = response.loadedUsers;
+                    alert('IDs actualizados: ' + JSON.stringify(loadedUserIds));
+                    page++;
+                    hasMore = response.hasMore;
+                } else {
+                    alert('No hay HTML en la respuesta');
+                    hasMore = false;
+                }
+                loading.style.display = hasMore ? 'block' : 'none';
+            } catch (e) {
+                alert('Error en bloque success: ' + e.message);
                 hasMore = false;
             }
-            loading.style.display = hasMore ? 'block' : 'none';
         },
         error: function(xhr, status, error) {
-            console.error('Error:', error);
+            alert('Error en la petición AJAX:\nStatus: ' + status + '\nError: ' + error);
             hasMore = false;
             loading.style.display = 'none';
         },
         complete: function() {
+            alert('Petición completada');
             isLoading = false;
             if (!hasMore) {
                 loading.style.display = 'none';
             }
         }
     });
+
 };
 
 $(window).scroll(function() {
@@ -566,6 +582,12 @@ $(window).scroll(function() {
             padding:0!important;
             width:100%!important;
 
+        }
+
+        
+        .franja p {
+            line-height: 14px;
+            font-size: 16px;
         }
     }
 
