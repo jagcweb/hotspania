@@ -651,12 +651,23 @@
             });
         };
 
-        // Usar scroll en lugar de Intersection Observer
         $(window).scroll(function() {
-            if (isElementInViewport(loading) && !isLoading && hasMore) {
+            const scrollTop = $(window).scrollTop();
+            const windowHeight = $(window).height();
+            const documentHeight = $(document).height();
+
+            const scrollBottom = scrollTop + windowHeight;
+            const threshold = 100;
+
+            if (
+                scrollBottom + threshold >= documentHeight &&
+                !isLoading &&
+                hasMore
+            ) {
                 loadMoreImages();
             }
         });
+
 
         function initializeNewImages() {
             const newItems = gallery.querySelectorAll('.gallery-item:not([data-initialized])');

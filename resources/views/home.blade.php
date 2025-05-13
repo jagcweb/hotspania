@@ -250,7 +250,7 @@ $(window).scroll(function() {
     const documentHeight = $(document).height();
 
     const scrollBottom = scrollTop + windowHeight;
-    const threshold = 100; // px antes del final
+    const threshold = 100;
 
     const galleryItems = document.querySelectorAll('.gallery-item').length;
 
