@@ -245,11 +245,25 @@ const loadMoreUsers = () => {
 };
 
 $(window).scroll(function() {
+    const scrollTop = $(window).scrollTop();
+    const windowHeight = $(window).height();
+    const documentHeight = $(document).height();
+
+    const scrollBottom = scrollTop + windowHeight;
+    const threshold = 100; // px antes del final
+
     const galleryItems = document.querySelectorAll('.gallery-item').length;
-    if (isElementInViewport(loading) && !isLoading && hasMore && galleryItems >= 20) {
+
+    if (
+        scrollBottom + threshold >= documentHeight &&
+        !isLoading &&
+        hasMore &&
+        galleryItems >= 20
+    ) {
         loadMoreUsers();
     }
 });
+
 </script>
 
 <style>
