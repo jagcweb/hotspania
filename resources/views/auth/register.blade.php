@@ -71,14 +71,14 @@
                                     
                                         
                                         <div class="row row_atributes">
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="whatsapp_number">Nº teléfono WhatsApp</label>
                                                     <input type="tel" class="form-control" id="whatsapp_number" name="whatsapp" value="{{ old('whatsapp') }}" required>
                                                 </div>
                                             </div>
                                                 
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="phone">Nº teléfono Llamadas</label>
                                                     <input type="tel" class="form-control" id="phone" name="phone" value="{{ old('phone') }}" required>
@@ -87,34 +87,34 @@
                                         </div>
                                                                                 
                                         <div class="row row_atributes">
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <label for="weight">Peso (kg)</label>
                                                 <input type="number" class="form-control" id="weight" name="weight" value="{{ old('weight') }}" required>
                                             </div>
 
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <label for="height">Altura (cm)</label>
                                                 <input type="number" class="form-control" id="height" name="height" value="{{ old('height') }}" required>
                                             </div>
                                             
-                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                                            <div class="col-md-4 col-sm-12 col-4 form-group">
                                                 <label for="bust">Busto (cm)</label>
                                                 <input type="number" class="form-control" id="bust" name="bust" value="{{ old('bust') }}" >
                                             </div>
                                             
-                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                                            <div class="col-md-4 col-sm-12 col-4 form-group">
                                                 <label for="waist">Cintura (cm)</label>
                                                 <input type="number" class="form-control" id="waist" name="waist" value="{{ old('waist') }}" >
                                             </div>
                                             
-                                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                                            <div class="col-md-4 col-sm-12 col-4 form-group">
                                                 <label for="hip">Cadera (cm)</label>
                                                 <input type="number" class="form-control" id="hip" name="hip" value="{{ old('hip') }}" >
                                             </div>
                                         </div>
                                         
                                         <div class="row row_atributes">
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="smoker">¿Fumas?</label>
                                                     <select class="form-control" id="smoker" name="smoker" required>
@@ -124,7 +124,7 @@
                                                 </div>    
                                             </div>
 
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="gender">Género</label>
                                                     <select class="form-control" id="gender" name="gender" required>
@@ -137,7 +137,7 @@
                                         </div>   
                                         
                                         <div class="row row_atributes">
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="start_day">Dia de Inicio</label>
                                                     <select class="form-control" id="start_day" name="start_day" required>
@@ -152,7 +152,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="end_day">Dia de Fin</label>
                                                     <select class="form-control" id="end_day" name="end_day" required>
@@ -176,7 +176,7 @@
                                         </div>
                                         
                                         <div class="row row_atributes">
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group {{ old('fulltime_time') ? 'd-none' : '' }}" id="start_time_div">
                                                     <label for="start_time">Hora de Inicio</label>
                                                     <select class="form-control" id="start_time" name="start_time">
@@ -188,7 +188,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group {{ old('fulltime_time') ? 'd-none' : '' }}" id="end_time_div">
                                                     <label for="end_time">Hora de Fin</label>
                                                     <select class="form-control" id="end_time" name="end_time">
@@ -202,7 +202,7 @@
                                         </div>
                                     
                                         <div class="row row_atributes">
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="cities">Ciudades</label>
                                                     <select id="ciudades" name="city[]" multiple required>
@@ -215,7 +215,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                            <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="working_zone">Zona de trabajo</label>
                                                     <input type="text" class="form-control" id="working_zone" name="working_zone" value="{{ old('working_zone') }}" required>

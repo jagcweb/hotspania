@@ -103,6 +103,70 @@
     </div>  
     <!-- ***** Preloader End ***** -->
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl)
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown')) {
+                    dropdownList.forEach(dropdown => {
+                        dropdown.hide();
+                    });
+                }
+            });
+
+            // City search functionality
+            const citySearch = document.querySelector('.city-search');
+            const cityList = document.querySelector('.city-list');
+            const dropdownItems = document.querySelectorAll('.city-list .dropdown-item');
+
+            if (citySearch) {
+                citySearch.addEventListener('input', function() {
+                    const searchText = this.value.toLowerCase();
+                    
+                    // Si hay texto, añadir clase searching
+                    cityList.classList.toggle('searching', searchText.length > 0);
+                    
+                    dropdownItems.forEach(item => {
+                        const cityName = item.textContent.toLowerCase();
+                        const matches = cityName.includes(searchText);
+                        
+                        if (searchText.length > 0) {
+                            item.style.display = matches ? 'block' : 'none';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+
+                // Prevent dropdown from closing when clicking the search input
+                citySearch.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+
+            // Handle city selection
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const cityName = this.textContent.trim().toLowerCase();
+                    
+                    // Set cookie with necessary attributes
+                    document.cookie = "selected_city=" + cityName + 
+                        "; path=/; SameSite=Lax; secure=true; max-age=2592000";
+                    
+                    // Mantener los parámetros actuales de la URL
+                    const currentUrl = new URL(window.location.href);
+                    window.location.href = currentUrl.href;
+                });
+            });
+        });
+    </script>
+
     <nav style="z-index: 10;">
         <a href="{{ route('home') }}">
             <img class="img_logo" src="{{ asset('images/logo.png') }}" alt="Logo"/>
@@ -140,71 +204,9 @@
                 </div>
             </li>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Initialize dropdowns
-                    var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
-                    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-                        return new bootstrap.Dropdown(dropdownToggleEl)
-                    });
 
-                    // Close dropdown when clicking outside
-                    document.addEventListener('click', function(e) {
-                        if (!e.target.closest('.dropdown')) {
-                            dropdownList.forEach(dropdown => {
-                                dropdown.hide();
-                            });
-                        }
-                    });
-
-                    // City search functionality
-                    const citySearch = document.querySelector('.city-search');
-                    const cityList = document.querySelector('.city-list');
-                    const dropdownItems = document.querySelectorAll('.city-list .dropdown-item');
-
-                    if (citySearch) {
-                        citySearch.addEventListener('input', function() {
-                            const searchText = this.value.toLowerCase();
-                            
-                            // Si hay texto, añadir clase searching
-                            cityList.classList.toggle('searching', searchText.length > 0);
-                            
-                            dropdownItems.forEach(item => {
-                                const cityName = item.textContent.toLowerCase();
-                                const matches = cityName.includes(searchText);
-                                
-                                if (searchText.length > 0) {
-                                    item.style.display = matches ? 'block' : 'none';
-                                } else {
-                                    item.style.display = 'none';
-                                }
-                            });
-                        });
-
-                        // Prevent dropdown from closing when clicking the search input
-                        citySearch.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                        });
-                    }
-
-                    // Handle city selection
-                    dropdownItems.forEach(item => {
-                        item.addEventListener('click', function() {
-                            const cityName = this.textContent.trim().toLowerCase();
-                            
-                            // Set cookie with necessary attributes
-                            document.cookie = "selected_city=" + cityName + 
-                                "; path=/; SameSite=Lax; secure=true; max-age=2592000";
-                            
-                            // Mantener los parámetros actuales de la URL
-                            const currentUrl = new URL(window.location.href);
-                            window.location.href = currentUrl.href;
-                        });
-                    });
-                });
-            </script>
         @endif
-        <ul class="list">
+         <ul class="list ullist">
             {{--<li><a class="text-white" href="#">Inicio</a></li>
             <li><a class="text-white" href="#">Mi cuenta</a></li>
             <li>
@@ -244,7 +246,12 @@
             </li>
           </form>
         </ul>
-      </nav>
+        <li class="lilist">
+            <a class="ml-3" href="javascript:void(0);">
+                <i class="fa-solid fa-bars text-white" style="font-size: 22px; line-height:20px;"></i>
+            </a>
+        </li>
+    </nav>
 
     @include('partial_msg')
     <div id="app" style="margin-top: 85px; min-height: 82vh;  display: flex;
@@ -404,6 +411,21 @@
     </div>
   </div>
 </div>
+
+<style>
+  .ullist{
+    position: absolute; 
+    right: 12%; 
+    top:6%; 
+  }
+
+  .lilist{
+    position: absolute; 
+    right: 5%; 
+    top: 26%;
+  }
+</style>
+
 <svg style="position:fixed; top:100vh">
   <defs>
     <filter id="blob">
