@@ -6,37 +6,60 @@
 <div id="page-wrapper background-transparent">
 
     <main role="main" style="margin-top:-70px;">
-        <!-- Content -->
+        @php 
+
+        @endphp
+        @php
+            $lastUserWithImage = \App\Models\User::whereHas('images', function($query) {
+                $query->whereNotNull('route_frontimage');
+            })->latest()->first();
+
+            $mostLikedImage = \App\Models\Image::orderBy('likes', 'DESC')->first();
+        @endphp
         <article>
             <div class="section background-transparent">
                 <div class="stories-container">
                     <a href="{{ route('home', ['filter' => 'disponibles']) }}" class="story-item">
                         <div class="story-circle">
-                            <span class="circle-text">Disponibles</span>
+                            <span class="circle-text">En línea <i class="fa-solid fa-circle text-success"></i></span>
                         </div>
                         <span class="story-text">Disponibles</span>
                     </a>
                     <a href="{{ route('home', ['filter' => 'lgtbi']) }}" class="story-item">
                         <div class="story-circle">
-                            <span class="circle-text">LGTBI+</span>
+                            <span class="circle-text"><i class="fa-solid fa-transgender icon-story"></i></span>
                         </div>
                         <span class="story-text">LGTBI+</span>
                     </a>
                     <a href="{{ route('home', ['filter' => 'nuevas']) }}" class="story-item">
-                        <div class="story-circle">
-                            <span class="circle-text">Nuevas</span>
+                        <div class="story-circle" style="padding: 0!important;">
+                            <span class="circle-text" style="width: 100%; height: 100%;">
+                                @if($lastUserWithImage)
+                                    <img src="{{ route('home.imageget', ['filename' => $lastUserWithImage->images->first()->route_frontimage ?? $lastUserWithImage->images->first()->route]) }}"
+                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                @else
+                                    <i class="fa-solid fa-user-plus icon-story"></i>
+                                @endif
+                            </span>
                         </div>
                         <span class="story-text">Nuevas</span>
                     </a>
                     <div class="story-item">
-                        <div class="story-circle">
-                            <span class="circle-text">Fotos</span>
+                        <div class="story-circle" style="padding: 0!important;">
+                                <span class="circle-text" style="width: 100%; height: 100%;">
+                                @if($lastUserWithImage)
+                                    <img src="{{ route('home.imageget', ['filename' => $mostLikedImage->route_frontimage ?? $mostLikedImage->route]) }}"
+                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                @else
+                                    <i class="fa-solid fa-user-plus icon-story"></i>
+                                @endif
+                            </span>
                         </div>
                         <span class="story-text">Fotos</span>
                     </div>
                     <a href="{{ route('home', ['filter' => 'ranking']) }}" class="story-item">
                         <div class="story-circle">
-                            <span class="circle-text">Ranking</span>
+                            <span class="circle-text"><i class="fa-solid fa-trophy icon-story"></i></span>
                         </div>
                         <span class="story-text">Ranking</span>
                     </a>
@@ -59,10 +82,15 @@
                         gap: 8px;
                         min-width: fit-content;
                     }
+
+                    .icon-story {
+                        font-size: 48px;
+                        color: white;
+                    }
         
                     .story-circle {
-                        width: 80px;
-                        height: 80px;
+                        width: 120px;
+                        height: 120px;
                         border-radius: 50%;
                         background: #f36e00;
                         padding: 4px;
@@ -97,16 +125,24 @@
                             justify-content: space-around;
                         }
                         .story-circle {
-                            width: 70px;
-                            height: 70px;
+                            width: 85px;
+                            height: 85px;
+                        }
+
+                       .icon-story {
+                            font-size: 36px;
                         }
                     }
 
                     @media (max-width: 576px) {
                         .stories-container { gap: 10px; }
                         .story-circle {
-                            width: 60px;
-                            height: 60px;
+                            width: 70px;
+                            height: 70px;
+                        }
+
+                        .icon-story {
+                            font-size: 35px;
                         }
                     }
 
@@ -116,14 +152,18 @@
                             padding: 20px 5px;
                         }
                         .story-circle {
-                            width: 45px;
-                            height: 45px;
+                            width: 55px;
+                            height: 55px;
                         }
                         .circle-text {
                             font-size: 8px;
                         }
                         .story-text {
                             font-size: 8px;
+                        }
+
+                        .icon-story {
+                            font-size: 30px;
                         }
                     }
 
@@ -133,14 +173,18 @@
                             padding: 20px 2px;
                         }
                         .story-circle {
-                            width: 40px;
-                            height: 40px;
+                            width: 45px;
+                            height: 45px;
                         }
                         .circle-text {
                             font-size: 7px;
                         }
                         .story-text {
                             font-size: 7px;
+                        }
+
+                        .icon-story {
+                            font-size: 24px;
                         }
                     }
 
