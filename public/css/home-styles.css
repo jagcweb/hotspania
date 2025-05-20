@@ -3110,7 +3110,7 @@ nav.background-transparent-hightlight.fixed .aside-nav > ul > li.active-item > a
   
   /* Containers */
   .section  { 
-    padding: 7.5rem 1.25rem;
+    padding-top: 85px;
   }
   .section-small-padding  { 
     padding: 3.5rem 1.25rem;

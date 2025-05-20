@@ -69,7 +69,6 @@
                     .stories-container {
                         display: flex;
                         gap: 20px;
-                        padding: 20px 10px;
                         overflow-x: auto;
                         justify-content: center;
                         width: auto;
@@ -149,7 +148,6 @@
                     @media (max-width: 400px) {
                         .stories-container { 
                             gap: 8px;
-                            padding: 20px 5px;
                         }
                         .story-circle {
                             width: 55px;
@@ -170,7 +168,6 @@
                     @media (max-width: 320px) {
                         .stories-container { 
                             gap: 5px;
-                            padding: 20px 2px;
                         }
                         .story-circle {
                             width: 45px;
@@ -715,7 +712,7 @@ $(window).scroll(function() {
         }
 
         .profile-user-name {
-            font-size: 2.2rem;
+            font-size: 18px;
         }
 
         .profile-edit-btn {

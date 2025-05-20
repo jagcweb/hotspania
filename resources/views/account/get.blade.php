@@ -69,6 +69,8 @@
 
                 </div>
 
+                <p style="font-size:16px;" class="text-justify text-city">{{ $user->working_zone ?? '' }} - Barcelona</p>
+
                 <div class="profile-stats">
 
                     @php
@@ -84,14 +86,16 @@
                 </div>
 
                 <div class="profile-bio mt-3">
-
-                    <p style="font-size:16px;" class="text-justify">{{ $user->working_zone ?? '' }} - Barcelona</p>
                     <p class="mt-2"></p>
-                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->age }} Años</p>
-                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->weight }} KG</p>
-                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->height }} CM</p>
+                    <div class="properties">
+                        <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->age }} Años</p>
+                        <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->weight }} KG</p>
+                    </div>
+                    <div class="properties">
+                        <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->height }} CM</p>
+                        <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ $user->is_smoker === 1 ? 'Si' : 'No' }}</p>
+                    </div>
                     <p style="font-size:16px; color:#fff;" class="text-justify">{{ $user->bust }} - {{ $user->waist }} - {{ $user->hip }}</p>
-                    <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ $user->is_smoker === 1 ? 'Si' : 'No' }}</p>
                     <p style="font-size:16px; color:#fff;" class="text-justify">
                         @if($user->start_day == "fulltime" && $user->end_day == "fulltime")
                         Todos los días
@@ -119,6 +123,11 @@
                             @endif 
                         @endif 
                     </p>
+                    @if(!is_null($user->link))
+                        <p class="link" style="font-size:16px; color:#fff;">
+                            <a href="{{ $user->link }}" target="_blank" style="color:#fff; font-size:16px; text-decoration:underline!important;">{{ str_replace(['http://', 'https://'], '', $user->link) }}</a>
+                        </p>
+                    @endif
                 </div>
             </div>
 
@@ -128,14 +137,8 @@
     </div>
 
     
-    <div class="container">
-        @if(!is_null($user->link))
-            <p class="mt-5 w-100 text-center">
-                <i class="fa-solid fa-link mr-1 link-icon"></i>
-                <a href="{{ $user->link }}" target="_blank" class="link-text">{{ $user->link }}</a>
-            </p>
-        @endif
-        <div class="buttons mt-5">
+    <div class="container container_mobile">
+        <div class="buttons mt-5 container_mobile">
             <button class="btn profile-edit-btn whatsapp_btn">WhatsApp</button>
             <button class="btn profile-edit-btn call_btn" style="margin-left:20px;">Llámame</button>
         </div>
@@ -259,6 +262,11 @@
         padding: 10px 0;
         z-index: 9999; /* Asegurarse de que esté por encima de otros elementos */
         transition: top 0.3s; /* Animación para que aparezca suavemente */
+    }
+
+    .properties {
+        display: flex;
+        flex-direction: column;
     }
 
     /* Contenedor de la barra */
@@ -1572,22 +1580,7 @@
         }
     }
 
-    @media screen and (max-width: 350px) {
-        .profile-stats li {
-            display: inline-block;
-            font-size: 1.1rem;
-            line-height: 1.5;
-            margin-right: 0.7rem;
-        }
 
-        .profile-user-name {
-            font-size: 1.1rem;
-        }
-
-        .profile-bio p {
-            font-size: 1.1rem!important;
-        }
-    }
 
     @media screen and (max-width: 600px) {
         .profile-stats{
@@ -1615,6 +1608,70 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
+        }
+    }
+
+    @media screen and (max-width: 350px) {
+        .container-mobile {
+            margin-top: 0!important;
+        }
+
+        .link, .link a {
+            font-size: 12px!important;
+        }
+
+        .properties {
+            flex-direction: row;
+        }
+
+        .properties p:nth-child(2) {
+            margin-left: 15px;
+        }
+
+        .mt-5 {
+            margin-top: 10px!important;
+        }
+        .text-city {
+            font-size: 13px!important;
+        }
+        .profile-stats li {
+            display: inline-block;
+            line-height: 1.5;
+            margin-right: 0.7rem;
+        }
+
+        .profile-user-name {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .profile-stats {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .profile-stats ul { 
+            gap: 0!important;
+            margin: 0!important; padding: 0!important;
+            justify-content: space-between;
+        }
+
+        .profile-stats ul li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.1rem;
+            gap: 0!important;
+            margin: 0!important; padding: 0!important;
+        }
+
+        .profile-bio {
+            margin: 0;
+            width: 100%;
+        }
+
+        .profile-bio p {
+            font-size: 1.1rem!important;
         }
     }
 
