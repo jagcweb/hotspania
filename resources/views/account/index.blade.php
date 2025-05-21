@@ -71,7 +71,7 @@
 
             </div>
 
-            <p style="font-size:16px;" class="text-justify text-city">{{ $user->working_zone ?? '' }} - Barcelona</p>
+            <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - Barcelona</p>
 
             <div class="profile-stats">
 
@@ -127,7 +127,7 @@
                 </p>
                 @if(!is_null(\Auth::user()->link))
                     <p class="link" style="font-size:16px; color:#fff;">
-                         <a href="{{ $user->link }}" target="_blank" style="color:#fff; font-size:16px; text-decoration:underline!important;">{{ str_replace(['http://', 'https://'], '', $user->link) }}</a>
+                         <a href="{{ \Auth::user()->link }}" target="_blank" style="color:#fff; font-size:16px; text-decoration:underline!important;">{{ str_replace(['http://', 'https://'], '', \Auth::user()->link) }}</a>
                     </p>
                 @endif
             </div>

@@ -169,7 +169,7 @@
     inputFile.addEventListener('change', (event) => {
         let files = event.target.files;
         const maxSizeInBytes = 2 * 1024 * 1024; // 2 MB in bytes
-        const maxFiles = 5;
+        const maxFiles = 10;
 
         // Filter files based on size limit
         const validFiles = Array.from(files).filter(file => file.size <= maxSizeInBytes);
@@ -181,13 +181,13 @@
             alert('Estos ficheros exceden el límite de 2MB y han sido borrados: ' + invalidFileNames);
         }
 
-        // Further filter to ensure maximum 5 files
+        // Further filter to ensure maximum 10 files
         let finalFiles = validFiles.slice(0, maxFiles);
 
         // Notify user if some files were removed due to exceeding the max file count
         if (validFiles.length > maxFiles) {
             const removedFiles = validFiles.slice(maxFiles).map(file => file.name).join(', ');
-            alert('Solo se permiten un máximo de 5 archivos. Estos han sido removidos: ' + removedFiles);
+            alert('Solo se permiten un máximo de 10 archivos. Estos han sido removidos: ' + removedFiles);
         }
 
         // Create a new DataTransfer object to hold the valid files

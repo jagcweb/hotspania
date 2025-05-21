@@ -53,9 +53,13 @@ class HomeController extends Controller
         }
 
         $orderByPosition = true;
+        $orderByLikes = false;
         switch ($request->get('filter')) {
             case 'disponibles':
-                //$query->where('available', true);
+                $query->where(function($q) {
+                    $q->whereNotNull('available_until')
+                      ->where('available_until', '>', Carbon::now('Europe/Madrid'));
+                });
                 break;
             case 'lgtbi':
                 $query->where('gender', 'lgtbi');
@@ -64,7 +68,22 @@ class HomeController extends Controller
                 $orderByPosition = false;
                 break;
             case 'ranking':
-                //$query->orderBy('visits', 'desc');
+                $orderByLikes = true;
+                $query->whereHas('images', function($q) {
+                    $q->select('user_id')
+                      ->groupBy('user_id')
+                      ->orderBy('likes', 'desc');
+                })
+                ->with(['images' => function($q) {
+                    $q->orderBy('likes', 'desc');
+                }])
+                ->orderBy(function($query) {
+                    $query->select('likes')
+                        ->from('images')
+                        ->whereColumn('user_id', 'users.id')
+                        ->orderBy('likes', 'desc')
+                        ->limit(1);
+                }, 'desc');
                 break;
         }
 
@@ -79,7 +98,9 @@ class HomeController extends Controller
         if ($orderByPosition) {
             $usersWithPosition = $usersWithPosition->orderBy('position');
         } else {
-            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
+            if(!$orderByLikes) {
+                $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
+            }
         }
         
         $usersWithPosition = $usersWithPosition->take(20)->get();
@@ -143,9 +164,13 @@ class HomeController extends Controller
         }
 
         $orderByPosition = true;
+        $orderByLikes = false;
         switch (request()->get('filter')) {
             case 'disponibles':
-                //$query->where('available', true);
+                $query->where(function($q) {
+                    $q->whereNotNull('available_until')
+                      ->where('available_until', '>', Carbon::now('Europe/Madrid'));
+                });
                 break;
             case 'lgtbi':
                 $query->where('gender', 'lgtbi');
@@ -154,7 +179,22 @@ class HomeController extends Controller
                 $orderByPosition = false;
                 break;
             case 'ranking':
-                //$query->orderBy('visits', 'desc');
+                $orderByLikes = true;
+                $query->whereHas('images', function($q) {
+                    $q->select('user_id')
+                      ->groupBy('user_id')
+                      ->orderBy('likes', 'desc');
+                })
+                ->with(['images' => function($q) {
+                    $q->orderBy('likes', 'desc');
+                }])
+                ->orderBy(function($query) {
+                    $query->select('likes')
+                        ->from('images')
+                        ->whereColumn('user_id', 'users.id')
+                        ->orderBy('likes', 'desc')
+                        ->limit(1);
+                }, 'desc');
                 break;
         }
 
@@ -171,7 +211,9 @@ class HomeController extends Controller
         if ($orderByPosition) {
             $usersWithPosition = $usersWithPosition->orderBy('position');
         } else {
-            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
+            if(!$orderByLikes) {
+                $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
+            }
         }
         
         $usersWithPosition = $usersWithPosition->take($perPage)->get();

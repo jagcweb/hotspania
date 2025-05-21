@@ -14,7 +14,7 @@
                 @endphp
 
                 {{ $last_image_date->diffInDays() }} días desde la última subida de imágenes o vídeos.
-                @if($last_image_date->diffInDays() < 30)
+                @if($last_image_date->diffInDays() < 30 && \Auth::user()->getRoleNames()[0] != 'admin')
                     <div class="alert alert-warning" role="alert">
                         <strong>¡Atención!</strong> Solo puedes subir imágenes o vídeos cada 30 días. La última subida fue el {{ $last_image_date->format('d/m/Y') }}.
                     </div>

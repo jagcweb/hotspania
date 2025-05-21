@@ -246,11 +246,13 @@
             </li>
           </form>
         </ul>
+        @if(!\Auth::user())
         <li class="lilist">
             <a class="ml-3" href="javascript:void(0);">
                 <i class="fa-solid fa-bars text-white" style="font-size: 22px; line-height:20px;"></i>
             </a>
         </li>
+        @endif
     </nav>
 
     @include('partial_msg')

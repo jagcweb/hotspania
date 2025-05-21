@@ -325,14 +325,40 @@
         event.preventDefault(); // Evita que se escriba en el campo
         alert("Por favor, seleccione la fecha en el calendario.");
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const linkInput = document.getElementById('link');
+        
+        // Set initial value if empty
+        if (linkInput && !linkInput.value) {
+            linkInput.value = 'https://';
+        }
+
+        // Add event listener for input changes
+        linkInput.addEventListener('input', () => {
+            if (!linkInput.value) {
+                linkInput.value = 'https://';
+            }
+        });
+
+        // Helper function to validate URLs 
+        function isValidURL(str) {
+            try {
+                new URL(str);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+    });
 </script>
 
 <script>
-    const heightInput = document.getElementById('height');
-    const weightInput = document.getElementById('weight');
-    const bustInput = document.getElementById('bust');
-    const waistInput = document.getElementById('waist');
-    const hipInput = document.getElementById('hip');
+    heightInput = document.getElementById('height');
+    weightInput = document.getElementById('weight');
+    bustInput = document.getElementById('bust');
+    waistInput = document.getElementById('waist');
+    hipInput = document.getElementById('hip');
 
     // Function to limit input to 3 characters
     const limitToThreeChars = (e) => {
@@ -513,9 +539,6 @@
             const value = field.value.trim();
             let valid = true;
             let errorMessage = '';
-
-            console.log(field.id, value);
-
             switch (field.id) {
                 case 'full_name':
                     valid = value.length > 0 && value.length <= 255;
@@ -799,11 +822,11 @@
     });
 
     // Add event listeners for height, weight, bust, waist, and hip fields
-    const heightInput = document.getElementById('height');
-    const weightInput = document.getElementById('weight');
-    const bustInput = document.getElementById('bust');
-    const waistInput = document.getElementById('waist');
-    const hipInput = document.getElementById('hip');
+    heightInput = document.getElementById('height');
+    weightInput = document.getElementById('weight');
+    bustInput = document.getElementById('bust');
+    waistInput = document.getElementById('waist');
+    hipInput = document.getElementById('hip');
 
     heightInput.addEventListener('input', () => {
         restrictToNumbers(heightInput);
