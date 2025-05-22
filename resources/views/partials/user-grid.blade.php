@@ -36,10 +36,10 @@
             // Guardar los colores restantes en la sesión
             session(['availableColors' => array_values($availableColors)]);
         @endphp
-        
+
         <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
             <div class="gallery-item image-hover-zoom" tabindex="0" data-user-id="{{ $user->id }}">
-                @if($isAvailable)
+                @if($isAvailable && request()->get('filter') !== 'disponibles')
                     <img src="{{ asset('images/llamas.gif') }}" class="flame-border {{ $colorClass }}" alt="Online">
                 @endif
                 <img src="{{ route('home.imageget', ['filename' => $image->route_frontimage ?? $image->route]) }}"

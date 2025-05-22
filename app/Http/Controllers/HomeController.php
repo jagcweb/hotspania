@@ -62,7 +62,7 @@ class HomeController extends Controller
                 });
                 break;
             case 'lgtbi':
-                $query->where('gender', 'lgtbi');
+                $query->where('gender', 'lgbti');
                 break;
             case 'nuevas':
                 $orderByPosition = false;
@@ -87,6 +87,8 @@ class HomeController extends Controller
                 break;
         }
 
+        $perPage = $orderByPosition ? 20 : 15;
+
         // Get users with position
         $usersWithPosition = clone $query;
         $usersWithPosition = $usersWithPosition->whereNotNull('position')
@@ -103,11 +105,11 @@ class HomeController extends Controller
             }
         }
         
-        $usersWithPosition = $usersWithPosition->take(20)->get();
+        $usersWithPosition = $usersWithPosition->take($perPage)->get();
 
         // Get users without position if needed
-        if ($usersWithPosition->count() < 20) {
-            $remaining = 20 - $usersWithPosition->count();
+        if ($usersWithPosition->count() < $perPage) {
+            $remaining = $perPage - $usersWithPosition->count();
             $usersWithoutPosition = clone $query;
             $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
                 ->with(['images', 'packageUser' => function($q) {
@@ -173,7 +175,7 @@ class HomeController extends Controller
                 });
                 break;
             case 'lgtbi':
-                $query->where('gender', 'lgtbi');
+                $query->where('gender', 'lgbti');
                 break;
             case 'nuevas':
                 $orderByPosition = false;

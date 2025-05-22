@@ -65,8 +65,6 @@ class RegisterController extends Controller
     public function save(Request $request, $step, $id = null) {
         switch($step) {
             case 'step-1':
-                var_dump($request->get('city'));
-                die();
                 $create = User::create([
                     'full_name' => Str::random(30),
                     'nickname' => $request->nickname,

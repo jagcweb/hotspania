@@ -52,7 +52,7 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <label for="nickname">Nombre</label>
+                                            <label for="nickname">Nombre Ficticio</label>
                                             <input type="text" class="form-control" id="nickname" name="nickname" value="{{ old('nickname') }}" required>
                                         </div>
 
@@ -60,15 +60,6 @@
                                             <label for="age">Edad</label>
                                             <input type="number" class="form-control" id="age" name="age" value="{{ old('age') }}" min="18" max="99" required>
                                         </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="date_of_birth">Fecha de Nacimiento</label>
-                                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" required 
-                                            onkeydown="showAlert(event)" onpaste="showAlert(event)"
-                                            >
-
-                                        </div>
-                                    
                                         
                                         <div class="row row_atributes">
                                             <div class="col-md-6 col-sm-6 col-6 form-group">
@@ -217,7 +208,7 @@
 
                                             <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
-                                                    <label for="working_zone">Zona de trabajo</label>
+                                                    <label for="working_zone">Zona</label>
                                                     <input type="text" class="form-control" id="working_zone" name="working_zone" value="{{ old('working_zone') }}" required>
                                                 </div>
                                             </div>
@@ -295,6 +286,14 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="date_of_birth">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" required 
+                            onkeydown="showAlert(event)" onpaste="showAlert(event)"
+                            >
+                        </div>
+                                    
+
+                        <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
                         </div>
@@ -322,32 +321,36 @@
 
 <script>
     function showAlert(event) {
-        event.preventDefault(); // Evita que se escriba en el campo
+        event.preventDefault();
         alert("Por favor, seleccione la fecha en el calendario.");
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         const linkInput = document.getElementById('link');
         
-        // Set initial value if empty
-        if (linkInput && !linkInput.value) {
-            linkInput.value = 'https://';
-        }
+        if (linkInput) {
+            // Add focus event listener
+            linkInput.addEventListener('focus', () => {
+                if (!linkInput.value) {
+                    linkInput.value = 'https://';
+                }
+            });
 
-        // Add event listener for input changes
-        linkInput.addEventListener('input', () => {
-            if (!linkInput.value) {
-                linkInput.value = 'https://';
-            }
-        });
+            // Add blur event listener 
+            linkInput.addEventListener('blur', () => {
+                if (linkInput.value === 'https://') {
+                    linkInput.value = '';
+                }
+            });
 
-        // Helper function to validate URLs 
-        function isValidURL(str) {
-            try {
-                new URL(str);
-                return true;
-            } catch (_) {
-                return false;
+            // Helper function to validate URLs
+            function isValidURL(str) {
+                try {
+                    new URL(str);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
             }
         }
     });
@@ -589,6 +592,9 @@
                     break;
 
                 case 'working_zone':
+                    valid = value.length > 0 && value.length <= 100;
+                    errorMessage = valid ? '' : 'La zona es requerida y no puede exceder 100 caracteres.';
+                    break;
                 case 'service_location':
                     const locationCheckboxes = document.querySelectorAll('input[name="service_location[]"]:checked');
                     valid = locationCheckboxes.length > 0;
@@ -647,12 +653,10 @@
                     break;
 
                 case 'ciudades':
-                    const selectedCities = document.querySelector('#ciudades').TomSelect.selectedItems;
-                    valid = selectedCities.length > 0;
+                    const selectedCities = tomSelect.getValue();
+                    valid = Array.isArray(selectedCities) ? selectedCities.length > 0 : selectedCities !== '';
                     errorMessage = valid ? '' : 'Se debe seleccionar al menos una ciudad.';
-                break;
-
-                // Add additional validations as needed
+                    break;
             }
             
 
@@ -668,6 +672,15 @@
 
             return valid;
         };
+
+        function isValidURL(str) {
+            try {
+                new URL(str);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
 
             // Function to check required fields for the next button
         const checkRequiredFields = (stepId) => {

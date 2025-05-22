@@ -295,7 +295,11 @@ $(window).scroll(function() {
 
     const galleryItems = document.querySelectorAll('.gallery-item').length;
 
+    const url = new URL(window.location.href);
+    const filterParam = url.searchParams.get('filter');
+    
     if (
+        filterParam !== 'nuevas' &&
         scrollBottom + threshold >= documentHeight &&
         !isLoading &&
         hasMore &&
