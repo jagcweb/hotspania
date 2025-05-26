@@ -75,7 +75,7 @@
 
                     @php
                         $totalVisits = $images->sum('visits') ?? 0;
-                        $totalLikes = $images->sum('likes') ?? 0;
+                        $totalLikes = \App\Models\ImageLike::whereIn('image_id', $images->pluck('id'))->count() ?? 0;
                     @endphp
                     <ul>
                         <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
@@ -172,7 +172,7 @@
                                 <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
                                         class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
                                 <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-heart" aria-hidden="true"></i> {{ $image->likes ?? 0 }}</li>
+                                    class="fas fa-heart" aria-hidden="true"></i> {{ \App\Models\ImageLike::where('image_id', $image->id)->count() }}</li>
                             </ul>
 
                         </div>
@@ -400,7 +400,6 @@
         left: 20px;
         bottom: 20px;
         font-size: 30px;
-        opacity: 0;
         transition: opacity 0.3s ease;
         z-index: 1002;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
@@ -410,6 +409,11 @@
     .permanent-heart.active {
         opacity: 1;
         color: #ff4444;
+    }
+
+    .permanent-heart.inactive {
+        opacity: 1;
+        color: #fff;
     }
 
     /* Añadir estilos para el wrapper */
@@ -485,12 +489,39 @@
             
             // Verificar el estado del like
             $.get(`/account/check-like/${imageId}`, function(response) {
-                if(response.hasLiked) {
-                    $('#permanentHeart').addClass('active');
-                    $('#floatingHeart').html('❤️');
-                } else {
-                    $('#permanentHeart').removeClass('active');
-                    $('#floatingHeart').html('🤍');
+                // Always show the permanent heart, just change its style 
+                $('#permanentHeart').addClass('active').html(response.hasLiked ? '❤️' : '🤍')
+
+                // Add click handler for empty heart
+                if (!response.hasLiked) {
+                    $('#permanentHeart').one('click', function(e) {
+                        e.stopPropagation();
+                        // Show animation
+                        $('#floatingHeart').html('❤️').addClass('show'); // Changed to red heart
+                        setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
+                        
+                        // Make the like request
+                        $.ajax({
+                            url: `/account/load/like/${imageId}`,
+                            method: 'GET',
+                            success: function(response) {
+                                if(response.success) {
+                                    let likesElement = $(window.contentList[currentIndex].element).find('.gallery-item-comments');
+                                    if(likesElement.length) {
+                                        likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                                    }
+                                    
+                                    $('#permanentHeart').addClass('active').html('❤️');
+                                    
+                                    if (!response.isAuthenticated) {
+                                        Cookies.set('image_like_' + imageId, 'true', { expires: 365 });
+                                    }
+
+                                    $(window.contentList[currentIndex].element).addClass('has-like');
+                                }
+                            }
+                        });
+                    });
                 }
             });
 
@@ -695,8 +726,8 @@
             let imageId = $(currentItem.element).data('id');
             const heart = $('#floatingHeart');
             
-            // Siempre mostrar corazón blanco en doble tap
-            heart.html('🤍');
+            // Siempre mostrar corazón rojo en doble tap
+            heart.html('❤️');
             heart.addClass('show');
             setTimeout(() => heart.removeClass('show'), 1000);
             
@@ -735,33 +766,60 @@
             e.stopPropagation();
             let currentItem = window.contentList[currentIndex];
             let imageId = $(currentItem.element).data('id');
-            
-            // Solo proceder si tiene like
-            if (!$(this).hasClass('active')) return;
 
-            $.ajax({
-                url: `/account/remove-like/${imageId}`,
-                method: 'GET',
-                success: function(response) {
-                    if(response.success) {
-                        let likesElement = $(currentItem.element).find('.gallery-item-comments');
-                        if(likesElement.length) {
-                            likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
-                        }
-                        
-                        $('#permanentHeart').removeClass('active');
-                        $('#floatingHeart').html('🤍');
-                        
-                        // Remover la clase has-like del elemento de la galería
-                        $(currentItem.element).removeClass('has-like');
-                        
-                        if (!response.isAuthenticated) {
-                            Cookies.remove('image_like_' + imageId);
+            // Verifica si ya tiene like
+            let hasLike = $(this).hasClass('active');
+
+            if (hasLike) {
+                // Quitar like
+                $.ajax({
+                    url: `/account/remove-like/${imageId}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            let likesElement = $(currentItem.element).find('.gallery-item-comments');
+                            if (likesElement.length) {
+                                likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                            }
+
+                            $('#permanentHeart').removeClass('active').html('🤍');
+                            $('#floatingHeart').html('🤍');
+                            $(currentItem.element).removeClass('has-like');
+
+                            if (!response.isAuthenticated) {
+                                Cookies.remove('image_like_' + imageId);
+                            }
                         }
                     }
-                }
-            });
+                });
+            } else {
+                // Agregar like
+                $.ajax({
+                    url: `/account/load/like/${imageId}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            let likesElement = $(currentItem.element).find('.gallery-item-comments');
+                            if (likesElement.length) {
+                                likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                            }
+
+                            $('#permanentHeart').addClass('active').html('❤️');
+                            $('#floatingHeart').html('🤍');
+                            $(currentItem.element).addClass('has-like');
+
+                            if (!response.isAuthenticated) {
+                                Cookies.set('image_like_' + imageId, 'true', { expires: 365 });
+                            }
+                        }
+                    }
+                });
+            }
         });
+
+
+
+
     });
 </script>
 
@@ -1611,7 +1669,7 @@
         }
     }
 
-    @media screen and (max-width: 350px) {
+    @media screen and (max-width: 400px) {
         .container-mobile {
             margin-top: 0!important;
         }

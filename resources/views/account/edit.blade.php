@@ -56,7 +56,7 @@
 
                 @php
                     $totalVisits = $images->sum('visits') ?? 0;
-                    $totalLikes = $images->sum('likes') ?? 0;
+                        $totalLikes = \App\Models\ImageLike::whereIn('image_id', $images->pluck('id'))->count() ?? 0;
                 @endphp
                 <ul>
                     <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
@@ -237,7 +237,7 @@
                                     <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
                                             class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
                                     <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
-                                            class="fas fa-heart" aria-hidden="true"></i> {{ $image->likes ?? 0 }}</li>
+                                        class="fas fa-heart" aria-hidden="true"></i> {{ \App\Models\ImageLike::where('image_id', $image->id)->count() }}</li>
                                 </ul>
 
                             </div>
