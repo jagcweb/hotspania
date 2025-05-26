@@ -475,7 +475,7 @@
         function checkInitialLikes() {
             $('.gallery-item').each(function() {
                 let imageId = $(this).data('id');
-                if (Cookies.get('image_like_' + imageId)) {
+                if (localStorage.getItem('image_like_' + imageId)) {
                     $(this).addClass('has-like');
                 }
             });
@@ -514,7 +514,7 @@
                                     $('#permanentHeart').addClass('active').html('❤️');
                                     
                                     if (!response.isAuthenticated) {
-                                        Cookies.set('image_like_' + imageId, 'true', { expires: 365 });
+                                        localStorage.setItem('image_like_' + imageId, 'true');
                                     }
 
                                     $(window.contentList[currentIndex].element).addClass('has-like');
@@ -748,7 +748,7 @@
                             $('#floatingHeart').html('🤍');
                             
                             if (!response.isAuthenticated) {
-                                Cookies.set('image_like_' + imageId, 'true', { expires: 365 });
+                                localStorage.setItem('image_like_' + imageId, 'true');
                             }
 
                             $(currentItem.element).addClass('has-like');
@@ -787,7 +787,7 @@
                             $(currentItem.element).removeClass('has-like');
 
                             if (!response.isAuthenticated) {
-                                Cookies.remove('image_like_' + imageId);
+                                localStorage.removeItem('image_like_' + imageId);
                             }
                         }
                     }
@@ -809,7 +809,7 @@
                             $(currentItem.element).addClass('has-like');
 
                             if (!response.isAuthenticated) {
-                                Cookies.set('image_like_' + imageId, 'true', { expires: 365 });
+                                localStorage.setItem('image_like_' + imageId, 'true');
                             }
                         }
                     }
