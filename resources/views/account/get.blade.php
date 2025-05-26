@@ -482,25 +482,51 @@
         }
 
         function loadContent(index) {
+            $('#permanentHeart').html('🤍').hide();
             let content = window.contentList[index];
             $('#modalVideo')[0].pause();
 
             let imageId = $(content.element).data('id');
             
             // Verificar el estado del like
-            $.get(`/account/check-like/${imageId}`, function(response) {
-                // Always show the permanent heart, just change its style 
-                $('#permanentHeart').addClass('active').html(response.hasLiked ? '❤️' : '🤍')
-
-                // Add click handler for empty heart
-                if (!response.hasLiked) {
+            @if(Auth::check())
+                $.get(`/account/check-like/${imageId}`, function(response) {
+                    $('#permanentHeart').addClass('active').html(response.hasLiked ? '❤️' : '🤍').show();
+                    
+                    if (!response.hasLiked) {
+                        $('#permanentHeart').one('click', function(e) {
+                            e.stopPropagation();
+                            $('#floatingHeart').html('❤️').addClass('show');
+                            setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
+                            
+                            $.ajax({
+                                url: `/account/load/like/${imageId}`,
+                                method: 'GET', 
+                                success: function(response) {
+                                    if(response.success) {
+                                        let likesElement = $(window.contentList[currentIndex].element).find('.gallery-item-comments');
+                                        if(likesElement.length) {
+                                            likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                                        }
+                                        
+                                        $('#permanentHeart').addClass('active').html('❤️');
+                                        $(window.contentList[currentIndex].element).addClass('has-like');
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
+            @else
+                let hasLike = localStorage.getItem('image_like_' + imageId);
+                $('#permanentHeart').addClass('active').html(hasLike ? '❤️' : '🤍').show();
+                
+                if (!hasLike) {
                     $('#permanentHeart').one('click', function(e) {
                         e.stopPropagation();
-                        // Show animation
-                        $('#floatingHeart').html('❤️').addClass('show'); // Changed to red heart
+                        $('#floatingHeart').html('❤️').addClass('show'); 
                         setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
                         
-                        // Make the like request
                         $.ajax({
                             url: `/account/load/like/${imageId}`,
                             method: 'GET',
@@ -512,18 +538,14 @@
                                     }
                                     
                                     $('#permanentHeart').addClass('active').html('❤️');
-                                    
-                                    if (!response.isAuthenticated) {
-                                        localStorage.setItem('image_like_' + imageId, 'true');
-                                    }
-
+                                    localStorage.setItem('image_like_' + imageId, 'true');
                                     $(window.contentList[currentIndex].element).addClass('has-like');
                                 }
                             }
                         });
                     });
                 }
-            });
+            @endif
 
             if (content.type === 'image') {
                 $('#modalImage').attr('src', content.src).show();
@@ -734,27 +756,27 @@
             // Verificar si ya tiene like
             let hasLike = $(currentItem.element).hasClass('has-like');
             if (!hasLike) {
-                $.ajax({
-                    url: `/account/load/like/${imageId}`,
-                    method: 'GET',
-                    success: function(response) {
-                        if(response.success) {
-                            let likesElement = $(currentItem.element).find('.gallery-item-comments');
-                            if(likesElement.length) {
-                                likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
-                            }
-                            
-                            $('#permanentHeart').addClass('active');
-                            $('#floatingHeart').html('🤍');
-                            
-                            if (!response.isAuthenticated) {
-                                localStorage.setItem('image_like_' + imageId, 'true');
-                            }
-
-                            $(currentItem.element).addClass('has-like');
-                        }
+            $.ajax({
+                url: `/account/load/like/${imageId}`,
+                method: 'GET',
+                success: function(response) {
+                if(response.success) {
+                    let likesElement = $(currentItem.element).find('.gallery-item-comments');
+                    if(likesElement.length) {
+                    likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
                     }
-                });
+                    
+                    $('#permanentHeart').addClass('active').html('❤️');
+                    $('#floatingHeart').html('❤️');
+                    
+                    if (!response.isAuthenticated) {
+                    localStorage.setItem('image_like_' + imageId, 'true');
+                    }
+
+                    $(currentItem.element).addClass('has-like');
+                }
+                }
+            });
             }
         });
 
@@ -783,7 +805,7 @@
                             }
 
                             $('#permanentHeart').removeClass('active').html('🤍');
-                            $('#floatingHeart').html('🤍');
+                            $('#floatingHeart').html('❤️');
                             $(currentItem.element).removeClass('has-like');
 
                             if (!response.isAuthenticated) {
@@ -805,7 +827,7 @@
                             }
 
                             $('#permanentHeart').addClass('active').html('❤️');
-                            $('#floatingHeart').html('🤍');
+                            $('#floatingHeart').html('❤️');
                             $(currentItem.element).addClass('has-like');
 
                             if (!response.isAuthenticated) {

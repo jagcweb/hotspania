@@ -157,16 +157,6 @@ class AccountController extends Controller
             ], 404);
         }
 
-        $cookieName = 'image_visit_' . $id;
-        
-        if (!Cookie::has($cookieName)) {
-            $image->visits = ($image->visits ?? 0) + 1;
-            $image->save();
-            
-            // Crear cookie que dura 10 minutos
-            Cookie::queue($cookieName, 'visited', 10);
-        }
-
         return response()->json([
             'success' => true,
             'visits' => $image->visits
@@ -197,19 +187,12 @@ class AccountController extends Controller
                 $hasLiked = true;
             }
         } else {
-            $guestId = Cookie::get('guest_id') ?? Str::random(40);
-            $existingLike = ImageLike::where('image_id', $id)
-                ->where('guest_id', $guestId)
-                ->first();
-
-            if (!$existingLike) {
-                ImageLike::create([
-                    'image_id' => $id,
-                    'guest_id' => $guestId
-                ]);
-                $hasLiked = true;
-                Cookie::queue('guest_id', $guestId, 525600);
-            }
+            $guestId = Cookie::get('hotspania_session');
+            ImageLike::create([
+                'image_id' => $id,
+                'guest_id' => $guestId
+            ]);
+            $hasLiked = true;
         }
 
         if ($hasLiked) {
@@ -221,7 +204,7 @@ class AccountController extends Controller
             'likes' => $image->likes,
             'hasLiked' => true,
             'isAuthenticated' => Auth::check()
-        ])->cookie('image_like_' . $id, 'true', 525600); // Añadir cookie específica del like
+        ]);
     }
 
     public function checkLike($id)
@@ -230,11 +213,6 @@ class AccountController extends Controller
             $hasLiked = ImageLike::where('image_id', $id)
                 ->where('user_id', Auth::id())
                 ->exists();
-        } else {
-            $guestId = Cookie::get('guest_id');
-            $hasLiked = $guestId ? ImageLike::where('image_id', $id)
-                ->where('guest_id', $guestId)
-                ->exists() : Cookie::get('image_like_' . $id) === 'true';
         }
 
         return response()->json(['hasLiked' => $hasLiked]);
@@ -256,19 +234,19 @@ class AccountController extends Controller
                 ->where('user_id', Auth::id())
                 ->delete();
         } else {
-            $guestId = Cookie::get('guest_id');
-            if ($guestId) {
-                ImageLike::where('image_id', $id)
-                    ->where('guest_id', $guestId)
-                    ->delete();
-            }
+            $guestId = Cookie::get('hotspania_session');
+            ImageLike::where('image_id', $id)
+                ->where('guest_id', $guestId)
+                ->delete();
         }
 
         $image->decrement('likes');
 
+        $totalLikes = ImageLike::where('image_id', $id)->count();
+
         return response()->json([
             'success' => true,
-            'likes' => $image->likes,
+            'likes' => $totalLikes,
             'hasLiked' => false,
             'isAuthenticated' => Auth::check()
         ]);
@@ -397,14 +375,6 @@ class AccountController extends Controller
                 ->whereIn('image_id', $images->pluck('id'))
                 ->pluck('image_id')
                 ->toArray();
-        } else {
-            $guestId = Cookie::get('guest_id');
-            if ($guestId) {
-                $likedImages = ImageLike::where('guest_id', $guestId)
-                    ->whereIn('image_id', $images->pluck('id'))
-                    ->pluck('image_id')
-                    ->toArray();
-            }
         }
 
         return view('account.get', [

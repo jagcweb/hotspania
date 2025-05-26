@@ -35,7 +35,19 @@
             
             // Guardar los colores restantes en la sesión
             session(['availableColors' => array_values($availableColors)]);
+
+            // Obtener todas las imágenes del usuario y sumar sus views
+            $totalViews = \App\Models\Image::where('user_id', $user->id)->sum('visits');
+
+            // Obtener el total de likes de todas las imágenes del usuario
+            $totalLikes = \App\Models\ImageLike::whereIn('image_id', function($query) use ($user) {
+                $query->select('id')
+                      ->from('images')
+                      ->where('user_id', $user->id);
+            })->count();
         @endphp
+
+
 
         <a href="{{ route('account.get', ['nickname' => $user->nickname]) }}">
             <div class="gallery-item image-hover-zoom" tabindex="0" data-user-id="{{ $user->id }}">
@@ -50,8 +62,12 @@
                 <div class="gallery-item-info">
                     <ul>
                         <li class="gallery-item-likes">
+                            <span class="visually-hidden">Views:</span>
+                            <i class="fas fa-eye" aria-hidden="true"></i> {{$totalViews}}
+                        </li>
+                        <li class="gallery-item-likes">
                             <span class="visually-hidden">Likes:</span>
-                            <i class="fas fa-eye" aria-hidden="true"></i> {{56 * ($i+2)}}
+                            <i class="fas fa-heart" aria-hidden="true"></i> {{$totalLikes}}
                         </li>
                     </ul>
                 </div>
