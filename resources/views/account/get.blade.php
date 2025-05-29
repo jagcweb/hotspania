@@ -496,6 +496,7 @@
                     if (!response.hasLiked) {
                         $('#permanentHeart').one('click', function(e) {
                             e.stopPropagation();
+                            console.log('Heart2 clicked to add like for image ID:', imageId);
                             $('#floatingHeart').html('❤️').addClass('show');
                             setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
                             
@@ -515,6 +516,30 @@
                                 }
                             });
                         });
+                    } else {
+                        $('#permanentHeart').one('click', function(e) {
+                            e.stopPropagation();
+                            console.log('Heart2 clicked to add like for image ID:', imageId);
+                            let currentItem = window.contentList[currentIndex];
+                            let imageId = $(currentItem.element).data('id');
+                            
+                            $.ajax({
+                                url: `/account/remove-like/${imageId}`,
+                                method: 'GET',
+                                success: function(response) {
+                                    if (response.success) {
+                                        let likesElement = $(currentItem.element).find('.gallery-item-comments');
+                                        if (likesElement.length) {
+                                            likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                                        }
+
+                                        $('#permanentHeart').removeClass('active').html('🤍');
+                                        $('#floatingHeart').html('❤️');
+                                        $(currentItem.element).removeClass('has-like');
+                                    }
+                                }
+                            });
+                        });
                     }
                 });
             @else
@@ -524,6 +549,7 @@
                 if (!hasLike) {
                     $('#permanentHeart').one('click', function(e) {
                         e.stopPropagation();
+                        console.log('Heart1 clicked to add like for image ID:', imageId);
                         $('#floatingHeart').html('❤️').addClass('show'); 
                         setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
                         
@@ -540,6 +566,31 @@
                                     $('#permanentHeart').addClass('active').html('❤️');
                                     localStorage.setItem('image_like_' + imageId, 'true');
                                     $(window.contentList[currentIndex].element).addClass('has-like');
+                                }
+                            }
+                        });
+                    });
+                } else {
+                    $('#permanentHeart').one('click', function(e) {
+                        e.stopPropagation();
+                        let currentItem = window.contentList[currentIndex];
+                        let imageId = $(currentItem.element).data('id');
+                        console.log('Heart1 clicked to remove like for image ID:', imageId);
+
+                        $.ajax({
+                            url: `/account/remove-like/${imageId}`,
+                            method: 'GET',
+                            success: function(response) {
+                                if (response.success) {
+                                    let likesElement = $(currentItem.element).find('.gallery-item-comments');
+                                    if (likesElement.length) {
+                                        likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                                    }
+
+                                    $('#permanentHeart').removeClass('active').html('🤍');
+                                    $('#floatingHeart').html('❤️');
+                                    $(currentItem.element).removeClass('has-like');
+                                    localStorage.removeItem('image_like_' + imageId);
                                 }
                             }
                         });
@@ -573,7 +624,7 @@
                     if(response.success) {
                         let visitsElement = thisItem.find('.gallery-item-likes');
                         if(visitsElement.length) {
-                            visitsElement.html(`<span class="visually-hidden">Visitas:</span><i class="fas fa-eye" aria-hidden="true"></i> ${response.visits}`);
+                            visitsElement.html(`<span class="visually-hidden">Visitas:</span><i class="fas fa-eye" aria-hidden="true"></i> ${response.visits || 0}`);
                         }
                     }
                 });
@@ -763,7 +814,7 @@
                 if(response.success) {
                     let likesElement = $(currentItem.element).find('.gallery-item-comments');
                     if(likesElement.length) {
-                    likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
+                    likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes || 0}`);
                     }
                     
                     $('#permanentHeart').addClass('active').html('❤️');
@@ -784,7 +835,7 @@
         checkInitialLikes();
 
         // Agregar el evento click para el corazón permanente
-        $('#permanentHeart').on('click', function(e) {
+        /*$('#permanentHeart').on('click', function(e) {
             e.stopPropagation();
             let currentItem = window.contentList[currentIndex];
             let imageId = $(currentItem.element).data('id');
@@ -837,13 +888,14 @@
                     }
                 });
             }
-        });
+        });*/
 
 
 
 
     });
 </script>
+
 
 <style>
     /*
@@ -1691,7 +1743,7 @@
         }
     }
 
-    @media screen and (max-width: 400px) {
+    @media screen and (max-width: 480px) {
         .container-mobile {
             margin-top: 0!important;
         }

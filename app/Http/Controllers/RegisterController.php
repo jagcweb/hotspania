@@ -77,7 +77,6 @@ class RegisterController extends Controller
                     'gender' => $request->gender,
                     'dni' => Str::random(8),
                     'dni_file' => Str::random(30),
-                    'date_of_birth' => $request->date_of_birth,
                     'email' => Str::random(30).'@gmail.com',
                     'height' => $request->height,
                     'weight' => $request->weight,
@@ -200,6 +199,7 @@ class RegisterController extends Controller
                 $user->full_name = $request->get('full_name');
                 $user->dni = $request->dni;
                 $user->dni_file = $imageName;
+                $user->date_of_birth = $request->date_of_birth;
                 $user->email = $request->email;
                 $user->password = \Hash::make($request->dni);
                 $user->completed = 1;

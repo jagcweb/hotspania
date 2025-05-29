@@ -149,6 +149,9 @@ class AccountController extends Controller
 
     public function show($id) {
         $image = Image::find($id);
+
+        $image->visits = $image->visits + 1;
+        $image->save();
         
         if (!$image) {
             return response()->json([
@@ -159,7 +162,7 @@ class AccountController extends Controller
 
         return response()->json([
             'success' => true,
-            'visits' => $image->visits
+            'visits' => $image->visits ?? 0
         ]);
     }
 
