@@ -467,21 +467,23 @@
     }
 
     // Manejo de eventos para cuando el usuario seleccione archivos
-    fileInput.addEventListener('change', async (e) => {
-        const files = e.target.files;
+    if (fileInput) {
+        fileInput.addEventListener('change', async (e) => {
+            const files = e.target.files;
 
-        // Iteramos sobre los archivos seleccionados y los procesamos
-        for (let file of files) {
-            if (file.type.startsWith('image/')) {
-                await processImage(file);  // Procesar imágenes
-            } else if (file.type.startsWith('video/')) {
-                await processVideo(file);  // Procesar videos
+            // Iteramos sobre los archivos seleccionados y los procesamos
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    await processImage(file);  // Procesar imágenes
+                } else if (file.type.startsWith('video/')) {
+                    await processVideo(file);  // Procesar videos
+                }
             }
-        }
-        
-        // Una vez procesados los archivos, enviamos el formulario
-        form.submit();
-    });
+            
+            // Una vez procesados los archivos, enviamos el formulario
+            form.submit();
+        });
+    }
 </script>
 
 <script>
@@ -524,20 +526,21 @@
     // Validations and AJAX
  
     document.addEventListener('DOMContentLoaded', () => {
-        const tomSelect = new TomSelect('#ciudades', {
+        if (document.getElementById('ciudades')) {
+            const tomSelect = new TomSelect('#ciudades', {
             placeholder: 'Selecciona ciudades',
             plugins: ['remove_button'],
             onChange: function(value) {
                 // Si hay alguna opción seleccionada, ocultamos el placeholder
                 if (value.length > 0) {
-                    $('#ciudades').siblings('.choices').find('.choices__placeholder').hide();
+                $('#ciudades').siblings('.choices').find('.choices__placeholder').hide();
                 } else {
-                    // Si no hay selección, mostramos el placeholder
-                    $('#ciudades').siblings('.choices').find('.choices__placeholder').show();
+                // Si no hay selección, mostramos el placeholder
+                $('#ciudades').siblings('.choices').find('.choices__placeholder').show();
                 }
             },
-
-        });
+            });
+        }
         const validateField = (field) => {
             const value = field.value.trim();
             let valid = true;
@@ -565,7 +568,9 @@
                     break;
 
                 case 'dni_file':
-                    // Assuming validation is handled in the backend
+                    const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+                    valid = field.files.length > 0 && acceptedImageTypes.includes(field.files[0].type);
+                    errorMessage = valid ? '' : 'Por favor seleccione una imagen válida (JPEG, PNG, JPG, GIF o WEBP).';
                     break;
 
                 case 'nickname':
@@ -670,6 +675,8 @@
                 field.classList.remove('is-invalid');
             }
 
+            console.log(`Field ${field.id} validation: ${valid ? 'valid' : 'invalid'}`);
+        
             return valid;
         };
 
@@ -699,6 +706,7 @@
             let allFilled = true;
     
             requiredFields.forEach(field => {
+                console.log(`Validating field: ${field.id}`);
                 if (!validateField(field)) {
                     allFilled = false;
                 }
@@ -709,6 +717,7 @@
         };
 
         document.querySelectorAll('input, select').forEach(field => {
+            console.log
             field.addEventListener('change', () => {
                 validateField(field);
                 checkRequiredFields(field.closest('.form-step').id);
@@ -803,19 +812,21 @@
     const startTimeInput = document.getElementById('start_time');
     const endTimeInput = document.getElementById('end_time');
 
-    fullTimeCheckbox.addEventListener('change', () => {
-        if (fullTimeCheckbox.checked) {
-            startTimeDiv.classList.add('d-none');
-            endTimeDiv.classList.add('d-none');
-            startTimeInput.value = '';
-            endTimeInput.value = '';
-            startTimeInput.selectedIndex = 0;
-            endTimeInput.selectedIndex = 0;
-        } else {
-            startTimeDiv.classList.remove('d-none');
-            endTimeDiv.classList.remove('d-none');
-        }
-    });
+    if(fullTimeCheckbox) {
+        fullTimeCheckbox.addEventListener('change', () => {
+            if (fullTimeCheckbox.checked) {
+                startTimeDiv.classList.add('d-none');
+                endTimeDiv.classList.add('d-none');
+                startTimeInput.value = '';
+                endTimeInput.value = '';
+                startTimeInput.selectedIndex = 0;
+                endTimeInput.selectedIndex = 0;
+            } else {
+                startTimeDiv.classList.remove('d-none');
+                endTimeDiv.classList.remove('d-none');
+            }
+        });
+    }
 
     const whatsappInput = document.getElementById('whatsapp_number');
     const phoneInput = document.getElementById('phone');
@@ -825,14 +836,16 @@
         input.value = input.value.replace(/[^0-9]/g, ''); // Remove non-numeric characters
     };
 
-    whatsappInput.addEventListener('input', () => {
-        restrictToNumbers(whatsappInput);
-        phoneInput.value = whatsappInput.value; // Sync values
-    });
+    if(whatsappInput && phoneInput) {
+        whatsappInput.addEventListener('input', () => {
+            restrictToNumbers(whatsappInput);
+            phoneInput.value = whatsappInput.value; // Sync values
+        });
 
-    phoneInput.addEventListener('input', () => {
-        restrictToNumbers(phoneInput);
-    });
+        phoneInput.addEventListener('input', () => {
+            restrictToNumbers(phoneInput);
+        });
+    }
 
     // Add event listeners for height, weight, bust, waist, and hip fields
     heightInput = document.getElementById('height');
@@ -841,25 +854,36 @@
     waistInput = document.getElementById('waist');
     hipInput = document.getElementById('hip');
 
-    heightInput.addEventListener('input', () => {
-        restrictToNumbers(heightInput);
-    });
+    // Add input validation if the elements exist
+    if (heightInput) {
+        heightInput.addEventListener('input', () => {
+            restrictToNumbers(heightInput);
+        });
+    }
 
-    weightInput.addEventListener('input', () => {
-        restrictToNumbers(weightInput);
-    });
+    if (weightInput) {
+        weightInput.addEventListener('input', () => {
+            restrictToNumbers(weightInput);
+        });
+    }
 
-    bustInput.addEventListener('input', () => {
-        restrictToNumbers(bustInput);
-    });
+    if (bustInput) {
+        bustInput.addEventListener('input', () => {
+            restrictToNumbers(bustInput);
+        });
+    }
 
-    waistInput.addEventListener('input', () => {
-        restrictToNumbers(waistInput);
-    });
+    if (waistInput) {
+        waistInput.addEventListener('input', () => {
+            restrictToNumbers(waistInput);
+        });
+    }
 
-    hipInput.addEventListener('input', () => {
-        restrictToNumbers(hipInput);
-    });
+    if (hipInput) {
+        hipInput.addEventListener('input', () => {
+            restrictToNumbers(hipInput);
+        });
+    }
 </script>
 
 <style>

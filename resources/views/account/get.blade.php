@@ -598,6 +598,36 @@
                 }
             @endif
 
+            let lastVisit = localStorage.getItem('image_visits_' + imageId);
+            let shouldCount = true;
+
+            if (lastVisit) {
+                let lastVisitDate = new Date(lastVisit);
+                let now = new Date();
+                let hoursDiff = (now - lastVisitDate) / (1000 * 60 * 60);
+                
+                if (hoursDiff < 24) {
+                    shouldCount = false;
+                }
+            }
+
+            if (shouldCount) {
+                $.ajax({
+                    url: `/account/load/show/${imageId}`,
+                    method: 'GET',
+                }).done(function (response){
+                    if(response.success) {
+                        let visitsElement = thisItem.find('.gallery-item-likes');
+                        if(visitsElement.length) {
+                            visitsElement.html(`<span class="visually-hidden">Visitas:</span><i class="fas fa-eye" aria-hidden="true"></i> ${response.visits || 0}`);
+                        }
+                        localStorage.removeItem('image_visits_' + imageId);
+                        const timestamp = new Date().toISOString();
+                        localStorage.setItem('image_visits_' + imageId, timestamp);
+                    }
+                });
+            }
+
             if (content.type === 'image') {
                 $('#modalImage').attr('src', content.src).show();
                 $('#modalVideo').hide();
@@ -617,19 +647,36 @@
             let imageId = $(this).data('id');
             let thisItem = $(this);
             // Make AJAX call to increment visits
-            $.ajax({
-                url: `/account/load/show/${imageId}`,
-                method: 'GET',
+            let lastVisit = localStorage.getItem('image_visits_' + imageId);
+            let shouldCount = true;
+
+            if (lastVisit) {
+                let lastVisitDate = new Date(lastVisit);
+                let now = new Date();
+                let hoursDiff = (now - lastVisitDate) / (1000 * 60 * 60);
+                
+                if (hoursDiff < 24) {
+                    shouldCount = false;
+                }
+            }
+
+            if (shouldCount) {
+                $.ajax({
+                    url: `/account/load/show/${imageId}`,
+                    method: 'GET',
                 }).done(function (response){
                     if(response.success) {
                         let visitsElement = thisItem.find('.gallery-item-likes');
                         if(visitsElement.length) {
                             visitsElement.html(`<span class="visually-hidden">Visitas:</span><i class="fas fa-eye" aria-hidden="true"></i> ${response.visits || 0}`);
                         }
+                        localStorage.removeItem('image_visits_' + imageId);
+                        const timestamp = new Date().toISOString();
+                        localStorage.setItem('image_visits_' + imageId, timestamp);
                     }
                 });
+            }
             
-            // Continue with existing modal code...
             updateContentList();
             currentIndex = findContentIndex(this);
             loadContent(currentIndex);

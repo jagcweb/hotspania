@@ -541,85 +541,87 @@
 
             // Search
 
-            const $container = $('.search-container');
-            const $input = $('.search-input');
-            const $toggle = $('.search-toggle');
+            if (!window.location.href.includes('/register/')) {
+                const $container = $('.search-container');
+                const $input = $('.search-input');
+                const $toggle = $('.search-toggle');
 
-            // Solo ocultamos el input si no hay búsqueda activa
-            if (!$input.val()) {
-                $input.addClass('d-none');
-            } else {
-                // Si hay búsqueda, mostramos el input con el ancho correcto
-                $input.css('width', '200px').css('opacity', 1);
-            }
-
-            $toggle.on('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if ($input.hasClass('d-none')) {
-                    $input.removeClass('d-none')
-                        .css('opacity', 0)
-                        .animate({
-                            width: '200px',
-                            opacity: 1
-                        }, 300, () => {
-                            $input.focus();
-                        });
+                // Solo ocultamos el input si no hay búsqueda activa
+                if (!$input.val()) {
+                    $input.addClass('d-none');
+                } else {
+                    // Si hay búsqueda, mostramos el input con el ancho correcto
+                    $input.css('width', '200px').css('opacity', 1);
                 }
-            });
 
-            $input.on('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    cerrarBusqueda();
-                } else if (e.key === 'Enter' && $input.val().trim() !== '') {
-                    console.log('Buscando:', $input.val());
-                }
-            });
-
-            $input.on('click', (e) => {
-                e.stopPropagation();
-            });
-
-            $(document).on('click', () => {
-                if ($input.val().trim() === '') {
-                    cerrarBusqueda();
-                }
-            });
-
-            const cerrarBusqueda = () => {
-                if (!$input.hasClass('d-none')) {
-                    $input.animate({
-                        width: '0',
-                        opacity: 0
-                    }, 300, () => {
-                        $input.val('').addClass('d-none');
-                    });
-                }
-            };
-
-            $('.city-dropdown li').on('click', function() {
-                const cityName = $(this).text().trim().toLowerCase();
-                $('.selected_city').val(cityName);
-                $('.formsubmit').submit();
-            });
-
-            function toggleMenu(icon, menu) {
-                $(icon).click(function (e) {
+                $toggle.on('click', (e) => {
+                    e.preventDefault();
                     e.stopPropagation();
-                    $(menu).toggle();
-                });
 
-                $(document).click(function (e) {
-                    if (!$(e.target).closest(icon + ', ' + menu).length) {
-                        $(menu).hide();
+                    if ($input.hasClass('d-none')) {
+                        $input.removeClass('d-none')
+                            .css('opacity', 0)
+                            .animate({
+                                width: '200px',
+                                opacity: 1
+                            }, 300, () => {
+                                $input.focus();
+                            });
                     }
                 });
-            }
 
-            toggleMenu('#bell-icon', '#bell-menu');
-            toggleMenu('#envelope-icon', '#envelope-menu');
-            toggleMenu('#user-icon', '#user-menu');
+                $input.on('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        cerrarBusqueda();
+                    } else if (e.key === 'Enter' && $input.val().trim() !== '') {
+                        console.log('Buscando:', $input.val());
+                    }
+                });
+
+                $input.on('click', (e) => {
+                    e.stopPropagation();
+                });
+
+                $(document).on('click', () => {
+                    if ($input.val().trim() === '') {
+                        cerrarBusqueda();
+                    }
+                });
+
+                const cerrarBusqueda = () => {
+                    if (!$input.hasClass('d-none')) {
+                        $input.animate({
+                            width: '0',
+                            opacity: 0
+                        }, 300, () => {
+                            $input.val('').addClass('d-none');
+                        });
+                    }
+                };
+
+                $('.city-dropdown li').on('click', function() {
+                    const cityName = $(this).text().trim().toLowerCase();
+                    $('.selected_city').val(cityName);
+                    $('.formsubmit').submit();
+                });
+
+                function toggleMenu(icon, menu) {
+                    $(icon).click(function (e) {
+                        e.stopPropagation();
+                        $(menu).toggle();
+                    });
+
+                    $(document).click(function (e) {
+                        if (!$(e.target).closest(icon + ', ' + menu).length) {
+                            $(menu).hide();
+                        }
+                    });
+                }
+
+                toggleMenu('#bell-icon', '#bell-menu');
+                toggleMenu('#envelope-icon', '#envelope-menu');
+                toggleMenu('#user-icon', '#user-menu');
+            }
         });
     </script>
 </body>
