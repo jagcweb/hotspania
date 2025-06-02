@@ -71,6 +71,72 @@
     </div>
 </div>
 
+    <div class="modal fade" id="imageGuidelinesModal" tabindex="-1" role="dialog" aria-labelledby="imageGuidelinesModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageGuidelinesModalLabel">Sitio para mayores de 18 años.</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="ageCheck" checked style="accent-color: #f44806;">
+                        <label class="form-check-label" for="ageCheck" style="letter-spacing: normal; text-transform: none;">
+                            Soy mayor de 18 años y acepto los términos y condiciones.
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="acceptTerms()" style="background:#f44806; width:100%; color:#fff;">Acceder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!getCookie('terms')) {
+            const modalElement = document.getElementById('imageGuidelinesModal');
+            const bootstrapModal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            // Guardar la instancia como propiedad del elemento para reutilizar
+            modalElement._bootstrapModal = bootstrapModal;
+            bootstrapModal.show();
+        }
+    });
+
+    // ✅ Botón que cierra el modal y guarda la cookie
+    function acceptTerms() {
+        const expirationDate = new Date();
+        expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+        document.cookie = `terms=accepted; expires=${expirationDate.toUTCString()}; path=/`;
+
+        const modalElement = document.getElementById('imageGuidelinesModal');
+
+        // Usamos la instancia previamente almacenada o creamos una nueva
+        let modalInstance = bootstrap.Modal.getInstance?.(modalElement);
+
+        // Si getInstance no está disponible, usa la instancia guardada manualmente
+        if (!modalInstance && modalElement._bootstrapModal) {
+            modalInstance = modalElement._bootstrapModal;
+        } else if (!modalInstance) {
+            modalInstance = new bootstrap.Modal(modalElement);
+        }
+
+        modalInstance.hide();
+    }
+
+    // ✅ Función para leer cookies sin jQuery
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+    </script>
+
+
 <style>
 
     .container-fluid {

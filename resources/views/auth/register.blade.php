@@ -258,6 +258,49 @@
             @endif
 
             @if($step == 2)
+                <!-- Modal -->
+                <div class="modal fade" id="imageGuidelinesModal" tabindex="-1" role="dialog" aria-labelledby="imageGuidelinesModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+                   <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="imageGuidelinesModalLabel">Directrices para las Imágenes</h5>
+                            </div>
+                            <div class="modal-body">
+                                <ul>
+                                    <li><span style="color:#f44806;">-</span> Imágenes con buena calidad y nitidez.</li>
+                                    <li><span style="color:#f44806;">-</span> Sin marca de agua, logos, o enlaces.</li>
+                                    <li><span style="color:#f44806;">-</span> Fotos con ROSTRO. Si lo quieres ocultar, haz click en "ocultar Rostro".</li>
+                                    <li><span style="color:#f44806;">-</span> Retoques mal hechos o sospechosos son motivo de rechazo.</li>
+                                    <li><span style="color:#f44806;">-</span> En todas las imágenes tenemos que poder reconocerte.</li>
+                                </ul>
+                                <br>
+                                <p class="font-weight-bold text-danger text-center">NO subiremos fotos falsas. Utiliza fotos tuyas.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn" data-dismiss="modal" style="background:#f44806; width:100%; color:#fff;">¡De acuerdo!</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const modalElement = document.getElementById('imageGuidelinesModal');
+                        const bootstrapModal = new bootstrap.Modal(modalElement, {
+                            backdrop: 'static',
+                            keyboard: false
+                        });
+
+                        // Mostrar modal
+                        bootstrapModal.show();
+
+                        // Botón que cierra el modal
+                        document.getElementById('acceptModalBtn').addEventListener('click', function () {
+                            bootstrapModal.hide();
+                        });
+                    });
+                </script>
+
                 <form id="upload-form" method="POST" action="{{ route('user.save', ['step' => 'step-2', 'id' => \Crypt::encryptString($user->id)]) }}" enctype="multipart/form-data">
                     @csrf
                     <section id="step-2" class="form-step">
@@ -306,6 +349,15 @@
                         <div class="form-group">
                             <label for="dni_file">Foto del documento</label>
                             <input type="file" class="form-control-file" id="dni_file" name="dni_file" required accept=".jpeg,.png,.jpg,.gif,.webp">
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" name="terms" required autocomplete="off">
+                                <label class="form-check-label" for="terms">
+                                    Acepto los términos y condiciones
+                                </label>
+                            </div>
                         </div>
                         <button class="w-100 btnstep3 disabled button submit_btn submit_btn_finish submit-btn" type="submit" disabled data="step-3">Guardar</button>
                     </section>
@@ -524,10 +576,21 @@
 
 <script>
     // Validations and AJAX
- 
     document.addEventListener('DOMContentLoaded', () => {
+        const btnStep3 = document.querySelector('.btnstep3');
+        if (btnStep3) {
+            btnStep3.addEventListener('click', (e) => {
+                if (!btnStep3.disabled) {
+                    e.preventDefault();
+                    alert('Registro completado! Te enviamos un correo con los pasos a seguir');
+                    e.target.closest('form').submit();
+                }
+            });
+        }
+
+        let tomSelect;
         if (document.getElementById('ciudades')) {
-            const tomSelect = new TomSelect('#ciudades', {
+            tomSelect = new TomSelect('#ciudades', {
             placeholder: 'Selecciona ciudades',
             plugins: ['remove_button'],
             onChange: function(value) {
@@ -545,6 +608,7 @@
             const value = field.value.trim();
             let valid = true;
             let errorMessage = '';
+            console.log('efe', field.id)
             switch (field.id) {
                 case 'full_name':
                     valid = value.length > 0 && value.length <= 255;
@@ -661,6 +725,10 @@
                     const selectedCities = tomSelect.getValue();
                     valid = Array.isArray(selectedCities) ? selectedCities.length > 0 : selectedCities !== '';
                     errorMessage = valid ? '' : 'Se debe seleccionar al menos una ciudad.';
+                    break;
+
+                case 'terms':
+                    valid = field.checked;
                     break;
             }
             
