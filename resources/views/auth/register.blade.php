@@ -678,8 +678,8 @@
 
 
                 case 'gender':
-                    valid = ['hombre', 'mujer', 'otro'].includes(value);
-                    errorMessage = valid ? '' : 'El género es requerido y debe ser uno de los siguientes: hombre, mujer, otro.';
+                    valid = ['hombre', 'mujer', 'lgbti'].includes(value);
+                    errorMessage = valid ? '' : 'El género es requerido y debe ser uno de los siguientes: hombre, mujer, lgbti.';
                     break;
 
                     case 'height':
