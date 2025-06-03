@@ -35,7 +35,7 @@ class HomeController extends Controller
         ->whereNotNull('active')
         ->whereNotNull('completed')
         ->whereNull('banned')
-        ->whereNotNull('visible')
+        ->whereNotNull('users.visible')
         ->whereHas('packageUser', function ($q) {
             $q->where('end_date', '>=', now())
               ->orderBy('end_date', 'desc');
@@ -70,63 +70,66 @@ class HomeController extends Controller
                 break;
             case 'ranking':
                 $orderByLikes = true;
-
-                $query->leftJoin('images', 'images.user_id', '=', 'users.id')
-                    ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
-                    ->select('users.*', \DB::raw('COUNT(image_likes.id) as total_likes'))
-                    ->groupBy('users.id')
-                    ->whereHas('images', function ($q) {
-                        $q->has('likes');
-                    })
-                    ->orderByDesc('total_likes')
-                    ->with(['images' => function ($q) {
-                        $q->withCount('likes')->orderByDesc('likes_count');
-                    }]);
+                $orderByPosition = false;
                 break;
-
         }
 
         $perPage = $orderByPosition ? 20 : 15;
 
-        $usersWithPosition = clone $query;
-        $usersWithPosition = $usersWithPosition->whereNotNull('position')
-            ->with(['images', 'packageUser' => function($q) {
-                $q->where('end_date', '>=', now())
-                ->orderBy('end_date', 'desc');
-            }]);
-
+        // Special handling for ranking by likes
         if ($orderByLikes) {
-            $usersWithPosition = $usersWithPosition->orderByDesc('total_likes');
-        } else if ($orderByPosition) {
-            $usersWithPosition = $usersWithPosition->orderBy('position');
+            $users = $query->leftJoin('images', 'images.user_id', '=', 'users.id')
+                ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
+                ->select('users.*', \DB::raw('COUNT(image_likes.id) as total_likes'))
+                ->groupBy('users.id')
+                ->having('total_likes', '>', 0)
+                ->orderByDesc('total_likes')
+                ->with(['images' => function ($q) {
+                    $q->withCount('likes')->orderByDesc('likes_count');
+                }, 'packageUser' => function($q) {
+                    $q->where('end_date', '>=', now())
+                    ->orderBy('end_date', 'desc');
+                }])
+                ->take($perPage)
+                ->get();
         } else {
-            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
-        }
-
-        $usersWithPosition = $usersWithPosition->take($perPage)->get();
-
-        if ($usersWithPosition->count() < $perPage) {
-            $remaining = $perPage - $usersWithPosition->count();
-            $usersWithoutPosition = clone $query;
-            $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
+            // Original logic for other filters
+            $usersWithPosition = clone $query;
+            $usersWithPosition = $usersWithPosition->whereNotNull('position')
                 ->with(['images', 'packageUser' => function($q) {
                     $q->where('end_date', '>=', now())
                     ->orderBy('end_date', 'desc');
                 }]);
 
-            if ($orderByLikes) {
-                $usersWithoutPosition = $usersWithoutPosition->orderByDesc('total_likes');
-            } else if (!$orderByPosition) {
-                $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
+            if ($orderByPosition) {
+                $usersWithPosition = $usersWithPosition->orderBy('position');
             } else {
-                $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
+                $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
             }
 
-            $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
+            $usersWithPosition = $usersWithPosition->take($perPage)->get();
 
-            $users = $usersWithPosition->concat($usersWithoutPosition);
-        } else {
-            $users = $usersWithPosition;
+            if ($usersWithPosition->count() < $perPage) {
+                $remaining = $perPage - $usersWithPosition->count();
+                $usersWithoutPosition = clone $query;
+                $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
+                    ->with(['images', 'packageUser' => function($q) {
+                        $q->where('end_date', '>=', now())
+                        ->orderBy('end_date', 'desc');
+                    }]);
+
+                if (!$orderByPosition) {
+                    $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
+                } else {
+                    $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
+                }
+
+                $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
+
+                $users = $usersWithPosition->concat($usersWithoutPosition);
+            } else {
+                $users = $usersWithPosition;
+            }
         }
 
         $loadedUserIds = $users->pluck('id')->toArray();
@@ -145,7 +148,7 @@ class HomeController extends Controller
             ->whereNotNull('completed')
             ->whereNull('banned')
             ->whereNotIn('id', $loadedUsers)
-            ->whereNotNull('visible')
+            ->whereNotNull('users.visible')
             ->whereHas('packageUser', function ($q) {
                 $q->where('end_date', '>=', now())
                 ->orderBy('end_date', 'desc');
