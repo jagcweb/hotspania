@@ -45,6 +45,10 @@
                       ->from('images')
                       ->where('user_id', $user->id);
             })->count();
+
+            // Calcular puntos totales (0.2 por vista y 0.5 por like)
+            $totalPoints = floor($totalViews * 0.2 + $totalLikes * 0.5);
+
         @endphp
 
 
@@ -68,6 +72,10 @@
                         <li class="gallery-item-likes">
                             <span class="visually-hidden">Likes:</span>
                             <i class="fas fa-heart" aria-hidden="true"></i> {{$totalLikes}}
+                        </li>
+                        <li class="gallery-item-likes">
+                            <span class="visually-hidden">Points:</span>
+                            <i class="fas fa-record-vinyl" aria-hidden="true"></i> {{$totalPoints}}
                         </li>
                     </ul>
                 </div>
