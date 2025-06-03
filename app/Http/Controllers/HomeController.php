@@ -71,21 +71,20 @@ class HomeController extends Controller
             case 'ranking':
                 $orderByLikes = true;
 
-                $likesSubquery = DB::table('image_likes')
-                    ->join('images', 'image_likes.image_id', '=', 'images.id')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn('images.user_id', 'users.id');
-
-                $query->select('users.*') // importante para evitar errores
-                    ->selectSub($likesSubquery, 'total_likes')
-                    ->whereHas('images', function ($q) {
-                        $q->has('likes');
-                    })
-                    ->orderByDesc('total_likes')
-                    ->with(['images' => function ($q) {
-                        $q->withCount('likes')
-                        ->orderByDesc('likes_count');
-                    }]);
+                $query->addSelect([
+                    'total_likes' => \DB::table('image_likes')
+                        ->join('images', 'image_likes.image_id', '=', 'images.id')
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('images.user_id', 'users.id')
+                ])
+                ->whereHas('images', function ($q) {
+                    $q->has('likes'); // solo usuarios que tienen imágenes con likes
+                })
+                ->orderByDesc('total_likes')
+                ->with(['images' => function($q) {
+                    $q->withCount('likes')
+                    ->orderByDesc('likes_count');
+                }]);
                 break;
 
         }
