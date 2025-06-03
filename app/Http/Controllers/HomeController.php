@@ -92,40 +92,41 @@ class HomeController extends Controller
 
         $perPage = $orderByPosition ? 20 : 15;
 
-        // Get users with position
         $usersWithPosition = clone $query;
         $usersWithPosition = $usersWithPosition->whereNotNull('position')
             ->with(['images', 'packageUser' => function($q) {
                 $q->where('end_date', '>=', now())
-                  ->orderBy('end_date', 'desc');
+                ->orderBy('end_date', 'desc');
             }]);
-            
-        if ($orderByPosition) {
+
+        if ($orderByLikes) {
+            // Si ordenamos por likes, mantenemos ese orden aquí
+            $usersWithPosition = $usersWithPosition->orderByDesc('total_likes');
+        } else if ($orderByPosition) {
             $usersWithPosition = $usersWithPosition->orderBy('position');
         } else {
-            if(!$orderByLikes) {
-                $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
-            }
+            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
         }
-        
+
         $usersWithPosition = $usersWithPosition->take($perPage)->get();
 
-        // Get users without position if needed
         if ($usersWithPosition->count() < $perPage) {
             $remaining = $perPage - $usersWithPosition->count();
             $usersWithoutPosition = clone $query;
             $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
                 ->with(['images', 'packageUser' => function($q) {
                     $q->where('end_date', '>=', now())
-                      ->orderBy('end_date', 'desc');
+                    ->orderBy('end_date', 'desc');
                 }]);
-            
-            if (!$orderByPosition) {
+
+            if ($orderByLikes) {
+                $usersWithoutPosition = $usersWithoutPosition->orderByDesc('total_likes');
+            } else if (!$orderByPosition) {
                 $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
             } else {
                 $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
             }
-            
+
             $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
 
             $users = $usersWithPosition->concat($usersWithoutPosition);
@@ -137,8 +138,7 @@ class HomeController extends Controller
         return view('home', compact('users', 'loadedUserIds', 'selected_city'));
     }
 
-    public function loadMore($page)
-    {
+    public function loadMore($page) {
         $perPage = 20;
         $loadedUsers = json_decode(request()->input('loaded_users', '[]'));
         $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : null;
@@ -149,11 +149,11 @@ class HomeController extends Controller
             ->whereNotNull('active')
             ->whereNotNull('completed')
             ->whereNull('banned')
-            ->whereNotNull('visible')
             ->whereNotIn('id', $loadedUsers)
+            ->whereNotNull('visible')
             ->whereHas('packageUser', function ($q) {
                 $q->where('end_date', '>=', now())
-                  ->orderBy('end_date', 'desc');
+                ->orderBy('end_date', 'desc');
             });
 
         // Filtrar por ciudad si hay una seleccionada
@@ -174,7 +174,7 @@ class HomeController extends Controller
             case 'disponibles':
                 $query->where(function($q) {
                     $q->whereNotNull('available_until')
-                      ->where('available_until', '>', Carbon::now('Europe/Madrid'));
+                    ->where('available_until', '>', Carbon::now('Europe/Madrid'));
                 });
                 break;
             case 'lgtbi':
@@ -191,55 +191,52 @@ class HomeController extends Controller
                     ->selectRaw('COUNT(*)')
                     ->whereColumn('images.user_id', 'users.id');
 
-                $query->select('users.*') // Selecciona todos los campos de users
-                    ->selectSub($likesSubquery, 'total_likes') // Añade total_likes como subconsulta
+                $query->select('users.*')
+                    ->selectSub($likesSubquery, 'total_likes')
                     ->whereHas('images', function ($q) {
                         $q->has('likes'); // Solo usuarios con imágenes con likes
                     })
                     ->orderByDesc('total_likes')
                     ->with(['images' => function ($q) {
-                        $q->withCount('likes')
-                        ->orderByDesc('likes_count');
+                        $q->withCount('likes')->orderByDesc('likes_count');
                     }]);
                 break;
         }
 
-        $query->whereNotNull('visible');
-
-        // Primero usuarios con posición
+        // Usuarios con posición
         $usersWithPosition = clone $query;
         $usersWithPosition = $usersWithPosition->whereNotNull('position')
             ->with(['images', 'packageUser' => function($q) {
-                $q->where('end_date', '>=', now())
-                  ->orderBy('end_date', 'desc');
+                $q->where('end_date', '>=', now())->orderBy('end_date', 'desc');
             }]);
-            
-        if ($orderByPosition) {
+
+        if ($orderByLikes) {
+            $usersWithPosition = $usersWithPosition->orderByDesc('total_likes');
+        } else if ($orderByPosition) {
             $usersWithPosition = $usersWithPosition->orderBy('position');
         } else {
-            if(!$orderByLikes) {
-                $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
-            }
+            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
         }
-        
+
         $usersWithPosition = $usersWithPosition->take($perPage)->get();
 
-        // Completar con usuarios sin posición si es necesario
+        // Usuarios sin posición
         if ($usersWithPosition->count() < $perPage) {
             $remaining = $perPage - $usersWithPosition->count();
             $usersWithoutPosition = clone $query;
             $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
                 ->with(['images', 'packageUser' => function($q) {
-                    $q->where('end_date', '>=', now())
-                      ->orderBy('end_date', 'desc');
+                    $q->where('end_date', '>=', now())->orderBy('end_date', 'desc');
                 }]);
-            
-            if (!$orderByPosition) {
+
+            if ($orderByLikes) {
+                $usersWithoutPosition = $usersWithoutPosition->orderByDesc('total_likes');
+            } else if (!$orderByPosition) {
                 $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
             } else {
                 $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
             }
-            
+
             $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
 
             $users = $usersWithPosition->concat($usersWithoutPosition);
@@ -255,7 +252,7 @@ class HomeController extends Controller
             ->whereNull('banned')
             ->whereHas('packageUser', function ($q) {
                 $q->where('end_date', '>=', now())
-                  ->orderBy('end_date', 'desc');
+                ->orderBy('end_date', 'desc');
             })
             ->whereNotIn('id', $loadedUsers)
             ->count();
@@ -270,6 +267,7 @@ class HomeController extends Controller
             'loadedUsers' => array_merge($loadedUsers, $users->pluck('id')->toArray())
         ]);
     }
+
 
     public function privacyPolicies()
     {
