@@ -502,6 +502,13 @@ $(window).scroll(function() {
         display: none;
     }
 
+    .gallery-item-info ul {
+        white-space: nowrap;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
     .gallery-item-info li {
         display: inline-block;
         font-size: 1.7rem;
