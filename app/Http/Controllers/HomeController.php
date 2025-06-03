@@ -69,26 +69,16 @@ class HomeController extends Controller
                 break;
             case 'ranking':
                 $orderByLikes = true;
-                $query->whereHas('images', function($q) {
-                    $q->select('images.id')
-                      ->leftJoin('image_likes', 'images.id', '=', 'image_likes.image_id')
-                      ->groupBy('images.id')
-                      ->orderByRaw('COUNT(image_likes.id) DESC');
-                })
-                ->with(['images' => function($q) {
-                    $q->leftJoin('image_likes', 'images.id', '=', 'image_likes.image_id')
-                      ->groupBy('images.id')
-                      ->orderByRaw('COUNT(image_likes.id) DESC');
-                }])
-                ->orderBy(function($query) {
-                    $query->select(\DB::raw('COUNT(image_likes.id)'))
-                        ->from('images')
-                        ->leftJoin('image_likes', 'images.id', '=', 'image_likes.image_id')
+                $query->addSelect([
+                    'total_likes' => \App\Models\ImageLike::selectRaw('COUNT(*)')
                         ->whereColumn('images.user_id', 'users.id')
-                        ->groupBy('images.id')
-                        ->orderByRaw('COUNT(image_likes.id) DESC')
-                        ->limit(1);
-                }, 'desc');
+                        ->join('images', 'image_likes.image_id', '=', 'images.id')
+                ])
+                ->orderBy('total_likes', 'desc')
+                ->with(['images' => function($q) {
+                    $q->withCount('likes')
+                      ->orderBy('likes_count', 'desc');
+                }]);
                 break;
         }
 
@@ -187,26 +177,16 @@ class HomeController extends Controller
                 break;
             case 'ranking':
                 $orderByLikes = true;
-                $query->whereHas('images', function($q) {
-                    $q->select('images.id')
-                      ->leftJoin('image_likes', 'images.id', '=', 'image_likes.image_id')
-                      ->groupBy('images.id')
-                      ->orderByRaw('COUNT(image_likes.id) DESC');
-                })
-                ->with(['images' => function($q) {
-                    $q->leftJoin('image_likes', 'images.id', '=', 'image_likes.image_id')
-                      ->groupBy('images.id')
-                      ->orderByRaw('COUNT(image_likes.id) DESC');
-                }])
-                ->orderBy(function($query) {
-                    $query->select(\DB::raw('COUNT(image_likes.id)'))
-                        ->from('images')
-                        ->leftJoin('image_likes', 'images.id', '=', 'image_likes.image_id')
+                $query->addSelect([
+                    'total_likes' => \App\Models\ImageLike::selectRaw('COUNT(*)')
                         ->whereColumn('images.user_id', 'users.id')
-                        ->groupBy('images.id')
-                        ->orderByRaw('COUNT(image_likes.id) DESC')
-                        ->limit(1);
-                }, 'desc');
+                        ->join('images', 'image_likes.image_id', '=', 'images.id')
+                ])
+                ->orderBy('total_likes', 'desc')
+                ->with(['images' => function($q) {
+                    $q->withCount('likes')
+                      ->orderBy('likes_count', 'desc');
+                }]);
                 break;
         }
 
