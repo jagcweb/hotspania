@@ -492,6 +492,7 @@
             $('#modalVideo')[0].pause();
 
             let imageId = $(content.element).data('id');
+            let thisItem = $(content.element);
             
             // Verificar el estado del like
             @if(Auth::check())
@@ -603,10 +604,12 @@
                 }
             @endif
 
+            console.log('test', imageId)
             let lastVisit = localStorage.getItem('image_visits_' + imageId);
             let shouldCount = true;
 
             if (lastVisit) {
+                console.log('Last visit:', lastVisit);
                 let lastVisitDate = new Date(lastVisit);
                 let now = new Date();
                 let hoursDiff = (now - lastVisitDate) / (1000 * 60 * 60);
@@ -614,9 +617,12 @@
                 if (hoursDiff < 24) {
                     shouldCount = false;
                 }
+
+                console.log('shouldCount:', shouldCount);
             }
 
             if (shouldCount) {
+                console.log('Incrementing visits for image ID:', imageId);
                 $.ajax({
                     url: `/account/load/show/${imageId}`,
                     method: 'GET',
