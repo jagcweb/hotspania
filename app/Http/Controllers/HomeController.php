@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use App\Models\User;
 use App\Helpers\StorageHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -69,17 +70,24 @@ class HomeController extends Controller
                 break;
             case 'ranking':
                 $orderByLikes = true;
-                $query->addSelect([
-                    'total_likes' => \App\Models\ImageLike::selectRaw('COUNT(*)')
-                        ->whereColumn('images.user_id', 'users.id')
-                        ->join('images', 'image_likes.image_id', '=', 'images.id')
-                ])
-                ->orderBy('total_likes', 'desc')
-                ->with(['images' => function($q) {
-                    $q->withCount('likes')
-                      ->orderBy('likes_count', 'desc');
-                }]);
+
+                $likesSubquery = DB::table('image_likes')
+                    ->join('images', 'image_likes.image_id', '=', 'images.id')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('images.user_id', 'users.id');
+
+                $query->select('users.*') // importante para evitar errores
+                    ->selectSub($likesSubquery, 'total_likes')
+                    ->whereHas('images', function ($q) {
+                        $q->has('likes');
+                    })
+                    ->orderByDesc('total_likes')
+                    ->with(['images' => function ($q) {
+                        $q->withCount('likes')
+                        ->orderByDesc('likes_count');
+                    }]);
                 break;
+
         }
 
         $perPage = $orderByPosition ? 20 : 15;
@@ -177,15 +185,20 @@ class HomeController extends Controller
                 break;
             case 'ranking':
                 $orderByLikes = true;
+
                 $query->addSelect([
-                    'total_likes' => \App\Models\ImageLike::selectRaw('COUNT(*)')
-                        ->whereColumn('images.user_id', 'users.id')
+                    'total_likes' => \DB::table('image_likes')
                         ->join('images', 'image_likes.image_id', '=', 'images.id')
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('images.user_id', 'users.id')
                 ])
-                ->orderBy('total_likes', 'desc')
+                ->whereHas('images', function ($q) {
+                    $q->has('likes'); // solo usuarios que tienen imágenes con likes
+                })
+                ->orderByDesc('total_likes')
                 ->with(['images' => function($q) {
                     $q->withCount('likes')
-                      ->orderBy('likes_count', 'desc');
+                    ->orderByDesc('likes_count');
                 }]);
                 break;
         }
