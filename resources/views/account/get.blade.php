@@ -76,7 +76,7 @@
                     @php
                         $totalVisits = $images->sum('visits') ?? 0;
                         $totalLikes = \App\Models\ImageLike::whereIn('image_id', $images->pluck('id'))->count() ?? 0;
-                        $totalPoints = floor($totalViews * 0.2 + $totalLikes * 0.5);
+                        $totalPoints = floor($totalVisits * 0.2 + $totalLikes * 0.5);
                     @endphp
                     <ul>
                         <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
