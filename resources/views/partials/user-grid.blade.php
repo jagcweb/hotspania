@@ -73,9 +73,9 @@
                             <span class="visually-hidden">Likes:</span>
                             <i class="fas fa-heart" aria-hidden="true"></i> {{$totalLikes}}
                         </li>
-                        <li class="gallery-item-likes">
+                        <li class="gallery-item-points">
                             <span class="visually-hidden">Points:</span>
-                            <i class="fas fa-record-vinyl" aria-hidden="true"></i> {{$totalPoints}}
+                            <i class="fas fa-bullseye" aria-hidden="true"></i> {{$totalPoints}}
                         </li>
                     </ul>
                 </div>

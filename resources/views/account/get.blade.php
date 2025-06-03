@@ -76,6 +76,7 @@
                     @php
                         $totalVisits = $images->sum('visits') ?? 0;
                         $totalLikes = \App\Models\ImageLike::whereIn('image_id', $images->pluck('id'))->count() ?? 0;
+                        $totalPoints = floor($totalViews * 0.2 + $totalLikes * 0.5);
                     @endphp
                     <ul>
                         <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
@@ -173,6 +174,10 @@
                                         class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
                                 <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
                                     class="fas fa-heart" aria-hidden="true"></i> {{ \App\Models\ImageLike::where('image_id', $image->id)->count() }}</li>
+                                <li class="gallery-item-points">
+                                    <span class="visually-hidden">Points:</span>
+                                    <i class="fas fa-bullseye" aria-hidden="true"></i> {{$totalPoints}}
+                                </li>
                             </ul>
 
                         </div>
@@ -1149,10 +1154,18 @@
         display: none;
     }
 
+    .gallery-item-info ul {
+        white-space: nowrap;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
     .gallery-item-info li {
         display: inline-block;
         font-size: 1.7rem;
         font-weight: 600;
+        margin-right: 0.8rem;
     }
 
     .gallery-item-likes {

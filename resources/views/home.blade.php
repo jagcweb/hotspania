@@ -513,6 +513,7 @@ $(window).scroll(function() {
         display: inline-block;
         font-size: 1.7rem;
         font-weight: 600;
+        margin-right: 0.8rem;
     }
 
     .gallery-item-likes {
