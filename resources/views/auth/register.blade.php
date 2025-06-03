@@ -304,12 +304,18 @@
                 <form id="upload-form" method="POST" action="{{ route('user.save', ['step' => 'step-2', 'id' => \Crypt::encryptString($user->id)]) }}" enctype="multipart/form-data">
                     @csrf
                     <section id="step-2" class="form-step">
-                        <h2 class="font-normal">Sube tus imágenes y vídeos </h2>
+                        <h2 class="font-normal" style="margin:0px; padding:0px;">Sube tus imágenes y vídeos</h2>
                         <div class="form-group">
                             <label for="files">Archivos</label>
                             <input type="file" name="files[]" class="step2input form-control mt-1 image_upload" 
                                     id="files" accept=".png,.jpeg,.jpg,.webp,.gif,.bmp,.avi,.mp4,.mpg,.mov,.3gp,.wmv,.flv" multiple required>
                             <small style="color:#fff;">Máximo 8 archivos y 10mb por cada uno.</small>
+                        </div>
+                        <div class="form-check mt-2 mb-2">
+                            <input class="form-check-input" type="checkbox" id="hide_face" name="hide_face" value="1">
+                            <label class="form-check-label" for="hide_face">
+                                Ocultar rostro
+                            </label>
                         </div>
                         <button id="upload-btn" class="w-100 btnstep2 disabled button btn-navigate-form-step submit_btn" disabled type="submit" step_number="3" data="step-1" onclick="startLoading()">Siguiente</button>
                     </section>

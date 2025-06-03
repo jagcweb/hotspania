@@ -6,9 +6,9 @@
 <div class="container-fluid">
     <div class="row text-center vh-100">
         <div class="col-xl-6 col-sm-12 textura">
-            <div class="d-flex flex-column align-items-center align-content-center vh-100 justify-content-center">
-            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid" width="200"/>
-          <div>
+            <div class="d-flex flex-column align-items-center align-content-center vh-100 justify-content-start">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid" width="200"/>
+            <div>
             <h4 class="text-white">Inicia sesión o regístrate - Nunca compartiremos tu información</h4>
           </div>
           <div>
