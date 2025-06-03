@@ -71,20 +71,16 @@ class HomeController extends Controller
             case 'ranking':
                 $orderByLikes = true;
 
-                $likesSubquery = \DB::table('image_likes')
-                    ->join('images', 'image_likes.image_id', '=', 'images.id')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn('images.user_id', 'users.id');
-
-                $query->select('users.*') // Selecciona todos los campos de users
-                    ->selectSub($likesSubquery, 'total_likes') // Añade total_likes como subconsulta
+                $query->leftJoin('images', 'images.user_id', '=', 'users.id')
+                    ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
+                    ->select('users.*', \DB::raw('COUNT(image_likes.id) as total_likes'))
+                    ->groupBy('users.id')
                     ->whereHas('images', function ($q) {
-                        $q->has('likes'); // Solo usuarios con imágenes con likes
+                        $q->has('likes');
                     })
                     ->orderByDesc('total_likes')
                     ->with(['images' => function ($q) {
-                        $q->withCount('likes')
-                        ->orderByDesc('likes_count');
+                        $q->withCount('likes')->orderByDesc('likes_count');
                     }]);
                 break;
 
@@ -100,7 +96,6 @@ class HomeController extends Controller
             }]);
 
         if ($orderByLikes) {
-            // Si ordenamos por likes, mantenemos ese orden aquí
             $usersWithPosition = $usersWithPosition->orderByDesc('total_likes');
         } else if ($orderByPosition) {
             $usersWithPosition = $usersWithPosition->orderBy('position');
@@ -186,15 +181,12 @@ class HomeController extends Controller
             case 'ranking':
                 $orderByLikes = true;
 
-                $likesSubquery = \DB::table('image_likes')
-                    ->join('images', 'image_likes.image_id', '=', 'images.id')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn('images.user_id', 'users.id');
-
-                $query->select('users.*')
-                    ->selectSub($likesSubquery, 'total_likes')
+                $query->leftJoin('images', 'images.user_id', '=', 'users.id')
+                    ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
+                    ->select('users.*', \DB::raw('COUNT(image_likes.id) as total_likes'))
+                    ->groupBy('users.id')
                     ->whereHas('images', function ($q) {
-                        $q->has('likes'); // Solo usuarios con imágenes con likes
+                        $q->has('likes');
                     })
                     ->orderByDesc('total_likes')
                     ->with(['images' => function ($q) {
