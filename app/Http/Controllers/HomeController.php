@@ -98,18 +98,23 @@ class HomeController extends Controller
                 ->take($perPage)
                 ->get();
         } elseif ($orderByBestPhoto) {
-            $users = $query->leftJoin('images', 'images.user_id', '=', 'users.id')
-                ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
-                ->select('users.*', 
-                    \DB::raw('MAX((COALESCE(images.visits, 0) * 0.2) + (COUNT(image_likes.id) * 0.5)) as best_photo_points'))
-                ->groupBy('users.id', 'images.id')
-                ->having('best_photo_points', '>', 0)
-                ->orderByDesc('best_photo_points')
+            $users = $query->leftJoin(\DB::raw('(
+                SELECT 
+                    user_id,
+                    MAX((COALESCE(visits, 0) * 0.2) + (
+                        SELECT COUNT(*) FROM image_likes WHERE image_likes.image_id = images.id
+                    ) * 0.5) as best_photo_points
+                FROM images 
+                GROUP BY user_id
+            ) as best_images'), 'best_images.user_id', '=', 'users.id')
+                ->select('users.*', 'best_images.best_photo_points')
+                ->whereNotNull('best_images.best_photo_points')
+                ->where('best_images.best_photo_points', '>', 0)
+                ->orderByDesc('best_images.best_photo_points')
                 ->with(['images' => function ($q) {
                     $q->withCount('likes')->orderByDesc('likes_count');
                 }, 'packageUser' => function($q) {
-                    $q->where('end_date', '>=', now())
-                    ->orderBy('end_date', 'desc');
+                    $q->where('end_date', '>=', now())->orderBy('end_date', 'desc');
                 }])
                 ->take($perPage)
                 ->get();
@@ -229,13 +234,19 @@ class HomeController extends Controller
                 ->take($perPage)
                 ->get();
         } elseif ($orderByBestPhoto) {
-            $users = $query->leftJoin('images', 'images.user_id', '=', 'users.id')
-                ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
-                ->select('users.*', 
-                    \DB::raw('MAX((COALESCE(images.visits, 0) * 0.2) + (COUNT(image_likes.id) * 0.5)) as best_photo_points'))
-                ->groupBy('users.id', 'images.id')
-                ->having('best_photo_points', '>', 0)
-                ->orderByDesc('best_photo_points')
+            $users = $query->leftJoin(\DB::raw('(
+                SELECT 
+                    user_id,
+                    MAX((COALESCE(visits, 0) * 0.2) + (
+                        SELECT COUNT(*) FROM image_likes WHERE image_likes.image_id = images.id
+                    ) * 0.5) as best_photo_points
+                FROM images 
+                GROUP BY user_id
+            ) as best_images'), 'best_images.user_id', '=', 'users.id')
+                ->select('users.*', 'best_images.best_photo_points')
+                ->whereNotNull('best_images.best_photo_points')
+                ->where('best_images.best_photo_points', '>', 0)
+                ->orderByDesc('best_images.best_photo_points')
                 ->with(['images' => function ($q) {
                     $q->withCount('likes')->orderByDesc('likes_count');
                 }, 'packageUser' => function($q) {
