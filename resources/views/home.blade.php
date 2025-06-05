@@ -11,10 +11,13 @@
         @endphp
         @php
             $lastUserWithImage = \App\Models\User::whereHas('images', function($query) {
-                $query->whereNotNull('route_frontimage');
+            $query->whereNotNull('route_frontimage');
             })->latest()->first();
 
-            $mostLikedImage = \App\Models\Image::orderBy('likes', 'DESC')->first();
+            $mostLikedImage = \App\Models\Image::select('images.*')
+            ->selectRaw('(visits * 0.2 + (SELECT COUNT(*) FROM image_like WHERE image_id = images.id) * 0.5) as score')
+            ->orderBy('score', 'DESC')
+            ->first();
         @endphp
         <article>
             <div class="section background-transparent">

@@ -9,10 +9,21 @@
 @foreach ($users as $i=>$user)
     @if(count($user->images) > 0)
         @php
-            $image = \App\Models\Image::where('user_id', $user->id)
-                ->whereNotNull('frontimage')
-                ->whereNotNull('route_frontimage')
-                ->first();
+            if (request()->has('fotos')) {
+                // Si la URL contiene ?fotos, seleccionar la imagen con más puntos
+                $image = \App\Models\Image::where('user_id', $user->id)
+                    ->whereNotNull('frontimage')
+                    ->whereNotNull('route_frontimage')
+                    ->selectRaw('*, (visits * 0.2 + (SELECT COUNT(*) FROM image_likes WHERE image_id = images.id) * 0.5) as total_points')
+                    ->orderBy('total_points', 'desc')
+                    ->first();
+            } else {
+                // Comportamiento normal: primera imagen disponible
+                $image = \App\Models\Image::where('user_id', $user->id)
+                    ->whereNotNull('frontimage')
+                    ->whereNotNull('route_frontimage')
+                    ->first();
+            }
             
             if (!is_object($image)) {
                 $image = \App\Models\Image::where('user_id', $user->id)->orderBy('id', 'asc')->first();
