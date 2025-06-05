@@ -15,7 +15,7 @@
             })->latest()->first();
 
             $mostLikedImage = \App\Models\Image::select('images.*')
-            ->selectRaw('(visits * 0.2 + (SELECT COUNT(*) FROM image_like WHERE image_id = images.id) * 0.5) as score')
+            ->selectRaw('(visits * 0.2 + (SELECT COUNT(*) FROM image_likes WHERE image_id = images.id) * 0.5) as score')
             ->orderBy('score', 'DESC')
             ->first();
         @endphp
