@@ -55,6 +55,7 @@ class HomeController extends Controller
 
         $orderByPosition = true;
         $orderByLikes = false;
+        $orderByBestPhoto = false;
         switch ($request->get('filter')) {
             case 'disponibles':
                 $query->where(function($q) {
@@ -66,6 +67,10 @@ class HomeController extends Controller
                 $query->where('gender', 'lgbti');
                 break;
             case 'nuevas':
+                $orderByPosition = false;
+                break;
+            case 'fotos':
+                $orderByBestPhoto = true;
                 $orderByPosition = false;
                 break;
             case 'ranking':
@@ -84,6 +89,22 @@ class HomeController extends Controller
                 ->groupBy('users.id')
                 ->having('total_points', '>', 0)
                 ->orderByDesc('total_points')
+                ->with(['images' => function ($q) {
+                    $q->withCount('likes')->orderByDesc('likes_count');
+                }, 'packageUser' => function($q) {
+                    $q->where('end_date', '>=', now())
+                    ->orderBy('end_date', 'desc');
+                }])
+                ->take($perPage)
+                ->get();
+        } elseif ($orderByBestPhoto) {
+            $users = $query->leftJoin('images', 'images.user_id', '=', 'users.id')
+                ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
+                ->select('users.*', 
+                    \DB::raw('MAX((COALESCE(images.visits, 0) * 0.2) + (COUNT(image_likes.id) * 0.5)) as best_photo_points'))
+                ->groupBy('users.id', 'images.id')
+                ->having('best_photo_points', '>', 0)
+                ->orderByDesc('best_photo_points')
                 ->with(['images' => function ($q) {
                     $q->withCount('likes')->orderByDesc('likes_count');
                 }, 'packageUser' => function($q) {
@@ -168,6 +189,7 @@ class HomeController extends Controller
 
         $orderByPosition = true;
         $orderByLikes = false;
+        $orderByBestPhoto = false;
         switch (request()->get('filter')) {
             case 'disponibles':
                 $query->where(function($q) {
@@ -179,6 +201,10 @@ class HomeController extends Controller
                 $query->where('gender', 'lgbti');
                 break;
             case 'nuevas':
+                $orderByPosition = false;
+                break;
+            case 'fotos':
+                $orderByBestPhoto = true;
                 $orderByPosition = false;
                 break;
             case 'ranking':
@@ -195,6 +221,21 @@ class HomeController extends Controller
                 ->groupBy('users.id')
                 ->having('total_points', '>', 0)
                 ->orderByDesc('total_points')
+                ->with(['images' => function ($q) {
+                    $q->withCount('likes')->orderByDesc('likes_count');
+                }, 'packageUser' => function($q) {
+                    $q->where('end_date', '>=', now())->orderBy('end_date', 'desc');
+                }])
+                ->take($perPage)
+                ->get();
+        } elseif ($orderByBestPhoto) {
+            $users = $query->leftJoin('images', 'images.user_id', '=', 'users.id')
+                ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
+                ->select('users.*', 
+                    \DB::raw('MAX((COALESCE(images.visits, 0) * 0.2) + (COUNT(image_likes.id) * 0.5)) as best_photo_points'))
+                ->groupBy('users.id', 'images.id')
+                ->having('best_photo_points', '>', 0)
+                ->orderByDesc('best_photo_points')
                 ->with(['images' => function ($q) {
                     $q->withCount('likes')->orderByDesc('likes_count');
                 }, 'packageUser' => function($q) {
