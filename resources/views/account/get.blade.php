@@ -604,7 +604,6 @@
                 }
             @endif
 
-            console.log('test', imageId)
             let lastVisit = localStorage.getItem('image_visits_' + imageId);
             let shouldCount = true;
 
@@ -657,36 +656,6 @@
         $(document).on('click', '.gallery-item', function() {
             let imageId = $(this).data('id');
             let thisItem = $(this);
-            // Make AJAX call to increment visits
-            let lastVisit = localStorage.getItem('image_visits_' + imageId);
-            let shouldCount = true;
-
-            if (lastVisit) {
-                let lastVisitDate = new Date(lastVisit);
-                let now = new Date();
-                let hoursDiff = (now - lastVisitDate) / (1000 * 60 * 60);
-                
-                if (hoursDiff < 24) {
-                    shouldCount = false;
-                }
-            }
-
-            if (shouldCount) {
-                $.ajax({
-                    url: `/account/load/show/${imageId}`,
-                    method: 'GET',
-                }).done(function (response){
-                    if(response.success) {
-                        let visitsElement = thisItem.find('.gallery-item-likes');
-                        if(visitsElement.length) {
-                            visitsElement.html(`<span class="visually-hidden">Visitas:</span><i class="fas fa-eye" aria-hidden="true"></i> ${response.visits || 0}`);
-                        }
-                        localStorage.removeItem('image_visits_' + imageId);
-                        const timestamp = new Date().toISOString();
-                        localStorage.setItem('image_visits_' + imageId, timestamp);
-                    }
-                });
-            }
             
             updateContentList();
             currentIndex = findContentIndex(this);
