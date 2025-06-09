@@ -485,8 +485,9 @@
                 }
             });
         }
-
+        
         function loadContent(index) {
+            const heart = $('#floatingHeart');
             $('#permanentHeart').html('🤍').hide();
             let content = window.contentList[index];
             $('#modalVideo')[0].pause();
@@ -494,116 +495,96 @@
             let imageId = $(content.element).data('id');
             let thisItem = $(content.element);
             
+            // Funciones auxiliares para evitar redundancia
+            function updateLikesDisplay(likes) {
+                let likesElement = $(window.contentList[currentIndex].element).find('.gallery-item-comments');
+                if(likesElement.length) {
+                    likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${likes}`);
+                }
+            }
+            
+            function showFloatingHeart() {
+                $('#floatingHeart').html('❤️').addClass('show');
+                setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
+            }
+            
+            function addLike() {
+                showFloatingHeart();
+                $.ajax({
+                    url: `/account/load/like/${imageId}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if(response.success) {
+                            updateLikesDisplay(response.likes);
+                            $('#permanentHeart').addClass('active').html('❤️');
+                            $(window.contentList[currentIndex].element).addClass('has-like');
+                            
+                            @if(!Auth::check())
+                                localStorage.setItem('image_like_' + imageId, 'true');
+                            @endif
+                        }
+                    }
+                });
+            }
+            
+            function removeLike() {
+                $.ajax({
+                    url: `/account/remove-like/${imageId}`,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            updateLikesDisplay(response.likes);
+                            $('#permanentHeart').removeClass('active').html('🤍');
+                            $(window.contentList[currentIndex].element).removeClass('has-like');
+                            
+                            @if(!Auth::check())
+                                localStorage.removeItem('image_like_' + imageId);
+                            @endif
+                        }
+                    }
+                });
+            }
+            
+            function setupHeartClick(hasLike) {
+                $('#permanentHeart').one('click', function(e) {
+                    e.stopPropagation();
+                    console.log(`Heart clicked to ${hasLike ? 'remove' : 'add'} like for image ID:`, imageId);
+                    
+                    if (hasLike) {
+                        removeLike();
+                    } else {
+                        addLike();
+                    }
+                });
+            }
+            
+            function setupDoubleClick() {
+                $('#modalImage, #modalVideo').on('dblclick', function() {
+                    addLike();
+                });
+            }
+            
             // Verificar el estado del like
             @if(Auth::check())
                 $.get(`/account/check-like/${imageId}`, function(response) {
                     $('#permanentHeart').addClass('active').html(response.hasLiked ? '❤️' : '🤍').show();
+                    setupHeartClick(response.hasLiked);
                     
                     if (!response.hasLiked) {
-                        $('#permanentHeart').one('click', function(e) {
-                            e.stopPropagation();
-                            console.log('Heart2 clicked to add like for image ID:', imageId);
-                            $('#floatingHeart').html('❤️').addClass('show');
-                            setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
-                            
-                            $.ajax({
-                                url: `/account/load/like/${imageId}`,
-                                method: 'GET', 
-                                success: function(response) {
-                                    if(response.success) {
-                                        let likesElement = $(window.contentList[currentIndex].element).find('.gallery-item-comments');
-                                        if(likesElement.length) {
-                                            likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
-                                        }
-                                        
-                                        $('#permanentHeart').addClass('active').html('❤️');
-                                        $(window.contentList[currentIndex].element).addClass('has-like');
-                                    }
-                                }
-                            });
-                        });
-                    } else {
-                        $('#permanentHeart').one('click', function(e) {
-                            e.stopPropagation();
-                            console.log('Heart2 clicked to add like for image ID:', imageId);
-                            let currentItem = window.contentList[currentIndex];
-                            let imageId = $(currentItem.element).data('id');
-                            
-                            $.ajax({
-                                url: `/account/remove-like/${imageId}`,
-                                method: 'GET',
-                                success: function(response) {
-                                    if (response.success) {
-                                        let likesElement = $(currentItem.element).find('.gallery-item-comments');
-                                        if (likesElement.length) {
-                                            likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
-                                        }
-
-                                        $('#permanentHeart').removeClass('active').html('🤍');
-                                        $('#floatingHeart').html('❤️');
-                                        $(currentItem.element).removeClass('has-like');
-                                    }
-                                }
-                            });
-                        });
+                        setupDoubleClick();
                     }
                 });
             @else
                 let hasLike = localStorage.getItem('image_like_' + imageId);
                 $('#permanentHeart').addClass('active').html(hasLike ? '❤️' : '🤍').show();
+                setupHeartClick(!!hasLike);
                 
                 if (!hasLike) {
-                    $('#permanentHeart').one('click', function(e) {
-                        e.stopPropagation();
-                        console.log('Heart1 clicked to add like for image ID:', imageId);
-                        $('#floatingHeart').html('❤️').addClass('show'); 
-                        setTimeout(() => $('#floatingHeart').removeClass('show'), 1000);
-                        
-                        $.ajax({
-                            url: `/account/load/like/${imageId}`,
-                            method: 'GET',
-                            success: function(response) {
-                                if(response.success) {
-                                    let likesElement = $(window.contentList[currentIndex].element).find('.gallery-item-comments');
-                                    if(likesElement.length) {
-                                        likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
-                                    }
-                                    
-                                    $('#permanentHeart').addClass('active').html('❤️');
-                                    localStorage.setItem('image_like_' + imageId, 'true');
-                                    $(window.contentList[currentIndex].element).addClass('has-like');
-                                }
-                            }
-                        });
-                    });
-                } else {
-                    $('#permanentHeart').one('click', function(e) {
-                        e.stopPropagation();
-                        let currentItem = window.contentList[currentIndex];
-                        let imageId = $(currentItem.element).data('id');
-                        console.log('Heart1 clicked to remove like for image ID:', imageId);
-
-                        $.ajax({
-                            url: `/account/remove-like/${imageId}`,
-                            method: 'GET',
-                            success: function(response) {
-                                if (response.success) {
-                                    let likesElement = $(currentItem.element).find('.gallery-item-comments');
-                                    if (likesElement.length) {
-                                        likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes}`);
-                                    }
-
-                                    $('#permanentHeart').removeClass('active').html('🤍');
-                                    $('#floatingHeart').html('❤️');
-                                    $(currentItem.element).removeClass('has-like');
-                                    localStorage.removeItem('image_like_' + imageId);
-                                }
-                            }
-                        });
-                    });
+                    setupDoubleClick();
                 }
             @endif
 
+            // Lógica de visitas
             let lastVisit = localStorage.getItem('image_visits_' + imageId);
             let shouldCount = true;
 
@@ -638,6 +619,7 @@
                 });
             }
 
+            // Mostrar contenido
             if (content.type === 'image') {
                 $('#modalImage').attr('src', content.src).show();
                 $('#modalVideo').hide();
@@ -819,44 +801,6 @@
                 updateContentList();
             }
         }
-
-        // Detectar doble click en la imagen o video
-        $('#modalImage, #modalVideo').on('dblclick', function() {
-            let currentItem = window.contentList[currentIndex];
-            let imageId = $(currentItem.element).data('id');
-            const heart = $('#floatingHeart');
-            
-            // Siempre mostrar corazón rojo en doble tap
-            heart.html('❤️');
-            heart.addClass('show');
-            setTimeout(() => heart.removeClass('show'), 1000);
-            
-            // Verificar si ya tiene like
-            let hasLike = $(currentItem.element).hasClass('has-like');
-            if (!hasLike) {
-            $.ajax({
-                url: `/account/load/like/${imageId}`,
-                method: 'GET',
-                success: function(response) {
-                if(response.success) {
-                    let likesElement = $(currentItem.element).find('.gallery-item-comments');
-                    if(likesElement.length) {
-                    likesElement.html(`<span class="visually-hidden">Me gusta:</span><i class="fas fa-heart" aria-hidden="true"></i> ${response.likes || 0}`);
-                    }
-                    
-                    $('#permanentHeart').addClass('active').html('❤️');
-                    $('#floatingHeart').html('❤️');
-                    
-                    if (!response.isAuthenticated) {
-                    localStorage.setItem('image_like_' + imageId, 'true');
-                    }
-
-                    $(currentItem.element).addClass('has-like');
-                }
-                }
-            });
-            }
-        });
 
         // Llamar a la función cuando se carga la página
         checkInitialLikes();
