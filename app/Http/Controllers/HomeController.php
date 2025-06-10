@@ -56,6 +56,7 @@ class HomeController extends Controller
         $orderByPosition = true;
         $orderByLikes = false;
         $orderByBestPhoto = false;
+        $orderByNew = false;
         switch ($request->get('filter')) {
             case 'disponibles':
                 $query->where(function($q) {
@@ -68,6 +69,7 @@ class HomeController extends Controller
                 break;
             case 'nuevas':
                 $orderByPosition = false;
+                $orderByNew = true;
                 break;
             case 'fotos':
                 $orderByBestPhoto = true;
@@ -118,43 +120,53 @@ class HomeController extends Controller
                 }])
                 ->take($perPage)
                 ->get();
+        } elseif ($orderByNew) {
+            $users = $query->orderBy('id', 'desc')
+            ->with(['images' => function ($q) {
+                $q->withCount('likes')->orderByDesc('likes_count');
+            }, 'packageUser' => function($q) {
+                $q->where('end_date', '>=', now())
+                ->orderBy('end_date', 'desc');
+            }])
+            ->take($perPage)
+            ->get();
         } else {
             // Original logic for other filters
             $usersWithPosition = clone $query;
             $usersWithPosition = $usersWithPosition->whereNotNull('position')
-                ->with(['images', 'packageUser' => function($q) {
-                    $q->where('end_date', '>=', now())
-                    ->orderBy('end_date', 'desc');
-                }]);
+            ->with(['images', 'packageUser' => function($q) {
+                $q->where('end_date', '>=', now())
+                ->orderBy('end_date', 'desc');
+            }]);
 
             if ($orderByPosition) {
-                $usersWithPosition = $usersWithPosition->orderBy('position');
+            $usersWithPosition = $usersWithPosition->orderBy('position');
             } else {
-                $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
+            $usersWithPosition = $usersWithPosition->orderBy('created_at', 'desc');
             }
 
             $usersWithPosition = $usersWithPosition->take($perPage)->get();
 
             if ($usersWithPosition->count() < $perPage) {
-                $remaining = $perPage - $usersWithPosition->count();
-                $usersWithoutPosition = clone $query;
-                $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
-                    ->with(['images', 'packageUser' => function($q) {
-                        $q->where('end_date', '>=', now())
-                        ->orderBy('end_date', 'desc');
-                    }]);
+            $remaining = $perPage - $usersWithPosition->count();
+            $usersWithoutPosition = clone $query;
+            $usersWithoutPosition = $usersWithoutPosition->whereNull('position')
+                ->with(['images', 'packageUser' => function($q) {
+                $q->where('end_date', '>=', now())
+                ->orderBy('end_date', 'desc');
+                }]);
 
-                if (!$orderByPosition) {
-                    $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
-                } else {
-                    $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
-                }
-
-                $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
-
-                $users = $usersWithPosition->concat($usersWithoutPosition);
+            if (!$orderByPosition) {
+                $usersWithoutPosition = $usersWithoutPosition->orderBy('created_at', 'desc');
             } else {
-                $users = $usersWithPosition;
+                $usersWithoutPosition = $usersWithoutPosition->inRandomOrder();
+            }
+
+            $usersWithoutPosition = $usersWithoutPosition->take($remaining)->get();
+
+            $users = $usersWithPosition->concat($usersWithoutPosition);
+            } else {
+            $users = $usersWithPosition;
             }
         }
 
@@ -195,6 +207,7 @@ class HomeController extends Controller
         $orderByPosition = true;
         $orderByLikes = false;
         $orderByBestPhoto = false;
+        $orderByNew = false;
         switch (request()->get('filter')) {
             case 'disponibles':
                 $query->where(function($q) {
@@ -207,6 +220,7 @@ class HomeController extends Controller
                 break;
             case 'nuevas':
                 $orderByPosition = false;
+                $orderByNew = true;
                 break;
             case 'fotos':
                 $orderByBestPhoto = true;
@@ -254,6 +268,16 @@ class HomeController extends Controller
                 }])
                 ->take($perPage)
                 ->get();
+        } elseif ($orderByNew) {
+            $users = $query->orderBy('id', 'desc')
+            ->with(['images' => function ($q) {
+                $q->withCount('likes')->orderByDesc('likes_count');
+            }, 'packageUser' => function($q) {
+                $q->where('end_date', '>=', now())
+                ->orderBy('end_date', 'desc');
+            }])
+            ->take($perPage)
+            ->get();
         } else {
             // Original logic for other filters
             // Usuarios con posición
