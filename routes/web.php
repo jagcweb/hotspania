@@ -111,6 +111,9 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('images/delete/all-{user}', 'App\Http\Controllers\Admin\ImageController@deleteAll')->name('admin.images.deleteall');
     Route::get('images/get-{filename}', 'App\Http\Controllers\Admin\ImageController@getImage')->name('admin.images.get');
     Route::get('images/gif-{filename}', 'App\Http\Controllers\Admin\ImageController@getGif')->name('admin.images.get_gif');
+    Route::post('images/blur/{id}/save-blur', 'App\Http\Controllers\Admin\ImageController@saveBlur')->name('admin.images.saveBlur');
+
+
 
     // Utility Management
     Route::post('utilities/assign-package', 'App\Http\Controllers\Admin\UtilityController@assignPackage')->name('admin.utilities.assign_package');

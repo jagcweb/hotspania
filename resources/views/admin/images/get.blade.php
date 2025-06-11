@@ -63,6 +63,123 @@
                             @endphp
                             
                             <div @if($i > 0) class="mt-4" @endif style="max-width: 100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+
+                                @if($image->status == 'pending' && !is_null($image->vision_data) && $image->vision_data != [] && $image->vision_data != null && $image->vision_data != 0)
+                                    @php
+                                        $visionData = json_decode($image->vision_data, true);
+                                        $nsfwScore = $visionData['nsfw'] ?? 0;
+                                    @endphp
+                                    @if($nsfwScore > 0.9997)
+                                        <div style="background-color: red; color: white; padding: 5px; margin: 5px; text-align: center; font-weight: bold; border-radius: 3px;">
+                                            NSFW 
+                                            <a 
+                                                title="Editar imagen {{$image->route}}" 
+                                                class="p-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editModal-{{ $image->id }}"
+                                                style="margin-left:5px; color: white; font-size: 14px; border-radius: 3px; display: inline-block; padding: 2px 8px; text-align: center; cursor:pointer; background: #000; text-decoration: none;">
+                                                <i class="fa-solid fa-edit"></i> Editar
+                                            </a>
+                                        </div>
+
+                                        <!-- Modal de edición -->
+                                        <div class="modal fade" id="editModal-{{ $image->id }}" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                                <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Editor de Imagen</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar" style="color: white;"></button>
+                                                </div>
+                                                <div class="modal-body text-center p-0" style="height: auto; display: flex; justify-content: center; align-items: center;">
+                                                    <canvas id="canvas-{{ $image->id }}" style="border: 1px solid #ccc; max-width: 100%; height: auto; display: block;"></canvas>
+                                                </div>
+                                                <div class="modal-footer d-flex justify-content-center">
+                                                    <button class="btn btn-primary w-100" style="background: #f36e00; color: white; border: none;" onclick="saveBlur('{{ $image->id }}')">Guardar</button>
+                                                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <script>
+                                            document.addEventListener("DOMContentLoaded", function () {
+                                                const imageId = "{{ $image->id }}";
+                                                const imagePath = "{{ route('admin.images.get', ['filename' => $image->route]) }}";
+
+                                                const canvas = document.getElementById("canvas-" + imageId);
+                                                canvas.style.cursor = 'crosshair'; // Cambiar cursor al pasar sobre el canvas
+                                                const ctx = canvas.getContext("2d");
+                                                let drawing = false;
+                                                const blurSize = 20;
+
+                                                const img = new Image();
+                                                img.crossOrigin = "Anonymous";
+                                                img.src = imagePath;
+
+                                                img.onload = function () {
+                                                    canvas.width = img.width;
+                                                    canvas.height = img.height;
+                                                    ctx.drawImage(img, 0, 0);
+                                                };
+
+                                                canvas.addEventListener("mousedown", () => drawing = true);
+                                                canvas.addEventListener("mouseup", () => drawing = false);
+                                                canvas.addEventListener("mousemove", (e) => {
+                                                    if (!drawing) return;
+                                                    const rect = canvas.getBoundingClientRect();
+
+                                                    const scaleX = canvas.width / rect.width;
+                                                    const scaleY = canvas.height / rect.height;
+
+                                                    const x = (e.clientX - rect.left) * scaleX;
+                                                    const y = (e.clientY - rect.top) * scaleY;
+
+                                                    const imageData = ctx.getImageData(x - blurSize/2, y - blurSize/2, blurSize, blurSize);
+                                                    let r = 0, g = 0, b = 0;
+                                                    for (let i = 0; i < imageData.data.length; i += 4) {
+                                                        r += imageData.data[i];
+                                                        g += imageData.data[i + 1];
+                                                        b += imageData.data[i + 2];
+                                                    }
+                                                    const pixels = imageData.data.length / 4;
+                                                    r /= pixels; g /= pixels; b /= pixels;
+                                                    for (let i = 0; i < imageData.data.length; i += 4) {
+                                                        imageData.data[i] = r;
+                                                        imageData.data[i + 1] = g;
+                                                        imageData.data[i + 2] = b;
+                                                    }
+                                                    ctx.putImageData(imageData, x - blurSize/2, y - blurSize/2);
+                                                });
+                                            });
+
+                                            function saveBlur(imageId) {
+                                                const canvas = document.getElementById("canvas-" + imageId);
+                                                const dataURL = canvas.toDataURL("image/jpeg");
+
+                                                const saveBlurUrl = "{{ route('admin.images.saveBlur', ['id' => 'ID_PLACEHOLDER']) }}".replace('ID_PLACEHOLDER', imageId);
+
+                                                fetch(saveBlurUrl, {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type": "application/json",
+                                                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                                                    },
+                                                    body: JSON.stringify({ image: dataURL })
+                                                })
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                    alert("Imagen guardada.");
+                                                    // Opcional: recarga la imagen en la página
+                                                    // location.reload();
+                                                })
+                                                .catch(err => {
+                                                    console.error(err);
+                                                    alert("Error al guardar la imagen.");
+                                                });
+                                            }
+                                        </script>
+
+                                    @endif
+                                @endif
                                 
                                 @if ($mimeType && strpos($mimeType, 'image/') === 0)
                                     <a href="{{ asset('storage/images/'.$image->route) }}" target="_blank">

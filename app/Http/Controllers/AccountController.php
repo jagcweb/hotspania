@@ -409,22 +409,66 @@ class AccountController extends Controller
             $mimeType = $file->getMimeType();
             $extension = $file->getClientOriginalExtension();
 
+         \Log::info("Procesando imagen: {$imageName}");
+
             \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
+            $tempImagePath = storage_path('app/public/temp_img_ia/' . $imageName);
 
-            $imageData = \Storage::disk('temp_img_ia')->get($imageName);
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
 
-            //$visionResult = $this->analyzeImageWithVisionAI($imageData);
-            //$vertexAIResult = $this->analyzeImageWithVertexAI($imageData);
-            //$opencvResult = $this->processImageWithOpenCV($imageData);
-            
+            if ($isWindows) {
+                $python = 'python';
+                $predictorPath = 'C:/xampp/htdocs/ProyectosFreelance/Hotspania/body_face_nsfw_models/models/app/predictor.py';
+                $command = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath);
+                $command2 = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath) . ' --blur_faces';
+            } else {
+                $activate = 'source /var/www/hotspania/body_face_nsfw_models/venv/bin/activate';
+                $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath);
+                $command = "bash -c '$activate && $script'";
+                $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces';
+                $command2 = "bash -c '$activate && $script2'";
+            }
 
-            $combinedResult = [
-                //'vision' => $visionResult,
-                //'vertex' => $vertexAIResult,
-                //'opencv' => $opencvResult,
-            ];
+            \Log::debug("Comando ejecutado: $command");
+
+            $output = shell_exec($command);
+
+            \Log::debug("Salida del script Python: $output");
+
+            $combinedResult = json_decode($output, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                \Log::error("Error al decodificar JSON: " . json_last_error_msg());
+                \Log::debug("Salida cruda del script Python: [$output]");
+                $combinedResult = ['error' => 'JSON parse failed', 'raw_output' => $output];
+            }
+
+            // Si se debe ocultar el rostro
+            if (!is_null($request->get('hide_face'))) {
+                \Log::info("Hide face detected for image: {$imageName}");
+                \Log::debug("Comando2 ejecutado: $command2");
+                $output2 = shell_exec($command2);
+                \Log::debug("Salida del script2 de Python: $output2");
+
+                // Verificar si existe la imagen difuminada y reemplazar $file
+                $ext = '.' . $extension;
+                $blurredPath = str_replace($ext, '_blurred' . $ext, $tempImagePath);
+
+                if (file_exists($blurredPath)) {
+                    $file = new \Illuminate\Http\UploadedFile(
+                        $blurredPath,
+                        $imageName,
+                        $mimeType,
+                        null,
+                        true // marcar como archivo de prueba
+                    );
+                    \Log::info("Imagen con rostros ocultos usada para la marca de agua: {$imageName}");
+                } else {
+                    \Log::warning("No se encontró la imagen difuminada esperada en: $blurredPath");
+                }
+            }
 
             \Storage::disk('temp_img_ia')->delete($imageName);
+            \Log::info("Archivo temporal eliminado: {$imageName}");
 
             // Initialize the ImageManager with the GD driver (explicitly using GD)
             $manager = new ImageManager(new Driver());

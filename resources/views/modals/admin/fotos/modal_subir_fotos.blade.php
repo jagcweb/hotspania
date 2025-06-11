@@ -13,8 +13,8 @@
                     $last_image_date = is_object($last_image) ? \Carbon\Carbon::parse($last_image->created_at) : \Carbon\Carbon::parse('2024-01-01');
                 @endphp
 
-                {{ $last_image_date->diffInDays() }} días desde la última subida de imágenes o vídeos.
-                @if($last_image_date->diffInDays() < 30 && \Auth::user()->getRoleNames()[0] != 'admin')
+                <span style="color: #000;">{{ $last_image_date->diffInDays() }} días desde la última subida de imágenes o vídeos.</span>
+                @if($last_image_date->diffInDays() < -1 && \Auth::user()->getRoleNames()[0] != 'admin')
                     <div class="alert alert-warning" role="alert">
                         <strong>¡Atención!</strong> Solo puedes subir imágenes o vídeos cada 30 días. La última subida fue el {{ $last_image_date->format('d/m/Y') }}.
                     </div>
@@ -25,6 +25,13 @@
                             <label for="image">Imágenes o vídeos (máximo 10 archivos)</label>
                             <input type="file" class="form-control image_upload" id="image" name="images[]" multiple accept=".jpeg,.png,.jpg,.gif,.webp,.mp4,.mov,.avi,.wmv,.avchd,.webm,.flv">
                             <input type="text" id="user_id" name="user_id" value="{{$u->id}}" hidden/>
+                        </div>
+
+                        <div class="form-check mt-2 mb-2">
+                            <input class="form-check-input" type="checkbox" id="hide_face" name="hide_face" value="1" style="accent-color: #f36e00;">
+                            <label class="form-check-label ml-2" for="hide_face">
+                                Ocultar rostro
+                            </label>
                         </div>
 
                         @if (Request::is('account/edit*'))
@@ -79,6 +86,7 @@
     var fileInput = document.getElementById('image');
     var progressContainer = document.getElementById('progress-container');
     var userId = document.getElementById('user_id').value;
+    var hideFaceCheckbox = document.getElementById('hide_face');
 
     // Obtener el token CSRF del meta tag
     var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -144,6 +152,11 @@
             var formData = new FormData();
             formData.append('images[]', file);  // Solo se sube un archivo por petición
             formData.append('user_id', userId);
+
+            if (hideFaceCheckbox && hideFaceCheckbox.checked) {
+                formData.append('hide_face', '1');
+            }
+
             xhr.send(formData);
         });
     }
