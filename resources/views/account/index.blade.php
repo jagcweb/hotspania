@@ -71,7 +71,7 @@
 
             </div>
 
-            <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - Barcelona</p>
+            <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - {{ ucfirst(\Cookie::get('selected_city')) ?? "Barcelona" }}</p>
 
             <div class="profile-stats">
 

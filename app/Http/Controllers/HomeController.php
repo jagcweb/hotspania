@@ -87,7 +87,7 @@ class HomeController extends Controller
         if ($orderByLikes) {
             $users = $query->leftJoin('images', 'images.user_id', '=', 'users.id')
                 ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
-                ->select('users.*', \DB::raw('(COALESCE(SUM(images.visits), 0) * 0.2) + (COUNT(image_likes.id) * 0.5) as total_points'))
+                ->select('users.*', \DB::raw('(COALESCE(SUM(images.visits), 0) * 0.2) + (COUNT(image_likes.id) * 0.5) + (COALESCE(users.visits, 0) * 1) as total_points'))
                 ->groupBy('users.id')
                 ->having('total_points', '>', 0)
                 ->orderByDesc('total_points')
@@ -236,8 +236,7 @@ class HomeController extends Controller
         if ($orderByLikes) {
             $users = $query->leftJoin('images', 'images.user_id', '=', 'users.id')
                 ->leftJoin('image_likes', 'image_likes.image_id', '=', 'images.id')
-                ->select('users.*', \DB::raw('(COALESCE(SUM(images.visits), 0) * 0.2) + (COUNT(image_likes.id) * 0.5) as total_points'))
-                ->groupBy('users.id')
+                ->select('users.*', \DB::raw('(COALESCE(SUM(images.visits), 0) * 0.2) + (COUNT(image_likes.id) * 0.5) + (COALESCE(users.visits, 0) * 1) as total_points'))
                 ->having('total_points', '>', 0)
                 ->orderByDesc('total_points')
                 ->with(['images' => function ($q) {

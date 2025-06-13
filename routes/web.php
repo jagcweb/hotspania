@@ -47,6 +47,7 @@ Route::post('/account/assign-package', [App\Http\Controllers\AccountController::
 Route::post('account/make-available/{id}',  [App\Http\Controllers\AccountController::class, 'makeAvailable'])->name('account.make_available');
 Route::get('account/make-unavailable/{id}',  [App\Http\Controllers\AccountController::class, 'makeUnavailable'])->name('account.make_unavailable');
 Route::get('/account/visible/{id}', [App\Http\Controllers\AccountController::class, 'visibleAccount'])->name('account.visible');
+Route::get('/account/load/addVisit/profile/{id}', [App\Http\Controllers\AccountController::class, 'addVisitProfile'])->name('account.addVisitProfile')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/account/load/show/{id}', [App\Http\Controllers\AccountController::class, 'show'])->name('account.show')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/account/load/like/{id}', [App\Http\Controllers\AccountController::class, 'like'])->name('account.like')->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/account/edit/edit-data', [App\Http\Controllers\AccountController::class, 'editData'])->name('account.edit-data');

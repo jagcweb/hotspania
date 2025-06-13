@@ -48,7 +48,7 @@ class AccountController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('logged')->except(['get', 'loadMore', 'show', 'like', 'checkLike', 'removeLike']); // Añadir 'checkLike' a las excepciones
+        $this->middleware('logged')->except(['get', 'loadMore', 'show', 'like', 'checkLike', 'removeLike']);
     }
 
     public function makeUnavailable($id) {
@@ -163,6 +163,24 @@ class AccountController extends Controller
         return response()->json([
             'success' => true,
             'visits' => $image->visits ?? 0
+        ]);
+    }
+
+    public function addVisitProfile($id) {
+        $id = \Crypt::decryptString($id);
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado'
+            ], 404);
+        }
+
+        $user->increment('visits');
+
+        return response()->json([
+            'success' => true,
+            'visits' => $user->visits ?? 0,
         ]);
     }
 

@@ -246,6 +246,7 @@ class ImageController extends Controller
             $imageModel->type = "images";
             $imageModel->status = 'approved'; // Set initial status to pending
             $imageModel->watermarked = 1;
+            $imageModel->visible = 1; // Set initial visibility to true
             $imageModel->vision_data = json_encode($combinedResult);
             $imageModel->save();
         }

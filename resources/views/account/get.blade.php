@@ -69,7 +69,7 @@
 
                 </div>
 
-                <p style="font-size:16px;" class="text-justify text-city">{{ $user->working_zone ?? '' }} - Barcelona</p>
+                <p style="font-size:16px;" class="text-justify text-city">{{ $user->working_zone ?? '' }} - {{ ucfirst(\Cookie::get('selected_city')) ?? "Barcelona" }}</p>
 
                 <div class="profile-stats">
 
@@ -448,6 +448,33 @@
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Check if profile visit should be counted
+        let profileVisitKey = 'profile_visits_{{ $user->id }}';
+        let lastProfileVisit = localStorage.getItem(profileVisitKey);
+        let shouldCountProfileVisit = true;
+
+        if (lastProfileVisit) {
+            let lastVisitDate = new Date(lastProfileVisit);
+            let now = new Date();
+            let hoursDiff = (now - lastVisitDate) / (1000 * 60 * 60);
+            
+            if (hoursDiff < 24) {
+            shouldCountProfileVisit = false;
+            }
+        }
+
+        if (shouldCountProfileVisit) {
+            $.ajax({
+            url: `/account/load/addVisit/profile/{{ \Crypt::encryptString($user->id) }}`,
+            method: 'GET',
+            }).done(function (response){
+            if(response.success) {
+                const timestamp = new Date().toISOString();
+                localStorage.setItem(profileVisitKey, timestamp);
+            }
+            });
+        }
+
         let currentIndex = 0; 
         window.contentList = []; // Hacemos contentList global
         let isModalActive = false;
@@ -494,6 +521,10 @@
 
             let imageId = $(content.element).data('id');
             let thisItem = $(content.element);
+            
+            // LIMPIAR EVENTOS ANTERIORES - ESTO ES CLAVE
+            $('#permanentHeart').off('click');
+            $('#modalImage, #modalVideo').off('dblclick');
             
             // Funciones auxiliares para evitar redundancia
             function updateLikesDisplay(likes) {
@@ -546,7 +577,7 @@
             }
             
             function setupHeartClick(hasLike) {
-                $('#permanentHeart').one('click', function(e) {
+                $('#permanentHeart').on('click', function(e) {
                     e.stopPropagation();
                     console.log(`Heart clicked to ${hasLike ? 'remove' : 'add'} like for image ID:`, imageId);
                     

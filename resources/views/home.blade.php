@@ -47,7 +47,7 @@
                         </div>
                         <span class="story-text">Nuevas</span>
                     </a>
-                    <a href="{{ route('home', ['filter' => 'fotos']) }}" class="story-item">
+                    {{--<a href="{{ route('home', ['filter' => 'fotos']) }}" class="story-item">
                         <div class="story-circle" style="padding: 0!important;">
                                 <span class="circle-text" style="width: 100%; height: 100%;">
                                 @if($lastUserWithImage)
@@ -59,7 +59,7 @@
                             </span>
                         </div>
                         <span class="story-text">Fotos</span>
-                    </a>
+                    </a>  --}}
                     <a href="{{ route('home', ['filter' => 'ranking']) }}" class="story-item">
                         <div class="story-circle">
                             <span class="circle-text"><i class="fa-solid fa-trophy icon-story"></i></span>
