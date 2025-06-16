@@ -159,7 +159,7 @@ class RegisterController extends Controller
                         $command = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath);
                         $command2 = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath) . ' --blur_faces';
                     } else {
-                        $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate';
+                        $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate 2>/dev/null';
                         $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' 2>/dev/null';
                         $command = "bash -c '$activate && $script'";
                         $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces 2>/dev/null';
