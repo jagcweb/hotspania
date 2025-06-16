@@ -69,7 +69,7 @@
                                         $visionData = json_decode($image->vision_data, true);
                                         $nsfwScore = $visionData['nsfw'] ?? 0;
                                     @endphp
-                                    @if($nsfwScore > 0.999)
+                                    @if($nsfwScore >= 0.999)
                                         <div style="background-color: red; color: white; padding: 5px; margin: 5px; text-align: center; font-weight: bold; border-radius: 3px;">
                                             NSFW 
                                             <a 
