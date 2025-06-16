@@ -439,13 +439,14 @@ class AccountController extends Controller
                 $predictorPath = 'C:/xampp/htdocs/ProyectosFreelance/Hotspania/body_face_nsfw_models/models/app/predictor.py';
                 $command = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath);
                 $command2 = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath) . ' --blur_faces';
-            } else {
-                $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate';
-                $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath);
-                $command = "bash -c '$activate && $script'";
-                $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces';
-                $command2 = "bash -c '$activate && $script2'";
-            }
+                } else {
+                    $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate';
+                    $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' 2>/dev/null';
+                    $command = "bash -c '$activate && $script'";
+                    $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces 2>/dev/null';
+                    $command2 = "bash -c '$activate && $script2'";
+                }
+
 
             \Log::debug("Comando ejecutado: $command");
 
