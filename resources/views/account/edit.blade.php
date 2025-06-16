@@ -50,7 +50,28 @@
 
             </div>
 
-            <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - {{ ucfirst(\Cookie::get('selected_city')) ?? "Barcelona" }}</p>
+                <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - <span id="selectedCity"></span></p>
+
+                <script>
+                    // Get cookie value from JavaScript
+                    function getCookie(name) {
+                        let value = `; ${document.cookie}`;
+                        let parts = value.split(`; ${name}=`);
+                        if (parts.length === 2) {
+                            return decodeURIComponent(parts.pop().split(';').shift());
+                        }
+                        return null;
+                    }
+                    
+                    // Update the city name from cookie
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const selectedCity = getCookie('selected_city') || 'Barcelona';
+                        const cityElement = document.getElementById('selectedCity');
+                        if (cityElement) {
+                            cityElement.textContent = selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1);
+                        }
+                    });
+                </script>
 
             <div class="profile-stats">
 

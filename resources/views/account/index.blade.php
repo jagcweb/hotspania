@@ -71,22 +71,28 @@
 
             </div>
 
-            <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - {{ ucfirst(\Cookie::get('selected_city')) ?? "Barcelona" }}</p>
+            <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - <span id="selectedCity"></span></p>
 
-            <div class="profile-stats">
-
-                @php
-                    $totalVisits = $images->sum('visits') ?? 0;
-                    $totalLikes = \App\Models\ImageLike::whereIn('image_id', $images->pluck('id'))->count() ?? 0;
-                    $totalPoints = floor($totalVisits * 0.2 + $totalLikes * 0.5);
-                @endphp
-                <ul>
-                    <li><span class="profile-stat-count">{{ count($images) }}</span> archivos</li>
-                    <li><span class="profile-stat-count">{{ $totalVisits }}</span> visitas</li>
-                    <li><span class="profile-stat-count">{{ $totalLikes }}</span> me gusta</li>
-                </ul>
-
-            </div>
+            <script>
+                // Get cookie value from JavaScript
+                function getCookie(name) {
+                    let value = `; ${document.cookie}`;
+                    let parts = value.split(`; ${name}=`);
+                    if (parts.length === 2) {
+                        return decodeURIComponent(parts.pop().split(';').shift());
+                    }
+                    return null;
+                }
+                
+                // Update the city name from cookie
+                document.addEventListener('DOMContentLoaded', function() {
+                    const selectedCity = getCookie('selected_city') || 'Barcelona';
+                    const cityElement = document.getElementById('selectedCity');
+                    if (cityElement) {
+                        cityElement.textContent = selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1);
+                    }
+                });
+                </script>
 
             <div class="profile-bio mt-3">
                 <p class="mt-2"></p>
