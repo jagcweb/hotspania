@@ -440,7 +440,7 @@ class AccountController extends Controller
                 $command = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath);
                 $command2 = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath) . ' --blur_faces';
             } else {
-                $activate = 'source /var/www/hotspania/body_face_nsfw_models/venv/bin/activate';
+                $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate';
                 $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath);
                 $command = "bash -c '$activate && $script'";
                 $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces';
