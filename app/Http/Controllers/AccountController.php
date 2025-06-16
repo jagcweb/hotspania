@@ -422,12 +422,10 @@ class AccountController extends Controller
         foreach ($files as $file) {
             // Generate a unique name for the image
             $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
-
-
             $mimeType = $file->getMimeType();
             $extension = $file->getClientOriginalExtension();
 
-         \Log::info("Procesando imagen: {$imageName}");
+            \Log::info("Procesando imagen: {$imageName}");
 
             \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
             $tempImagePath = storage_path('app/public/temp_img_ia/' . $imageName);
@@ -441,20 +439,26 @@ class AccountController extends Controller
                 $command2 = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath) . ' --blur_faces';
             } else {
                 $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate 2>/dev/null';
-                $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' 2>/dev/null';
-                $command = "bash -c '$activate && $script'";
-                $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces 2>/dev/null';
-                $command2 = "bash -c '$activate && $script2'";
+                $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath);
+                $command = "bash -c '$activate && { $script; } 2>/dev/null'";
+                $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces';
+                $command2 = "bash -c '$activate && { $script2; } 2>/dev/null'";
             }
-
 
             \Log::debug("Comando ejecutado: $command");
 
             $output = shell_exec($command);
 
-            \Log::debug("Salida del script Python: $output");
+            \Log::debug("Salida cruda del script Python: $output");
 
-            $combinedResult = json_decode($output, true);
+            // Filtrar la salida para extraer solo el JSON válido
+            if (preg_match('/\{.*\}/s', $output, $matches)) {
+                $json_output = $matches[0];
+            } else {
+                $json_output = '';
+            }
+
+            $combinedResult = json_decode($json_output, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 \Log::error("Error al decodificar JSON: " . json_last_error_msg());
                 \Log::debug("Salida cruda del script Python: [$output]");
@@ -489,23 +493,22 @@ class AccountController extends Controller
             \Storage::disk('temp_img_ia')->delete($imageName);
             \Log::info("Archivo temporal eliminado: {$imageName}");
 
-            // Initialize the ImageManager with the GD driver (explicitly using GD)
             $manager = new ImageManager(new Driver());
-
             $this->addWaterMark($file, $imageName, $extension, false);
 
             $imageModel = new Image(); // Assuming you have an Image model
-            $imageModel->user_id = \Auth::user()->id;
+            $imageModel->user_id = $request->input('user_id');
             $imageModel->route = $imageName;
             $imageModel->route_gif = $gifName ?? NULL;
             $imageModel->size = round($file->getSize() / 1024, 2);
             $imageModel->type = "images";
-            $imageModel->status = 'pending'; // Set initial status to pending
+            $imageModel->status = 'approved'; // Set initial status to pending
             $imageModel->watermarked = 1;
-            $imageModel->visible = 1;
+            $imageModel->visible = 1; // Set initial visibility to true
             $imageModel->vision_data = json_encode($combinedResult);
             $imageModel->save();
         }
+
 
         //return back()->with('success', 'Images uploaded with watermark pattern successfully!');
     }

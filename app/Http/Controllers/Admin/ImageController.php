@@ -187,19 +187,26 @@ class ImageController extends Controller
                 $command2 = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath) . ' --blur_faces';
             } else {
                 $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate 2>/dev/null';
-                $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' 2>/dev/null';
-                $command = "bash -c '$activate && $script'";
-                $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces 2>/dev/null';
-                $command2 = "bash -c '$activate && $script2'";
+                $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath);
+                $command = "bash -c '$activate && { $script; } 2>/dev/null'";
+                $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces';
+                $command2 = "bash -c '$activate && { $script2; } 2>/dev/null'";
             }
 
             \Log::debug("Comando ejecutado: $command");
 
             $output = shell_exec($command);
 
-            \Log::debug("Salida del script Python: $output");
+            \Log::debug("Salida cruda del script Python: $output");
 
-            $combinedResult = json_decode($output, true);
+            // Filtrar la salida para extraer solo el JSON válido
+            if (preg_match('/\{.*\}/s', $output, $matches)) {
+                $json_output = $matches[0];
+            } else {
+                $json_output = '';
+            }
+
+            $combinedResult = json_decode($json_output, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 \Log::error("Error al decodificar JSON: " . json_last_error_msg());
                 \Log::debug("Salida cruda del script Python: [$output]");
@@ -237,7 +244,6 @@ class ImageController extends Controller
             $manager = new ImageManager(new Driver());
             $this->addWaterMark($file, $imageName, $extension, false);
 
-
             $imageModel = new Image(); // Assuming you have an Image model
             $imageModel->user_id = $request->input('user_id');
             $imageModel->route = $imageName;
@@ -250,6 +256,7 @@ class ImageController extends Controller
             $imageModel->vision_data = json_encode($combinedResult);
             $imageModel->save();
         }
+
 
         //return back()->with('success', 'Images uploaded with watermark pattern successfully!');
     }
