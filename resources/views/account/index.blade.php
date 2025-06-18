@@ -168,14 +168,19 @@
 
                         <div class="gallery-item-info">
 
+                        @php
+                            $totalVisits = $images->sum('visits') ?? 0;
+                            $totalLikes = \App\Models\ImageLike::whereIn('image_id', $images->pluck('id'))->count() ?? 0;
+                            $totalPoints = floor($totalVisits * 0.2 + $totalLikes * 0.5);
+                        @endphp
                             <ul>
                                 <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
-                                        class="fas fa-eye" aria-hidden="true"></i> {{ $image->visits ?? 0 }}</li>
+                                        class="fas fa-eye" aria-hidden="true"></i> {{ $totalVisits ?? 0 }}</li>
                                     <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-heart" aria-hidden="true"></i> {{ \App\Models\ImageLike::where('image_id', $image->id)->count() }}</li>
+                                        class="fas fa-heart" aria-hidden="true"></i> {{ $totalLikes ?? 0 }}</li>
                                     <li class="gallery-item-points">
                                         <span class="visually-hidden">Points:</span>
-                                        <i class="fas fa-bullseye" aria-hidden="true"></i> {{$totalPoints}}
+                                        <i class="fas fa-bullseye" aria-hidden="true"></i> {{$totalPoints ?? 0}}
                                     </li>
                             </ul>
 

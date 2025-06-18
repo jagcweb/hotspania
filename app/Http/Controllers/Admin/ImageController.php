@@ -168,93 +168,18 @@ class ImageController extends Controller
 
         // Process each file
         foreach ($files as $file) {
-            // Generate a unique name for the image
             $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
             $mimeType = $file->getMimeType();
             $extension = $file->getClientOriginalExtension();
-
-            \Log::info("Procesando imagen: {$imageName}");
+            $userId = $request->input('user_id');
+            $hideFace = !is_null($request->get('hide_face'));
 
             \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
             $tempImagePath = storage_path('app/public/temp_img_ia/' . $imageName);
 
-            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+            \App\Jobs\ProcesarImagen::dispatch($tempImagePath, $imageName, $mimeType, $extension, $userId, $hideFace, "pending");
 
-            if ($isWindows) {
-                $python = 'python';
-                $predictorPath = 'C:/xampp/htdocs/ProyectosFreelance/Hotspania/body_face_nsfw_models/models/app/predictor.py';
-                $command = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath);
-                $command2 = "$python " . escapeshellarg($predictorPath) . ' ' . escapeshellarg($tempImagePath) . ' --blur_faces';
-            } else {
-                $activate = 'source /var/www/hotspania/body_face_nsfw_models/models/app/venv/bin/activate 2>/dev/null';
-                $script = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath);
-                $command = "bash -c '$activate && { $script; } 2>/dev/null'";
-                $script2 = 'python3 /var/www/hotspania/body_face_nsfw_models/models/app/predictor.py ' . escapeshellarg($tempImagePath) . ' --blur_faces';
-                $command2 = "bash -c '$activate && { $script2; } 2>/dev/null'";
-            }
-
-            \Log::debug("Comando ejecutado: $command");
-
-            $output = shell_exec($command);
-
-            \Log::debug("Salida cruda del script Python: $output");
-
-            // Filtrar la salida para extraer solo el JSON válido
-            if (preg_match('/\{.*\}/s', $output, $matches)) {
-                $json_output = $matches[0];
-            } else {
-                $json_output = '';
-            }
-
-            $combinedResult = json_decode($json_output, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                \Log::error("Error al decodificar JSON: " . json_last_error_msg());
-                \Log::debug("Salida cruda del script Python: [$output]");
-                $combinedResult = ['error' => 'JSON parse failed', 'raw_output' => $output];
-            }
-
-            // Si se debe ocultar el rostro
-            if (!is_null($request->get('hide_face'))) {
-                \Log::info("Hide face detected for image: {$imageName}");
-                \Log::debug("Comando2 ejecutado: $command2");
-                $output2 = shell_exec($command2);
-                \Log::debug("Salida del script2 de Python: $output2");
-
-                // Verificar si existe la imagen difuminada y reemplazar $file
-                $ext = '.' . $extension;
-                $blurredPath = str_replace($ext, '_blurred' . $ext, $tempImagePath);
-
-                if (file_exists($blurredPath)) {
-                    $file = new \Illuminate\Http\UploadedFile(
-                        $blurredPath,
-                        $imageName,
-                        $mimeType,
-                        null,
-                        true // marcar como archivo de prueba
-                    );
-                    \Log::info("Imagen con rostros ocultos usada para la marca de agua: {$imageName}");
-                } else {
-                    \Log::warning("No se encontró la imagen difuminada esperada en: $blurredPath");
-                }
-            }
-
-            \Storage::disk('temp_img_ia')->delete($imageName);
-            \Log::info("Archivo temporal eliminado: {$imageName}");
-
-            $manager = new ImageManager(new Driver());
-            $this->addWaterMark($file, $imageName, $extension, false);
-
-            $imageModel = new Image(); // Assuming you have an Image model
-            $imageModel->user_id = $request->input('user_id');
-            $imageModel->route = $imageName;
-            $imageModel->route_gif = $gifName ?? NULL;
-            $imageModel->size = round($file->getSize() / 1024, 2);
-            $imageModel->type = "images";
-            $imageModel->status = 'approved'; // Set initial status to pending
-            $imageModel->watermarked = 1;
-            $imageModel->visible = 1; // Set initial visibility to true
-            $imageModel->vision_data = json_encode($combinedResult);
-            $imageModel->save();
+            \Log::info("Imagen enviada a cola: {$imageName}");
         }
 
 
