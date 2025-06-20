@@ -101,58 +101,341 @@
                                         </div>
 
                                         <script>
-                                            document.addEventListener("DOMContentLoaded", function () {
-                                                const imageId = "{{ $image->id }}";
-                                                const imagePath = "{{ route('admin.images.get', ['filename' => $image->route]) }}";
+                                        document.addEventListener("DOMContentLoaded", function () {
+                                            const imageId = "{{ $image->id }}";
+                                            const imagePath = "{{ route('admin.images.get', ['filename' => $image->route]) }}";
 
-                                                const canvas = document.getElementById("canvas-" + imageId);
-                                                canvas.style.cursor = 'crosshair'; // Cambiar cursor al pasar sobre el canvas
-                                                const ctx = canvas.getContext("2d");
-                                                let drawing = false;
-                                                const blurSize = 20;
+                                            const canvas = document.getElementById("canvas-" + imageId);
+                                            canvas.style.cursor = 'crosshair';
+                                            const ctx = canvas.getContext("2d");
+                                            const img = new Image();
+                                            img.crossOrigin = "Anonymous";
+                                            img.src = imagePath;
 
-                                                const img = new Image();
-                                                img.crossOrigin = "Anonymous";
-                                                img.src = imagePath;
+                                            let isDragging = false;
+                                            let isMoving = false;
+                                            let startX = 0;
+                                            let startY = 0;
+                                            let currentX = 0;
+                                            let currentY = 0;
+                                            let radius = 0;
+                                            let blurMenu;
+                                            let savedImage;
+                                            let originalImageData = null;
+                                            let circleSelected = false;
+                                            let hue = 0;
+                                            let undoStack = []; // Stack para deshacer cambios
+                                            const maxUndoSteps = 20; // Máximo número de pasos a guardar
 
-                                                img.onload = function () {
-                                                    canvas.width = img.width;
-                                                    canvas.height = img.height;
-                                                    ctx.drawImage(img, 0, 0);
+                                            img.onload = function () {
+                                                canvas.width = img.width;
+                                                canvas.height = img.height;
+                                                ctx.drawImage(img, 0, 0);
+                                                savedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                                originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                                // Guardar el estado inicial en el stack de deshacer
+                                                saveStateToUndoStack();
+                                            };
+
+                                            function saveStateToUndoStack() {
+                                                const currentState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                                undoStack.push(currentState);
+                                                
+                                                // Limitar el tamaño del stack
+                                                if (undoStack.length > maxUndoSteps) {
+                                                    undoStack.shift();
+                                                }
+                                            }
+
+                                            function undo() {
+                                                if (undoStack.length > 1) {
+                                                    // Remover el estado actual
+                                                    undoStack.pop();
+                                                    // Obtener el estado anterior
+                                                    const previousState = undoStack[undoStack.length - 1];
+                                                    ctx.putImageData(previousState, 0, 0);
+                                                    savedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                                    
+                                                    // Ocultar círculo actual
+                                                    radius = 0;
+                                                    circleSelected = false;
+                                                    drawSelectionCircle();
+                                                }
+                                            }
+
+                                            function getMousePos(e) {
+                                                const rect = canvas.getBoundingClientRect();
+                                                const scaleX = canvas.width / rect.width;
+                                                const scaleY = canvas.height / rect.height;
+                                                return {
+                                                    x: (e.clientX - rect.left) * scaleX,
+                                                    y: (e.clientY - rect.top) * scaleY
                                                 };
+                                            }
 
-                                                canvas.addEventListener("mousedown", () => drawing = true);
-                                                canvas.addEventListener("mouseup", () => drawing = false);
-                                                canvas.addEventListener("mousemove", (e) => {
-                                                    if (!drawing) return;
-                                                    const rect = canvas.getBoundingClientRect();
+                                            function isInsideCircle(x, y) {
+                                                const dx = x - startX;
+                                                const dy = y - startY;
+                                                return Math.sqrt(dx * dx + dy * dy) <= radius;
+                                            }
 
-                                                    const scaleX = canvas.width / rect.width;
-                                                    const scaleY = canvas.height / rect.height;
-
-                                                    const x = (e.clientX - rect.left) * scaleX;
-                                                    const y = (e.clientY - rect.top) * scaleY;
-
-                                                    const imageData = ctx.getImageData(x - blurSize/2, y - blurSize/2, blurSize, blurSize);
-                                                    let r = 0, g = 0, b = 0;
-                                                    for (let i = 0; i < imageData.data.length; i += 4) {
-                                                        r += imageData.data[i];
-                                                        g += imageData.data[i + 1];
-                                                        b += imageData.data[i + 2];
+                                            canvas.addEventListener("mousedown", function (e) {
+                                                if (e.button === 0) {
+                                                    const pos = getMousePos(e);
+                                                    if (radius > 0 && isInsideCircle(pos.x, pos.y)) {
+                                                        isMoving = true;
+                                                        circleSelected = true;
+                                                    } else {
+                                                        // Guardar el estado actual antes de crear un nuevo círculo
+                                                        savedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                                        startX = pos.x;
+                                                        startY = pos.y;
+                                                        currentX = pos.x;
+                                                        currentY = pos.y;
+                                                        isDragging = true;
+                                                        circleSelected = false;
+                                                        drawSelectionCircle();
                                                     }
-                                                    const pixels = imageData.data.length / 4;
-                                                    r /= pixels; g /= pixels; b /= pixels;
-                                                    for (let i = 0; i < imageData.data.length; i += 4) {
-                                                        imageData.data[i] = r;
-                                                        imageData.data[i + 1] = g;
-                                                        imageData.data[i + 2] = b;
-                                                    }
-                                                    ctx.putImageData(imageData, x - blurSize/2, y - blurSize/2);
-                                                });
+                                                }
                                             });
 
-                                            function saveBlur(imageId) {
-                                                const canvas = document.getElementById("canvas-" + imageId);
+                                            canvas.addEventListener("mousemove", function (e) {
+                                                const pos = getMousePos(e);
+
+                                                if (isDragging) {
+                                                    currentX = pos.x;
+                                                    currentY = pos.y;
+                                                    radius = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
+                                                    drawSelectionCircle();
+                                                }
+
+                                                if (isMoving) {
+                                                    startX = pos.x;
+                                                    startY = pos.y;
+                                                    drawSelectionCircle();
+                                                }
+                                            });
+
+                                            canvas.addEventListener("mouseup", function () {
+                                                isDragging = false;
+                                                isMoving = false;
+                                            });
+
+                                            canvas.addEventListener("contextmenu", function (e) {
+                                                e.preventDefault();
+                                                if (blurMenu) blurMenu.remove();
+                                                showBlurMenu(e.pageX, e.pageY);
+                                            });
+
+                                            function drawSelectionCircle() {
+                                                ctx.putImageData(savedImage, 0, 0);
+                                                if (radius > 0) {
+                                                    ctx.beginPath();
+                                                    ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+                                                    ctx.lineWidth = 4;
+
+                                                    if (circleSelected) {
+                                                        const gradient = ctx.createLinearGradient(startX - radius, startY - radius, startX + radius, startY + radius);
+                                                        for (let i = 0; i <= 1; i += 0.1) {
+                                                            gradient.addColorStop(i, `hsl(${(hue + i * 360) % 360}, 100%, 50%)`);
+                                                        }
+                                                        ctx.strokeStyle = gradient;
+                                                    } else {
+                                                        ctx.strokeStyle = 'red';
+                                                    }
+
+                                                    ctx.stroke();
+                                                }
+                                            }
+
+                                            function showBlurMenu(x, y) {
+                                                blurMenu = document.createElement("div");
+                                                blurMenu.style.position = "absolute";
+                                                blurMenu.style.left = x + "px";
+                                                blurMenu.style.top = y + "px";
+                                                blurMenu.style.background = "#fff";
+                                                blurMenu.style.border = "1px solid #ccc";
+                                                blurMenu.style.padding = "5px";
+                                                blurMenu.style.zIndex = 9999;
+
+                                                for (let i = 1; i <= 10; i++) {
+                                                    const option = document.createElement("div");
+                                                    option.innerText = "Desenfoque nivel " + i;
+                                                    option.style.cursor = "pointer";
+                                                    option.style.padding = "2px 10px";
+                                                    option.onmouseover = () => option.style.background = "#eee";
+                                                    option.onmouseout = () => option.style.background = "#fff";
+
+                                                    option.onclick = () => {
+                                                        // Primero ocultar el círculo completamente
+                                                        const tempRadius = radius;
+                                                        const tempStartX = startX;
+                                                        const tempStartY = startY;
+                                                        
+                                                        radius = 0;
+                                                        circleSelected = false;
+                                                        ctx.putImageData(savedImage, 0, 0); // Restaurar imagen sin círculo
+                                                        
+                                                        // Ahora aplicar el blur con los valores originales
+                                                        applyCircularBlur(tempStartX, tempStartY, tempRadius, i);
+                                                        blurMenu.remove();
+                                                        
+                                                        // Guardar estado después del blur
+                                                        saveStateToUndoStack();
+                                                        savedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                                    };
+                                                    blurMenu.appendChild(option);
+                                                }
+
+                                                document.body.appendChild(blurMenu);
+                                            }
+
+                                            function applyCircularBlur(cx, cy, r, level) {
+                                                // Obtener los datos de la región circular con padding para el blur
+                                                const kernelSize = Math.max(3, level * 3); // Aumentar tamaño del kernel
+                                                const padding = Math.floor(kernelSize / 2);
+                                                const x = Math.max(0, Math.floor(cx - r - padding));
+                                                const y = Math.max(0, Math.floor(cy - r - padding));
+                                                const width = Math.min(canvas.width - x, Math.ceil(r * 2) + padding * 2);
+                                                const height = Math.min(canvas.height - y, Math.ceil(r * 2) + padding * 2);
+                                                
+                                                const imageData = ctx.getImageData(x, y, width, height);
+                                                const data = imageData.data;
+                                                const newData = new Uint8ClampedArray(data.length);
+                                                
+                                                // Crear kernel gaussiano más agresivo
+                                                const sigma = level * 1.5; // Aumentar intensidad
+                                                const kernel = [];
+                                                let totalWeight = 0;
+                                                
+                                                for (let ky = -padding; ky <= padding; ky++) {
+                                                    for (let kx = -padding; kx <= padding; kx++) {
+                                                        const distance = Math.sqrt(kx * kx + ky * ky);
+                                                        const weight = Math.exp(-(distance * distance) / (2 * sigma * sigma));
+                                                        kernel.push(weight);
+                                                        totalWeight += weight;
+                                                    }
+                                                }
+                                                
+                                                // Normalizar kernel
+                                                for (let i = 0; i < kernel.length; i++) {
+                                                    kernel[i] /= totalWeight;
+                                                }
+
+                                                // Aplicar blur con múltiples pasadas
+                                                const passes = Math.max(1, level);
+                                                let sourceData = new Uint8ClampedArray(data);
+                                                
+                                                for (let pass = 0; pass < passes; pass++) {
+                                                    newData.fill(0);
+                                                    
+                                                    for (let py = 0; py < height; py++) {
+                                                        for (let px = 0; px < width; px++) {
+                                                            // Verificar si el píxel está dentro del círculo
+                                                            const globalX = x + px;
+                                                            const globalY = y + py;
+                                                            const dx = globalX - cx;
+                                                            const dy = globalY - cy;
+                                                            
+                                                            const pixelIndex = (py * width + px) * 4;
+                                                            
+                                                            if (dx * dx + dy * dy > r * r) {
+                                                                // Copiar píxel original si está fuera del círculo
+                                                                for (let c = 0; c < 4; c++) {
+                                                                    newData[pixelIndex + c] = sourceData[pixelIndex + c];
+                                                                }
+                                                                continue;
+                                                            }
+
+                                                            let red = 0, green = 0, blue = 0, alpha = 0;
+                                                            let kernelIndex = 0;
+
+                                                            // Aplicar kernel gaussiano
+                                                            for (let ky = -padding; ky <= padding; ky++) {
+                                                                for (let kx = -padding; kx <= padding; kx++) {
+                                                                    const sampleY = py + ky;
+                                                                    const sampleX = px + kx;
+                                                                    
+                                                                    if (sampleY >= 0 && sampleY < height && sampleX >= 0 && sampleX < width) {
+                                                                        const sampleIndex = (sampleY * width + sampleX) * 4;
+                                                                        const weight = kernel[kernelIndex];
+                                                                        
+                                                                        red += sourceData[sampleIndex] * weight;
+                                                                        green += sourceData[sampleIndex + 1] * weight;
+                                                                        blue += sourceData[sampleIndex + 2] * weight;
+                                                                        alpha += sourceData[sampleIndex + 3] * weight;
+                                                                    }
+                                                                    kernelIndex++;
+                                                                }
+                                                            }
+
+                                                            newData[pixelIndex] = Math.round(red);
+                                                            newData[pixelIndex + 1] = Math.round(green);
+                                                            newData[pixelIndex + 2] = Math.round(blue);
+                                                            newData[pixelIndex + 3] = Math.round(alpha);
+                                                        }
+                                                    }
+                                                    
+                                                    // Usar el resultado como entrada para el siguiente pase
+                                                    sourceData.set(newData);
+                                                }
+
+                                                // Crear nueva imagen con los datos procesados
+                                                const processedImageData = new ImageData(newData, width, height);
+                                                
+                                                // Aplicar la imagen procesada solo dentro del círculo
+                                                ctx.save();
+                                                ctx.beginPath();
+                                                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                                                ctx.clip();
+                                                ctx.putImageData(processedImageData, x, y);
+                                                ctx.restore();
+                                            }
+
+                                            window.addEventListener("keydown", function (e) {
+                                                // CTRL+Z para deshacer
+                                                if (e.ctrlKey && e.key === 'z') {
+                                                    e.preventDefault();
+                                                    undo();
+                                                    return;
+                                                }
+                                                
+                                                // Delete/Backspace para restaurar imagen original
+                                                if ((e.key === "Delete" || e.key === "Backspace") && circleSelected && originalImageData) {
+                                                    ctx.putImageData(originalImageData, 0, 0);
+                                                    savedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                                    
+                                                    // Guardar estado después de restaurar
+                                                    saveStateToUndoStack();
+                                                    
+                                                    radius = 0;
+                                                    circleSelected = false;
+                                                    drawSelectionCircle();
+                                                }
+                                            });
+
+                                            window.addEventListener("click", function (e) {
+                                                const pos = getMousePos(e);
+                                                if (!isInsideCircle(pos.x, pos.y)) {
+                                                    circleSelected = false;
+                                                    drawSelectionCircle();
+                                                }
+                                                if (blurMenu) blurMenu.remove();
+                                            });
+
+                                            function animate() {
+                                                if (circleSelected) {
+                                                    hue = (hue + 2) % 360;
+                                                    drawSelectionCircle();
+                                                }
+                                                requestAnimationFrame(animate);
+                                            }
+                                            animate();
+
+                                        });
+
+                                        function saveBlur(imageId) {
+                                            const canvas = document.getElementById("canvas-" + imageId);
                                                 const dataURL = canvas.toDataURL("image/jpeg");
 
                                                 const saveBlurUrl = "{{ route('admin.images.saveBlur', ['id' => 'ID_PLACEHOLDER']) }}".replace('ID_PLACEHOLDER', imageId);
@@ -174,8 +457,9 @@
                                                     console.error(err);
                                                     alert("Error al guardar la imagen.");
                                                 });
-                                            }
+                                        }
                                         </script>
+
 
                                     @endif
                                 @endif
