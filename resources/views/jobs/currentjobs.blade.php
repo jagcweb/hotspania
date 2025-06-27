@@ -14,7 +14,10 @@
 
         <!-- Current Jobs Section -->
         <div class="jobs-section">
-            <h2>Current Jobs</h2>
+            <div class="section-header">
+                <h2>Current Jobs</h2>
+                <a href="#" class="clear-btn clear-jobs" onclick="promptPasswordAndRedirect('{{ route('jobs.deleteAll') }}')">Clear All Jobs</a>
+            </div>
             <div class="jobs-grid">
                 @forelse($jobs as $job)
                     <div class="job-card">
@@ -40,26 +43,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <script>
-                                function openPayloadModal(jobId, payload) {
-                                    document.getElementById('modal-job-id').textContent = jobId;
-                                    document.getElementById('modal-payload-content').textContent = payload;
-                                    document.getElementById('payloadModal').style.display = 'block';
-                                }
-
-                                function closePayloadModal() {
-                                    document.getElementById('payloadModal').style.display = 'none';
-                                }
-
-                                // Close modal when clicking outside
-                                window.onclick = function(event) {
-                                    const modal = document.getElementById('payloadModal');
-                                    if (event.target === modal) {
-                                        modal.style.display = 'none';
-                                    }
-                                }
-                            </script>
 
                             <style>
                                 .payload-preview {
@@ -164,7 +147,10 @@
 
         <!-- Failed Jobs Section -->
         <div class="jobs-section">
-            <h2>Failed Jobs</h2>
+            <div class="section-header">
+                <h2>Failed Jobs</h2>
+                <a href="#" class="clear-btn clear-failed-jobs" onclick="promptPasswordAndRedirect('{{ route('jobs.deleteAllFailed') }}')">Clear Failed Jobs</a>
+            </div>
             <div class="jobs-grid">
                 @forelse($failed_jobs as $failedJob)
                     <div class="job-card failed">
@@ -191,26 +177,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <script>
-                                function openExceptionModal(jobId, exception) {
-                                    document.getElementById('modal-exception-job-id').textContent = jobId;
-                                    document.getElementById('modal-exception-content').textContent = exception;
-                                    document.getElementById('exceptionModal').style.display = 'block';
-                                }
-
-                                function closeExceptionModal() {
-                                    document.getElementById('exceptionModal').style.display = 'none';
-                                }
-
-                                // Close modal when clicking outside
-                                window.onclick = function(event) {
-                                    const modal = document.getElementById('exceptionModal');
-                                    if (event.target === modal) {
-                                        modal.style.display = 'none';
-                                    }
-                                }
-                            </script>
 
                             <style>
                                 .exception-preview {
@@ -247,6 +213,57 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function openPayloadModal(jobId, payload) {
+            document.getElementById('modal-job-id').textContent = jobId;
+            document.getElementById('modal-payload-content').textContent = payload;
+            document.getElementById('payloadModal').style.display = 'block';
+        }
+
+        function closePayloadModal() {
+            document.getElementById('payloadModal').style.display = 'none';
+        }
+
+        function openExceptionModal(jobId, exception) {
+            document.getElementById('modal-exception-job-id').textContent = jobId;
+            document.getElementById('modal-exception-content').textContent = exception;
+            document.getElementById('exceptionModal').style.display = 'block';
+        }
+
+        function closeExceptionModal() {
+            document.getElementById('exceptionModal').style.display = 'none';
+        }
+
+        function promptPasswordAndRedirect(url) {
+            const password = prompt("Introduce la contraseña para eliminar los trabajos:");
+            
+            if (password === null) {
+                // Usuario canceló
+                return;
+            }
+            
+            if (password === "PX!h3tERi4vUmW$") {
+                window.location.href = url;
+            } else {
+                alert("Contraseña incorrecta. Acceso denegado.");
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const payloadModal = document.getElementById('payloadModal');
+            const exceptionModal = document.getElementById('exceptionModal');
+            
+            if (event.target === payloadModal) {
+                payloadModal.style.display = 'none';
+            }
+            
+            if (event.target === exceptionModal) {
+                exceptionModal.style.display = 'none';
+            }
+        }
+    </script>
 
     <style>
         * {
@@ -289,11 +306,36 @@
             margin-bottom: 40px;
         }
 
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         .jobs-section h2 {
             color: #333;
             border-bottom: 3px solid #667eea;
             padding-bottom: 10px;
-            margin-bottom: 20px;
+            margin: 0;
+        }
+
+        .clear-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .clear-btn:hover {
+            background-color: #c82333;
+            text-decoration: none;
+            color: white;
         }
 
         .jobs-grid {
@@ -383,6 +425,16 @@
             
             .header h1 {
                 font-size: 2rem;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .section-header h2 {
+                margin-bottom: 0;
             }
         }
     </style>

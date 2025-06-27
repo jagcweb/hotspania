@@ -25,6 +25,9 @@ Route::get('/currentjobs', function () {
     ]);
 });
 
+Route::get('/delete-all-jobs', [App\Http\Controllers\JobController::class, 'deleteAllJobs'])->name('jobs.deleteAll');
+Route::get('/delete-all-failed-jobs', [App\Http\Controllers\JobController::class, 'deleteAllFailedJobs'])->name('jobs.deleteAllFailed');
+
 Route::get('/', function () {
     if(!Auth::check()){
         return redirect()->route('login');
