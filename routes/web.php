@@ -23,7 +23,7 @@ Route::get('/currentjobs', function () {
         'jobs' => $jobs,
         'failed_jobs' => $failedJobs
     ]);
-});
+})->name('jobs.current');
 
 Route::get('/delete-all-jobs', [App\Http\Controllers\JobController::class, 'deleteAllJobs'])->name('jobs.deleteAll');
 Route::get('/delete-all-failed-jobs', [App\Http\Controllers\JobController::class, 'deleteAllFailedJobs'])->name('jobs.deleteAllFailed');

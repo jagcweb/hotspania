@@ -12,20 +12,22 @@ class JobController extends Controller
     public function deleteAllJobs(Request $request)
     {
         if ($request->pass !== "PX!h3tERi4vUmW$") {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return redirect()->route('jobs.current')->with('error', 'Unauthorized');
         }
         
         Job::truncate();
-        return response()->json(['message' => 'All jobs deleted successfully']);
+        
+        return redirect()->route('jobs.current')->with('success', 'All jobs deleted successfully');
     }
 
     public function deleteAllFailedJobs(Request $request)
     {
         if ($request->pass !== "PX!h3tERi4vUmW$") {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return redirect()->route('jobs.current')->with('error', 'Unauthorized');
         }
         
         FailedJob::truncate();
-        return response()->json(['message' => 'All failed jobs deleted successfully']);
+        
+        return redirect()->route('jobs.current')->with('success', 'All failed jobs deleted successfully');
     }
 }

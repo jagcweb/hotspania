@@ -12,6 +12,27 @@
             <p>Monitor current and failed jobs</p>
         </div>
 
+        <!-- Alert Messages -->
+        @if(session('success') || session('error'))
+            <div class="alert-container">
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        <span class="alert-icon">✓</span>
+                        {{ session('success') }}
+                        <button class="alert-close" onclick="this.parentElement.style.display='none'">&times;</button>
+                    </div>
+                @endif
+                
+                @if(session('error'))
+                    <div class="alert alert-error">
+                        <span class="alert-icon">✗</span>
+                        {{ session('error') }}
+                        <button class="alert-close" onclick="this.parentElement.style.display='none'">&times;</button>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         <!-- Current Jobs Section -->
         <div class="jobs-section">
             <div class="section-header">
