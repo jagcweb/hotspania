@@ -124,13 +124,14 @@
             const password = prompt("Introduce la contraseña para eliminar los trabajos:");
             
             if (password === null) {
-                return;
+            return;
             }
             
             if (password === "PX!h3tERi4vUmW$") {
-                window.location.href = url;
+            const separator = url.includes('?') ? '&' : '?';
+            window.location.href = url + separator + 'pass=' + encodeURIComponent(password);
             } else {
-                alert("Contraseña incorrecta. Acceso denegado.");
+            alert("Contraseña incorrecta. Acceso denegado.");
             }
         }
 
