@@ -65,7 +65,7 @@
         />
     </head>
 
-    <body style="background: #1d1d1d; min-height:100vh;">
+    <body style="background: #1d1d1d; min-height:100vh; overflow-x: hidden;">
         <!-- ***** Preloader Start ***** -->
         <div id="preloader">
             <div class="jumper">
@@ -306,10 +306,24 @@
                                     </div>
                                 </form>
                             </ul>
+                            @php $notifications = \App\Models\Notification::where('user_id', \Auth::id())->orderBy('id', 'desc')->get(); @endphp
+                            <style>
+                                #notification-count {
+                                    font-size: 0.7rem;
+                                    padding: 0.35em 0.5em;
+                                    top: 20%; /* bajarlo un poco */
+                                    right: 10%;
+                                    transform: translate(50%, -50%);
+                                }
+                            </style>
+
                             <ul class="navbar-nav ml-auto">
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link" id="bell-icon">
+                                <li class="nav-item position-relative">
+                                    <a href="#" class="nav-link" id="bell-icon" data-bs-toggle="modal" data-bs-target="#ver-notificaciones">
                                         <i class="fas fa-bell"></i>
+                                        <span class="position-absolute badge rounded-pill bg-danger" id="notification-count">
+                                            {{ $notifications->where('readed', false)->count() > 0 ? $notifications->where('readed', false)->count() : 0 }}
+                                        </span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -318,16 +332,10 @@
                                     </a>
                                 </li>
                                 <li class="nav-item dropdown">
-                                    <a
-                                        href="#"
-                                        class="nav-link dropdown-toggle"
-                                        id="user-icon"
-                                    >
+                                    <a href="#" class="nav-link dropdown-toggle" id="user-icon">
                                         <i class="fas fa-user"></i>
                                     </a>
-                                    <div class="dropdown-menu dropdown-menu-right" id="bell-menu">
-                                        <a href="#" class="dropdown-item">Sin Notificaciones</a>
-                                    </div>
+
                                     <div class="dropdown-menu dropdown-menu-right" id="envelope-menu">
                                         <a href="#" class="dropdown-item">Sin Mensajes</a>
                                     </div>
@@ -339,8 +347,8 @@
                                         <form id="logout-form" action="{{ url('logout') }}" method="POST">
                                             {{ csrf_field() }}
                                             <a href="javascript:{}" 
-                                               onclick="document.getElementById('logout-form').submit();"
-                                               class="dropdown-item notify-item">
+                                            onclick="document.getElementById('logout-form').submit();"
+                                            class="dropdown-item notify-item">
                                                 <i class="fas fa-sign-out-alt"></i>
                                                 <span>Cerrar sesión</span>
                                             </a>
@@ -348,6 +356,8 @@
                                     </div>
                                 </li>
                             </ul>
+
+
                         </div>
                 
                         <style>
@@ -559,6 +569,8 @@
                 <div class="text-center">Copyright © Hotspania</div>
             </footer>
         </div>
+
+        @include('modals.modal_ver_notificaciones')
 
         <!-- jQuery -->
         <script src="{{ asset('js/jquery-2.1.0.min.js') }}"></script>

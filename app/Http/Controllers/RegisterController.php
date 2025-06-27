@@ -181,6 +181,32 @@ class RegisterController extends Controller
                 $user->password = \Hash::make($request->dni);
                 $user->completed = 1;
                 $user->update();
+
+                try {
+                    $adminUserId = app()->make(\App\Http\Controllers\AuxiliarController::class)->getAdminUserId();
+                    
+                    if ($adminUserId) {
+                        // Create a notification for admin about new uploads
+                        Notification::create([
+                            'user_id' => $adminUserId,
+                            'subject' => 'Nuevo registro de usuario para revisión',
+                            'text' => 'El usuario ' .  $user->nickname . ' se ha registrado.',
+                            'type' => 'user',
+                            'type_id' => $user->id,
+                        ]);
+
+                        Notification::create([
+                            'user_id' => $adminUserId,
+                            'subject' => 'Imagenes nuevas para revisión',
+                            'text' => 'El usuario ' . $user->nickname . ' ha subido nuevas imágenes que requieren revisión.',
+                            'type' => 'image',
+                            'type_id' => $user->id,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("Error al notificar al administrador: " . $e->getMessage());
+                }
+
                 
                 return redirect()->route('login')->with('exito', 'Paso 3 completado. Usuario creado.');
             break;

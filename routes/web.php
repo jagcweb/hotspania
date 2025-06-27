@@ -84,6 +84,14 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/register-user/{step}/{id?}', [App\Http\Controllers\RegisterController::class, 'save'])->name('user.save');
 
+//NotificationController
+Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+Route::get('/notifications/get', [App\Http\Controllers\NotificationController::class, 'get'])->name('notifications.get');
+Route::post('/notifications/mark-as-read/{id}', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+Route::get('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+Route::post('/notifications/delete/{id}', [App\Http\Controllers\NotificationController::class, 'delete'])->name('notifications.delete');
+Route::post('/notifications/delete-all', [App\Http\Controllers\NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
+
 Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('/', [App\Http\Controllers\AdminController::class, 'index'])->name('admin');
 
@@ -149,6 +157,14 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::post('utilities/package-user-save', 'App\Http\Controllers\Admin\UtilityController@savePackageUser')->name('admin.utilities.packages_users_save');
     Route::get('utilities/package-user-delete/{id}', 'App\Http\Controllers\Admin\UtilityController@deletePackageUser')->name('admin.utilities.packages_users_delete');
     Route::get('utilities/news', 'App\Http\Controllers\Admin\UtilityController@news')->name('admin.utilities.news');
+
+    //NotificationController
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('admin.notifications.index');
+    Route::get('/notifications/get', [App\Http\Controllers\NotificationController::class, 'get'])->name('admin.notifications.get');
+    Route::post('/notifications/mark-as-read/{id}', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('admin.notifications.markAsRead');
+    Route::get('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('admin.notifications.markAllAsRead');
+    Route::post('/notifications/delete/{id}', [App\Http\Controllers\NotificationController::class, 'delete'])->name('admin.notifications.delete');
+    Route::post('/notifications/delete-all', [App\Http\Controllers\NotificationController::class, 'deleteAll'])->name('admin.notifications.deleteAll');
 });
 
 

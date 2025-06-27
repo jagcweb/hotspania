@@ -14,7 +14,12 @@
                 @endphp
 
                 <span style="color: #000;">{{ $last_image_date->diffInDays() }} días desde la última subida de imágenes o vídeos.</span>
-                @if($last_image_date->diffInDays() < 30 && \Auth::user()->getRoleNames()[0] != 'admin')
+                @php
+                    $hostname = parse_url(url()->current(), PHP_URL_HOST) ?? '';
+                    $dayLimit = (str_contains($hostname, 'localhost') || str_contains($hostname, '127.0.0.1')) ? -1 : 30;
+                @endphp
+                
+                @if($last_image_date->diffInDays() < $dayLimit && \Auth::user()->getRoleNames()[0] != 'admin')
                     <div class="alert alert-warning" role="alert">
                         <strong>¡Atención!</strong> Solo puedes subir imágenes o vídeos cada 30 días. La última subida fue el {{ $last_image_date->format('d/m/Y') }}.
                     </div>

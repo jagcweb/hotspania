@@ -38,6 +38,7 @@ use Illuminate\Support\Str;
 use App\Models\Package;
 use App\Models\PackageUser;
 use App\Models\PackageUserHistory;
+use App\Models\Notification;
 
 class AccountController extends Controller
 {
@@ -432,6 +433,24 @@ class AccountController extends Controller
             \App\Jobs\ProcesarImagen::dispatch($tempImagePath, $imageName, $mimeType, $extension, $userId, $hideFace, "pending");
 
             \Log::info("Imagen enviada a cola: {$imageName}");
+        }
+
+        // After uploading images, get admin user ID for notifications
+        try {
+            $adminUserId = app()->make(\App\Http\Controllers\AuxiliarController::class)->getAdminUserId();
+            
+            if ($adminUserId) {
+                // Create a notification for admin about new uploads
+                Notification::create([
+                    'user_id' => $adminUserId,
+                    'subject' => 'Imagenes nuevas para revisión',
+                    'text' => 'El usuario ' . \Auth::user()->nickname . ' ha subido nuevas imágenes que requieren revisión.',
+                    'type' => 'image',
+                    'type_id' => \Auth::id(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Error al notificar al administrador: " . $e->getMessage());
         }
 
         return response()->json(['status' => 'processing', 'message' => 'Las imágenes están siendo procesadas.']);
