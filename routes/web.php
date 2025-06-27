@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Artisan;
 */
 
 Route::get('/currentjobs', function () {
-    $jobs = \App\Models\Jobs::all();
-    $failedJobs = \App\Models\FailedJobs::all();
+    $jobs = \App\Models\Job::all();
+    $failedJobs = \App\Models\FailedJob::all();
 
     return view('jobs.currentjobs', [
         'jobs' => $jobs,
