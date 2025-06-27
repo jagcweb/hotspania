@@ -24,9 +24,9 @@
                         </div>
                         <div class="job-details">
                             <p><strong>Queue:</strong> {{ $job->queue ?? 'default' }}</p>
-                            <p><strong>Payload:</strong> {{ Str::limit($job->payload, 100) }}</p>
+                            <p><strong>Payload:</strong> {{ Str::limit($job->payload, 500) }}</p>
                             <p><strong>Attempts:</strong> {{ $job->attempts }}</p>
-                            <p><strong>Created:</strong> {{ \Carbon\Carbon::createFromTimestamp($job->created_at)->format('Y-m-d H:i:s') }}</p>
+                            <p><strong>Created:</strong> {{ \Carbon\Carbon::parse($job->created_at)->format('Y-m-d H:i:s') }}</p>
                         </div>
                     </div>
                 @empty
@@ -50,8 +50,8 @@
                         <div class="job-details">
                             <p><strong>Queue:</strong> {{ $failedJob->queue ?? 'default' }}</p>
                             <p><strong>Connection:</strong> {{ $failedJob->connection }}</p>
-                            <p><strong>Exception:</strong> {{ Str::limit($failedJob->exception, 150) }}</p>
-                            <p><strong>Failed at:</strong> {{ $failedJob->failed_at }}</p>
+                            <p><strong>Exception:</strong> {{ Str::limit($failedJob->exception, 500) }}</p>
+                            <p><strong>Failed at:</strong> {{ \Carbon\Carbon::parse($failedJob->failed_at)->format('Y-m-d H:i:s') }}</p>
                         </div>
                     </div>
                 @empty
