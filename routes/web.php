@@ -15,6 +15,16 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
+Route::get('/currentjobs', function () {
+    $jobs = \App\Models\Jobs::all();
+    $failedJobs = \App\Models\FailedJobs::all();
+
+    return view('jobs.currentjobs', [
+        'jobs' => $jobs,
+        'failed_jobs' => $failedJobs
+    ]);
+});
+
 Route::get('/', function () {
     if(!Auth::check()){
         return redirect()->route('login');
