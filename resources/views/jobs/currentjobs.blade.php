@@ -24,7 +24,132 @@
                         </div>
                         <div class="job-details">
                             <p><strong>Queue:</strong> {{ $job->queue ?? 'default' }}</p>
-                            <p><strong>Payload:</strong> {{ Str::limit($job->payload, 500) }}</p>
+                            <p><strong>Payload:</strong> 
+                                <button class="view-payload-btn" onclick="openPayloadModal('{{ $job->id }}', `{{ addslashes($job->payload) }}`)">Ver completo</button>
+                            </p>
+
+                            <!-- Modal for payload -->
+                            <div id="payloadModal" class="modal" style="display: none;">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3>Payload completo - Job #<span id="modal-job-id"></span></h3>
+                                        <span class="close" onclick="closePayloadModal()">&times;</span>
+                                    </div>
+                                    <div class="modal-body">
+                                        <pre id="modal-payload-content"></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                            function openPayloadModal(jobId, payload) {
+                                document.getElementById('modal-job-id').textContent = jobId;
+                                document.getElementById('modal-payload-content').textContent = payload;
+                                document.getElementById('payloadModal').style.display = 'block';
+                            }
+
+                            function closePayloadModal() {
+                                document.getElementById('payloadModal').style.display = 'none';
+                            }
+
+                            // Close modal when clicking outside
+                            window.onclick = function(event) {
+                                const modal = document.getElementById('payloadModal');
+                                if (event.target === modal) {
+                                    modal.style.display = 'none';
+                                }
+                            }
+                            </script>
+
+                            <style>
+                            .payload-preview {
+                                font-family: monospace;
+                                background-color: #f8f9fa;
+                                padding: 2px 4px;
+                                border-radius: 3px;
+                            }
+
+                            .view-payload-btn {
+                                background-color: #007bff;
+                                color: white;
+                                border: none;
+                                padding: 4px 8px;
+                                border-radius: 3px;
+                                cursor: pointer;
+                                font-size: 0.8rem;
+                                margin-left: 8px;
+                            }
+
+                            .view-payload-btn:hover {
+                                background-color: #0056b3;
+                            }
+
+                            .modal {
+                                position: fixed;
+                                z-index: 1000;
+                                left: 0;
+                                top: 0;
+                                width: 100%;
+                                height: 100%;
+                                background-color: rgba(0,0,0,0.4);
+                            }
+
+                            .modal-content {
+                                background-color: #fefefe;
+                                margin: 5% auto;
+                                padding: 0;
+                                border: none;
+                                width: 80%;
+                                max-width: 800px;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            }
+
+                            .modal-header {
+                                padding: 20px;
+                                background-color: #f8f9fa;
+                                border-bottom: 1px solid #dee2e6;
+                                border-radius: 8px 8px 0 0;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                            }
+
+                            .modal-header h3 {
+                                margin: 0;
+                                color: #333;
+                            }
+
+                            .close {
+                                color: #aaa;
+                                font-size: 28px;
+                                font-weight: bold;
+                                cursor: pointer;
+                            }
+
+                            .close:hover {
+                                color: #000;
+                            }
+
+                            .modal-body {
+                                padding: 20px;
+                                max-height: 60vh;
+                                overflow-y: auto;
+                            }
+
+                            .modal-body pre {
+                                background-color: #f8f9fa;
+                                padding: 15px;
+                                border-radius: 4px;
+                                border: 1px solid #e9ecef;
+                                white-space: pre-wrap;
+                                word-wrap: break-word;
+                                font-family: 'Courier New', monospace;
+                                font-size: 0.9rem;
+                                line-height: 1.4;
+                                color: #333;
+                            }
+                            </style>
                             <p><strong>Attempts:</strong> {{ $job->attempts }}</p>
                             <p><strong>Created:</strong> {{ \Carbon\Carbon::parse($job->created_at)->format('Y-m-d H:i:s') }}</p>
                         </div>
@@ -50,7 +175,67 @@
                         <div class="job-details">
                             <p><strong>Queue:</strong> {{ $failedJob->queue ?? 'default' }}</p>
                             <p><strong>Connection:</strong> {{ $failedJob->connection }}</p>
-                            <p><strong>Exception:</strong> {{ Str::limit($failedJob->exception, 500) }}</p>
+                            <p><strong>Exception:</strong> 
+                                <button class="view-exception-btn" onclick="openExceptionModal('{{ $failedJob->id }}', `{{ addslashes($failedJob->exception) }}`)">Ver completo</button>
+                            </p>
+
+                            <!-- Modal for exception -->
+                            <div id="exceptionModal" class="modal" style="display: none;">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h3>Exception completa - Job #<span id="modal-exception-job-id"></span></h3>
+                                        <span class="close" onclick="closeExceptionModal()">&times;</span>
+                                    </div>
+                                    <div class="modal-body">
+                                        <pre id="modal-exception-content"></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                            function openExceptionModal(jobId, exception) {
+                                document.getElementById('modal-exception-job-id').textContent = jobId;
+                                document.getElementById('modal-exception-content').textContent = exception;
+                                document.getElementById('exceptionModal').style.display = 'block';
+                            }
+
+                            function closeExceptionModal() {
+                                document.getElementById('exceptionModal').style.display = 'none';
+                            }
+
+                            // Close modal when clicking outside
+                            window.onclick = function(event) {
+                                const modal = document.getElementById('exceptionModal');
+                                if (event.target === modal) {
+                                    modal.style.display = 'none';
+                                }
+                            }
+                            </script>
+
+                            <style>
+                            .exception-preview {
+                                font-family: monospace;
+                                background-color: #f8f9fa;
+                                padding: 2px 4px;
+                                border-radius: 3px;
+                                color: #e74c3c;
+                            }
+
+                            .view-exception-btn {
+                                background-color: #e74c3c;
+                                color: white;
+                                border: none;
+                                padding: 4px 8px;
+                                border-radius: 3px;
+                                cursor: pointer;
+                                font-size: 0.8rem;
+                                margin-left: 8px;
+                            }
+
+                            .view-exception-btn:hover {
+                                background-color: #c0392b;
+                            }
+                            </style>
                             <p><strong>Failed at:</strong> {{ \Carbon\Carbon::parse($failedJob->failed_at)->format('Y-m-d H:i:s') }}</p>
                         </div>
                     </div>
