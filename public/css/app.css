@@ -10887,13 +10887,13 @@ a.close.disabled {
 
 .modal-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center!important;
   justify-content: space-between;
   padding: 1rem 1rem;
   border-bottom: 1px solid #dee2e6;
   border-top-left-radius: calc(0.3rem - 1px);
   border-top-right-radius: calc(0.3rem - 1px);
-  height: 100px;
+  height: 100px!important;
 }
 
 .modal-header .close {
