@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Helpers\StorageHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class HomeController extends Controller
 {
@@ -341,9 +342,7 @@ class HomeController extends Controller
         ]);
     }
 
-
-    public function privacyPolicies()
-    {
+    public function privacyPolicies() {
         return view('privacy_policies');
     }
 
@@ -363,5 +362,20 @@ class HomeController extends Controller
         $file = \Storage::disk(StorageHelper::getDisk('videogif'))->get($filename);
 
         return new Response($file, 200);
+    }
+
+    public function getDocument($filename) {
+        $filePath = public_path('documents/' . $filename);
+
+        if (!file_exists($filePath)) {
+            abort(404, 'Documento no encontrado');
+        }
+
+        $file = file_get_contents($filePath);
+
+        return new Response($file, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+        ]);
     }
 }

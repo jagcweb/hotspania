@@ -51,6 +51,7 @@ Route::get('/logout', function(){
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home/image-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getImage'])->name('home.imageget');
 Route::get('/home/gif-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getGif'])->name('home.gifget');
+Route::get('/document/{filename}',  [App\Http\Controllers\HomeController::class, 'getDocument'])->name('home.document');
 Route::get('/home/load-more/{page}', [App\Http\Controllers\HomeController::class, 'loadMore'])->name('home.loadmore');
 
 //AccountController
@@ -177,3 +178,39 @@ Route::post('/admin/users/update/{id}', [App\Http\Controllers\Admin\UserControll
 Route::get('/admin/users/verify/{id}', [App\Http\Controllers\Admin\UserController::class, 'verify'])->name('admin.user.verify');
 Route::get('/admin/users/ban/{id}', [App\Http\Controllers\Admin\UserController::class, 'ban'])->name('admin.user.ban');
 Route::get('/admin/users/get-pdf/{name_pdf}', [App\Http\Controllers\Admin\UserController::class, 'getPdf'])->name('admin.user.getPdf');
+
+//ChatbotController
+Route::get('/chatbot', [App\Http\Controllers\ChatbotController::class, 'index'])->name('chatbot.index');
+Route::post('/chatbot/chat', [App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
+
+
+Route::get('/check-dns-records', function () {
+    $domain = 'hotspania.es';
+    $results = [];
+    
+    // Verificar MX
+    $mx = dns_get_record($domain, DNS_MX);
+    $results['MX'] = $mx;
+    
+    // Verificar TXT (incluye SPF)
+    $txt = dns_get_record($domain, DNS_TXT);
+    $results['TXT'] = $txt;
+    
+    // Verificar DMARC
+    $dmarc = dns_get_record('_dmarc.' . $domain, DNS_TXT);
+    $results['DMARC'] = $dmarc;
+    
+    return response()->json([
+        'domain' => $domain,
+        'records' => $results,
+        'timestamp' => now(),
+        'analysis' => [
+            'spf_found' => collect($txt)->contains(function($record) {
+                return strpos($record['txt'], 'v=spf1') !== false;
+            }),
+            'dmarc_found' => !empty($dmarc),
+            'mx_count' => count($mx)
+        ]
+    ]);
+});
+
