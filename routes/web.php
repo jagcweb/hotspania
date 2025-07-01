@@ -279,3 +279,43 @@ Route::get('/test-partial-dns', function () {
     }
 });
 
+Route::get('/digitalocean-unblock-request', function () {
+    return response()->json([
+        'status' => 'SMTP BLOCKING CONFIRMED',
+        'evidence' => [
+            'web_ports' => 'All working (80, 443, 53, 22)',
+            'email_receive_ports' => 'All working (993, 143, 995, 110)', 
+            'smtp_send_ports' => 'All blocked (25, 465, 587)',
+            'conclusion' => 'DigitalOcean blocks outbound SMTP specifically'
+        ],
+        'unblock_request' => [
+            'url' => 'https://cloud.digitalocean.com/support/tickets/new',
+            'template' => "Subject: Request SMTP Port Unblocking for Business Email\n\n" .
+                         "Hello DigitalOcean Support,\n\n" .
+                         "I need SMTP ports unblocked for my legitimate business website.\n\n" .
+                         "BUSINESS DETAILS:\n" .
+                         "- Website: hotspania.es\n" .
+                         "- Business: Tourism/Hospitality\n" .
+                         "- Email: consultas@hotspania.es\n" .
+                         "- Purpose: Customer contact forms, booking confirmations\n\n" .
+                         "SERVER DETAILS:\n" .
+                         "- Droplet: ubuntu-s-1vcpu-1gb-amd-ams3-01\n" .
+                         "- IP: 146.190.18.74\n" .
+                         "- Region: AMS3\n\n" .
+                         "TECHNICAL VERIFICATION:\n" .
+                         "I've confirmed that ports 25, 465, and 587 are blocked while all other ports work normally.\n" .
+                         "This is preventing legitimate business email functionality.\n\n" .
+                         "EMAIL PROVIDER:\n" .
+                         "- Provider: Ionos\n" .
+                         "- SMTP Server: smtp.ionos.es\n" .
+                         "- DNS Records: Properly configured\n\n" .
+                         "This is NOT for bulk marketing - only transactional business emails.\n\n" .
+                         "Please unblock outbound SMTP ports for this droplet.\n\n" .
+                         "Thank you,\n" .
+                         "jagcweb\n" .
+                         "Date: " . now()->format('Y-m-d H:i:s') . " UTC",
+            'expected_response_time' => '24-48 hours'
+        ]
+    ]);
+});
+
