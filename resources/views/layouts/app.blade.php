@@ -624,5 +624,446 @@
             }
         });
     </script>
+
+<!-- Botón flotante circular -->
+<div id="chatbot-float-btn" style="
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #f44806 0%, #ff8800 100%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.17);
+    cursor: pointer;
+">
+    <div id="chatbot-float-btn" style="...">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin-top: -12px;">
+        <path d="M4 19v-2a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" stroke="#fff" stroke-width="2" />
+        <circle cx="9" cy="15" r="1.2" fill="#fff"/>
+        <circle cx="12" cy="15" r="1.2" fill="#fff"/>
+        <circle cx="15" cy="15" r="1.2" fill="#fff"/>
+    </svg>
+</div>
+</div>
+
+<!-- Modal del chatbot (oculto por defecto) -->
+<div id="chatbot-modal" style="
+    position: fixed;
+    bottom: 0; right: 0;
+    left: 0; top: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.32);
+    display: none;
+    align-items: flex-end;
+    justify-content: flex-end;
+    z-index: 1001;
+">
+    <div class="chat-container" style="
+        max-width: 400px;
+        height: 600px;
+        margin: 0 24px 24px 0;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #fff;
+    ">
+        <!-- Botón cerrar modal -->
+        <button id="chatbot-close-btn" style="
+            position: absolute; top: 14px; right: 18px;
+            background: none; border: none; cursor: pointer; z-index: 2; width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+        " title="Cerrar">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M6 6L18 18" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M6 18L18 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <!-- Chat header -->
+        <div class="chat-header">
+            <h1 style="color:#fff;">🤖 Asistente Inteligente</h1>
+            <p style="color:#fff;">Pregúntame sobre la documentación disponible</p>
+        </div>
+        <!-- Mensajes -->
+        <div class="messages-container" id="messagesContainer"></div>
+        <!-- Typing indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <!-- Input -->
+        <div class="input-container">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Escribe tu pregunta aquí..." 
+                    maxlength="1000"
+                >
+                <button id="sendButton" type="button">Enviar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ESTILOS -->
+<style>
+    /* El CSS es el mismo de tu template original, con pequeños ajustes para el modal/chat-container pequeño */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .chat-container {
+        width: 100%;
+        max-width: 400px;
+        height: 600px;
+        background: white;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .chat-header {
+        background: linear-gradient(135deg, #f44806 0%, #ff8800 100%);
+        color: white;
+        padding: 20px 20px 14px 20px;
+        text-align: center;
+    }
+
+    .chat-header h1 {
+        font-size: 20px;
+        margin-bottom: 3px;
+    }
+
+    .chat-header p {
+        opacity: 0.9;
+        font-size: 13px;
+    }
+
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background: #fff;
+    }
+
+    .message {
+        max-width: 80%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+
+    .message.user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, #f44806 0%, #ff8800 100%);
+        color: white;
+    }
+
+    .message.bot {
+        align-self: flex-start;
+        background: #f1f3f4;
+        color: #333;
+        border: 1px solid #e1e3e4;
+    }
+
+    .message.bot .sources {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #ddd;
+        font-size: 12px;
+        color: #666;
+    }
+
+    .message.bot .sources strong {
+        color: #333;
+    }
+
+    .typing-indicator {
+        align-self: flex-start;
+        background: #f1f3f4;
+        padding: 12px 16px;
+        border-radius: 18px;
+        display: none;
+    }
+
+    .typing-dots {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dots span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #999;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing {
+        0%, 80%, 100% {
+            transform: scale(0);
+            opacity: 0.5;
+        }
+        40% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .input-container {
+        padding: 20px;
+        border-top: 1px solid #e1e3e4;
+        background: white;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        /* Solución extra para evitar saltos: */
+        flex-wrap: nowrap;
+    }
+
+    .input-group input {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 12px 16px;
+        border: 2px solid #f44806;
+        border-radius: 24px;
+        outline: none;
+        font-size: 16px;
+        transition: border-color 0.3s;
+        /* Elimina cualquier width:100% heredado */
+        width: auto;
+        box-sizing: border-box;
+    }
+
+    .input-group input:focus {
+        border-color: #ff8800;
+    }
+
+    .input-group button {
+        flex-shrink: 0;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #f44806 0%, #ff8800 100%);
+        color: white;
+        border: none;
+        border-radius: 24px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: opacity 0.3s;
+        /* Elimina cualquier display:block o width:100% heredado */
+        width: auto;
+        margin: 0;
+    }
+
+    .input-group button:hover:not(:disabled) {
+        opacity: 0.9;
+    }
+
+    .input-group button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        text-align: center;
+        padding: 10px;
+        background: #ffeaea;
+        border-radius: 8px;
+        margin: 10px 20px;
+    }
+
+    @media (max-width: 500px) {
+        .chat-container {
+            max-width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            margin: 0;
+        }
+        #chatbot-modal {
+            align-items: flex-end;
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- SCRIPT -->
+<script>
+(function() {
+    // Botón flotante y modal
+    const floatBtn = document.getElementById('chatbot-float-btn');
+    const modal = document.getElementById('chatbot-modal');
+    const closeBtn = document.getElementById('chatbot-close-btn');
+    let messagesContainer, messageInput, sendButton, typingIndicator;
+
+    // Mostrar el modal y preparar el chat
+    floatBtn.onclick = function() {
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            messagesContainer = document.getElementById('messagesContainer');
+            messageInput = document.getElementById('messageInput');
+            sendButton = document.getElementById('sendButton');
+            typingIndicator = document.getElementById('typingIndicator');
+
+            // Mensaje de bienvenida solo si está vacío
+            if (messagesContainer && messagesContainer.childElementCount === 0) {
+                addMessage('¡Hola! Soy tu asistente especializado. Puedo ayudarte con consultas basadas en la documentación disponible. ¿En qué puedo ayudarte hoy?', false);
+            }
+
+            // Focus en el input
+            if (messageInput) messageInput.focus();
+
+            // Listener para Enter
+            if (messageInput) {
+                messageInput.onkeypress = function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                }
+            }
+
+            // Listener para botón enviar
+            if (sendButton) {
+                sendButton.onclick = function() {
+                    sendMessage();
+                }
+            }
+        }, 100);
+    };
+
+    // Cerrar el modal
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+        // Limpia el input
+        if (messageInput) messageInput.value = '';
+    };
+
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Función para añadir mensajes
+    function addMessage(content, isUser = false, sources = null) {
+        if (!messagesContainer) return;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        
+        if (isUser) {
+            messageDiv.textContent = content;
+        } else {
+            messageDiv.innerHTML = content.replace(/\n/g, '<br>');
+            if (sources && sources.length > 0) {
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'sources';
+                sourcesDiv.innerHTML = `<strong>Fuentes:</strong> ${sources.join(', ')}`;
+                messageDiv.appendChild(sourcesDiv);
+            }
+        }
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    function showTyping() {
+        if (typingIndicator) {
+            typingIndicator.style.display = 'block';
+            scrollToBottom();
+        }
+    }
+
+    function hideTyping() {
+        if (typingIndicator) {
+            typingIndicator.style.display = 'none';
+        }
+    }
+
+    function scrollToBottom() {
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }
+
+    function setLoading(loading) {
+        if (sendButton && messageInput) {
+            sendButton.disabled = loading;
+            messageInput.disabled = loading;
+            sendButton.textContent = loading ? 'Enviando...' : 'Enviar';
+        }
+    }
+
+    function showError(message) {
+        if (!messagesContainer) return;
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        messagesContainer.appendChild(errorDiv);
+        scrollToBottom();
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+        addMessage(message, true);
+        messageInput.value = '';
+        setLoading(true);
+        showTyping();
+        try {
+            const response = await fetch('/chatbot/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ message })
+            });
+            const data = await response.json();
+            hideTyping();
+            if (data.success) {
+                addMessage(data.response, false, data.sources);
+            } else {
+                showError(data.response || 'Error al procesar la respuesta');
+            }
+        } catch (error) {
+            hideTyping();
+            showError('Error de conexión. Por favor, inténtalo de nuevo.');
+        } finally {
+            setLoading(false);
+            messageInput.focus();
+        }
+    }
+})();
+</script>
 </body>
 </html>
+ 

@@ -34,7 +34,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f44806 0%, #ff8800 100%);
             color: white;
             padding: 20px;
             text-align: center;
@@ -69,7 +69,7 @@
 
         .message.user {
             align-self: flex-end;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f44806 0%, #ff8800 100%);
             color: white;
         }
 
@@ -155,7 +155,7 @@
 
         .input-group button {
             padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f44806 0%, #ff8800 100%);
             color: white;
             border: none;
             border-radius: 24px;

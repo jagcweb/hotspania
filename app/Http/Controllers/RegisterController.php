@@ -207,6 +207,12 @@ class RegisterController extends Controller
                     \Log::error("Error al notificar al administrador: " . $e->getMessage());
                 }
 
+                try {
+                    \Mail::to($user->email)->send(new \App\Mail\BienvenidaHotspania($user->email, $request->dni));
+                } catch (\Exception $e) {
+                    \Log::error('Error enviando email de bienvenida: ' . $e->getMessage());
+                }
+
                 
                 return redirect()->route('login')->with('exito', 'Paso 3 completado. Usuario creado.');
             break;

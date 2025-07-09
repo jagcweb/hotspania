@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Artisan;
 
 class AdminController extends Controller
 {
@@ -14,13 +15,25 @@ class AdminController extends Controller
      */
     public function index(Request $request)
     {
-        // Gather relevant data for the admin dashboard (e.g., user count, pending tasks, recent activity)
-        $data = [
-            // 'userCount' => User::count(),
-            // 'pendingTasks' => Task::where('status', 0)->count(),
-            // 'recentActivity' => Activity::latest()->limit(5)->get(),
-        ];
+        return view('admin.dashboard');
+    }
 
-        return view('admin.dashboard', $data);
+    /**
+     * Ejecuta el comando artisan docs:load para cargar la documentación.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function cargarDocumentacion(Request $request)
+    {
+        // Ejecuta el comando 'docs:load'
+        $output = Artisan::call('docs:load');
+
+        // Puedes obtener el resultado así:
+        $result = Artisan::output();
+
+        // Redirige de nuevo con un mensaje flash
+        return redirect()->route('admin')
+        ->with('exito', 'Documentación cargada correctamente.')
+        ->with('output', $result);
     }
 }

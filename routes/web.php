@@ -94,6 +94,7 @@ Route::post('/notifications/delete/{id}', [App\Http\Controllers\NotificationCont
 Route::post('/notifications/delete-all', [App\Http\Controllers\NotificationController::class, 'deleteAll'])->name('notifications.deleteAll');
 
 Route::prefix('admin')->middleware('admin')->group(function () {
+    Route::get('/load-docu', [App\Http\Controllers\Admin\AdminController::class, 'cargarDocumentacion'])->name('admin.load-docu');
     Route::get('/', [App\Http\Controllers\AdminController::class, 'index'])->name('admin');
 
     // City Change Management

@@ -318,6 +318,11 @@
                             </style>
 
                             <ul class="navbar-nav ml-auto">
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.load-docu') }}" class="nav-link" id="download-icon">
+                                        <i class="fas fa-upload"></i>
+                                    </a>
+                                </li>
                                 <li class="nav-item position-relative">
                                     <a href="#" class="nav-link" id="bell-icon" data-bs-toggle="modal" data-bs-target="#ver-notificaciones">
                                         <i class="fas fa-bell"></i>
