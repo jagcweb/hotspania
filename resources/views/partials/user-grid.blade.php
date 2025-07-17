@@ -84,10 +84,10 @@
                             <span class="visually-hidden">Likes:</span>
                             <i class="fas fa-heart" aria-hidden="true"></i> {{$totalLikes}}
                         </li>
-                        <li class="gallery-item-points">
+                        {{-- <li class="gallery-item-points">
                             <span class="visually-hidden">Points:</span>
                             <i class="fas fa-bullseye" aria-hidden="true"></i> {{$totalPoints}}
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
             </div>

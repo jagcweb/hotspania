@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title') Fichas Activas @endsection
+@section('title') Fichas Rechazadas @endsection
 
 @section('content')
 
@@ -45,17 +45,11 @@
                                         <a title="Ver Perfil" href="#" data-toggle="modal" data-target="#ver-perfil-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-user"></i>
                                         </a>
-                                        <a title="Asignar Paquete" href="#" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" class="icon">
-                                            <i class="fa-solid fa-archive"></i>
-                                        </a>
                                         <a title="Editar Estado" href="#" data-toggle="modal" data-target="#editar-status-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-pen"></i>
                                         </a>
                                         <a title="Historial Paquete" href="#" data-toggle="modal" data-target="#historial-paquete-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
-                                        </a>
-                                        <a title="Hacer disponible" href="#" data-toggle="modal" data-target="#hacer-disponible-{{$u->id}}" class="icon">
-                                            <i class="fa-solid fa-check"></i>
                                         </a>
                                         <a title="Cambiar estado cuenta" href="#" data-toggle="modal" data-target="#cambiar-estado-cuenta-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-user-pen"></i>
@@ -63,11 +57,9 @@
                                     </div>
                                 </div>
                             </div>
-                            @include('modals.admin.modal_asignar_paquete')
                             @include('modals.admin.modal_ver_perfil')
                             @include('modals.admin.user.modal_editar_status')
                             @include('modals.admin.modal_historial_paquete')
-                            @include('modals.admin.modal_hacer_disponible')
                             @include('modals.admin.modal_cambiar_estado_cuenta')
                         @endif
                     @endforeach

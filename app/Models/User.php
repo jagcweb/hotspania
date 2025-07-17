@@ -54,7 +54,9 @@ class User extends Authenticatable
         'link',
         'position',
         'available_time',
-        'available_until'
+        'available_until',
+        'reject_reason',
+        'first_time'
     ];
 
     /**

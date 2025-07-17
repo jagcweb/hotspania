@@ -44,9 +44,197 @@
 
             </div>
 
+            
+            @php
+                $active = \Auth::user()->active;
+                $badgeText = 'Pendiente';
+                $badgeClass = 'badge-warning';
+                if ($active === 1) {
+                    $badgeText = 'Activa';
+                    $badgeClass = 'badge-success';
+                } elseif ($active === 2) {
+                    $badgeText = 'Rechazada';
+                    $badgeClass = 'badge-danger';
+                }
+            @endphp
+
+            <style>
+                .badge-inline-container {
+                    display: inline-flex;
+                    gap: 10px;
+                    align-items: center;
+                    vertical-align: middle;
+                    margin-left: 10px;
+                }
+                .badge {
+                    position: relative;
+                    padding: 8px 18px;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    font-size: 13px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
+                    border: 2px solid rgba(255, 255, 255, 0.1);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                    overflow: hidden;
+                    display: inline-flex;
+                    align-items: center;
+                    vertical-align: middle;
+                }
+                .badge::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                    transition: left 0.5s ease;
+                }
+                .badge:hover::before {
+                    left: 100%;
+                }
+                .badge:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+                }
+                .badge-pending {
+                    background: linear-gradient(135deg, #ff9a56 0%, #ff7b39 100%);
+                    color: white;
+                    position: relative;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                }
+                .badge-pending::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 8px;
+                    width: 8px;
+                    height: 8px;
+                    background: rgba(255, 255, 255, 0.8);
+                    border-radius: 50%;
+                    transform: translateY(-50%);
+                    animation: pulse 2s infinite;
+                }
+                .badge-pending:hover {
+                    background: linear-gradient(135deg, #ff8c42 0%, #ff6b1a 100%);
+                }
+                .badge-active {
+                    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+                    color: white;
+                    position: relative;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                }
+                .badge-active::after {
+                    content: '✓';
+                    position: absolute;
+                    top: 50%;
+                    left: 8px;
+                    transform: translateY(-50%);
+                    font-size: 12px;
+                    font-weight: bold;
+                }
+                .badge-active:hover {
+                    background: linear-gradient(135deg, #4e9a2a 0%, #90d4aa 100%);
+                }
+                .badge-rejected {
+                    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+                    color: white;
+                    position: relative;
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                }
+                .badge-rejected::after {
+                    content: '✕';
+                    position: absolute;
+                    top: 50%;
+                    left: 8px;
+                    transform: translateY(-50%);
+                    font-size: 12px;
+                    font-weight: bold;
+                }
+                .badge-rejected:hover {
+                    background: linear-gradient(135deg, #e73c5e 0%, #e63946 100%);
+                }
+                @keyframes pulse {
+                    0% { opacity: 1; }
+                    50% { opacity: 0.5; }
+                    100% { opacity: 1; }
+                }
+                @media (max-width: 768px) {
+                    .badge-inline-container {
+                        gap: 8px;
+                    }
+                    .badge {
+                        font-size: 12px;
+                        padding: 7px 14px;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .badge-inline-container {
+                        gap: 6px;
+                        margin-left: 6px;
+                    }
+                    .badge {
+                        font-size: 10px;
+                        padding: 5px 10px;
+                    }
+                    .badge-pending::after,
+                    .badge-active::after,
+                    .badge-rejected::after {
+                        left: 5px;
+                        font-size: 10px;
+                        width: 6px;
+                        height: 6px;
+                    }
+                }
+                @media (max-width: 370px) {
+                    .badge-inline-container {
+                        gap: 4px;
+                        margin-left: 4px;
+                    }
+                    .badge {
+                        font-size: 8px;
+                        padding: 3px 7px;
+                    }
+                    .badge-pending::after,
+                    .badge-active::after,
+                    .badge-rejected::after {
+                        left: 3px;
+                        font-size: 8px;
+                        width: 5px;
+                        height: 5px;
+                    }
+                }
+            </style>
+
             <div class="profile-user-settings">
 
-                <h1 class="profile-user-name text-white">{{ \Auth::user()->nickname }}</h1>
+                <h1 class="profile-user-name text-white">
+                    {{ \Auth::user()->nickname }}
+                    <span class="badge-inline-container">
+                        @if (is_null($active))
+                            <span class="badge badge-pending">
+                                <span style="margin-left: 15px;">Pendiente</span>
+                            </span>
+                        @elseif ($active === 1)
+                            <span class="badge badge-active">
+                                <span style="margin-left: 15px;">Activa</span>
+                            </span>
+                        @elseif ($active === 2)
+                            <span class="badge badge-rejected">
+                                <span style="margin-left: 15px;">Rechazada</span>
+                            </span>
+                            @if(!empty(\Auth::user()->reject_reason))
+                                <div style="color:#ff416c; font-size:13px; margin-top:4px;">
+                                    Motivo: {{ \Auth::user()->reject_reason }}
+                                </div>
+                            @endif
+                        @endif
+                    </span>
+                </h1>
 
             </div>
 

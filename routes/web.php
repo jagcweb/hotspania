@@ -81,6 +81,7 @@ Route::get('/account/remove-like/{id}', [App\Http\Controllers\AccountController:
 //RegistersController
 Route::middleware('guest')->group(function () {
     Route::get('/register/paso-{step}/{user?}', [App\Http\Controllers\RegisterController::class, 'create'])->name('user.register');
+    Route::get('/register/check-username-or-email', [App\Http\Controllers\RegisterController::class, 'checkUsernameOrEmail'])->name('user.checkUsernameOrEmail');
 });
 
 Route::post('/register-user/{step}/{id?}', [App\Http\Controllers\RegisterController::class, 'save'])->name('user.save');
@@ -111,6 +112,8 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::post('users/change-password/{id}', 'App\Http\Controllers\Admin\UserController@updatePassword')->name('admin.users.update_password');
     Route::get('users/getPending', 'App\Http\Controllers\Admin\UserController@getPending')->name('admin.users.getPending');
     Route::get('users/getActive', 'App\Http\Controllers\Admin\UserController@getActive')->name('admin.users.getActive');
+    Route::get('users/getRejected', 'App\Http\Controllers\Admin\UserController@getRejected')->name('admin.users.getRejected');
+    Route::post('users/changeStatus/{id}', 'App\Http\Controllers\Admin\UserController@changeStatus')->name('admin.users.changeStatus');
     Route::get('users/getRequests', 'App\Http\Controllers\Admin\UserController@getRequests')->name('admin.users.getRequests');
     Route::get('users/getLoginRecords', 'App\Http\Controllers\Admin\UserController@getLoginRecords')->name('admin.users.getLoginRecords');
     Route::get('users/positions', 'App\Http\Controllers\Admin\UserController@getPositionals')->name('admin.users.getPositionals');
@@ -121,6 +124,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     // Image Management
     Route::get('images-get/{id}/{name}/{filter}', 'App\Http\Controllers\Admin\ImageController@get')->name('admin.images.getFilter');
     Route::post('images', 'App\Http\Controllers\Admin\ImageController@upload')->name('admin.images.upload');
+    Route::get('images/download/{id}', 'App\Http\Controllers\Admin\ImageController@downloadImages')->name('admin.images.download');
     Route::get('images/{image}/setfront', 'App\Http\Controllers\Admin\ImageController@setFront')->name('admin.images.setfront');
     Route::get('images/{image}/approve', 'App\Http\Controllers\Admin\ImageController@approve')->name('admin.images.approve');
     Route::get('images/{image}/unapprove', 'App\Http\Controllers\Admin\ImageController@unapprove')->name('admin.images.unapprove');

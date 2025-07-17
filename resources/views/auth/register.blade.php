@@ -378,6 +378,69 @@
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.7.0/dist/ffmpeg.min.js"></script>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Helper to create or update validation message
+    function setValidationMessage(input, message, isError) {
+        let small = input.parentNode.querySelector('small.validation-msg');
+        if (!small) {
+            small = document.createElement('small');
+            small.className = 'validation-msg';
+            input.parentNode.appendChild(small);
+        }
+        small.textContent = message;
+        small.style.color = isError ? '#ff4d4f' : '#13da35';
+        small.style.display = message ? 'block' : 'none';
+    }
+
+    // AJAX check function
+    async function checkUsernameOrEmail(type, value) {
+        if (!value) {
+            setValidationMessage(document.getElementById(type), '', false);
+            return;
+        }
+        try {
+            const params = new URLSearchParams();
+            params.append(type, value);
+            const response = await fetch(`/register/check-username-or-email?${params.toString()}`);
+            const data = await response.json();
+            if (type === 'nickname') {
+                if (data.nickname_exists) {
+                    setValidationMessage(document.getElementById('nickname'), 'Este nombre ya está en uso.', true);
+                } else {
+                    setValidationMessage(document.getElementById('nickname'), 'Nombre disponible.', false);
+                }
+            }
+            if (type === 'email') {
+                if (data.email_exists) {
+                    setValidationMessage(document.getElementById('email'), 'Este email ya está registrado.', true);
+                } else {
+                    setValidationMessage(document.getElementById('email'), 'Email disponible.', false);
+                }
+            }
+        } catch (e) {
+            // Optionally handle error
+        }
+    }
+
+    // Nickname AJAX validation
+    const nicknameInput = document.getElementById('nickname');
+    if (nicknameInput) {
+        nicknameInput.addEventListener('blur', function () {
+            checkUsernameOrEmail('nickname', nicknameInput.value.trim());
+        });
+    }
+
+    // Email AJAX validation
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function () {
+            checkUsernameOrEmail('email', emailInput.value.trim());
+        });
+    }
+});
+</script>
+
+<script>
     function showAlert(event) {
         event.preventDefault();
         alert("Por favor, seleccione la fecha en el calendario.");
@@ -633,8 +696,11 @@
 
                 case 'email':
                     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    valid = emailPattern.test(value);
-                    errorMessage = valid ? '' : 'El email es requerido y debe ser válido.';
+                    // Check if the validation message for "email ya está registrado" exists and is visible
+                    const emailValidationMsg = document.querySelector('#email ~ small.validation-msg');
+                    const isEmailInUse = emailValidationMsg && emailValidationMsg.textContent.includes('ya está registrado') && emailValidationMsg.style.display !== 'none';
+                    valid = emailPattern.test(value) && !isEmailInUse;
+                    errorMessage = valid ? '' : (isEmailInUse ? 'Este email ya está registrado.' : 'El email es requerido y debe ser válido.');
                     break;
 
                 case 'dni_file':
@@ -644,8 +710,11 @@
                     break;
 
                 case 'nickname':
-                    valid = value.length > 0 && value.length <= 50;
-                    errorMessage = valid ? '' : 'El apodo es requerido y no puede exceder 50 caracteres.';
+                    // Check if the validation message for "nombre ya está en uso" exists and is visible
+                    const nicknameValidationMsg = document.querySelector('#nickname ~ small.validation-msg');
+                    const isNameInUse = nicknameValidationMsg && nicknameValidationMsg.textContent.includes('ya está en uso') && nicknameValidationMsg.style.display !== 'none';
+                    valid = value.length > 0 && value.length <= 50 && !isNameInUse;
+                    errorMessage = valid ? '' : (isNameInUse ? 'Este nombre ya está en uso.' : 'El apodo es requerido y no puede exceder 50 caracteres.');
                     break;
 
                 case 'age':

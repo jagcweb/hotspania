@@ -54,6 +54,9 @@
                                         <a title="Historial Paquete" href="#" data-toggle="modal" data-target="#historial-paquete-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
                                         </a>
+                                        <a title="Cambiar estado cuenta" href="#" data-toggle="modal" data-target="#cambiar-estado-cuenta-{{$u->id}}" class="icon">
+                                            <i class="fa-solid fa-user-pen"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -61,6 +64,7 @@
                             @include('modals.admin.modal_ver_perfil')
                             @include('modals.admin.user.modal_editar_status')
                             @include('modals.admin.modal_historial_paquete')
+                            @include('modals.admin.modal_cambiar_estado_cuenta')
                         @endif
                     @endforeach
                 </div>

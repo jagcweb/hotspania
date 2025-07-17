@@ -147,7 +147,7 @@ class UserController extends Controller
             'full_name' => 'required|string|max:255',
             'dni' => 'required|string|max:20', // Ajusta la longitud según tu país
             'date_of_birth' => 'required|date',
-            'email' => 'required|email|unique:users,id',
+            'email' => 'required|email|unique:users,email,' . $request->user_id,
             'dni_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
             'nickname' => 'required|string|max:50|unique:users,id',
             'age' => 'required|numeric|min:18|max:99',
@@ -310,6 +310,55 @@ class UserController extends Controller
         $users = $users->get();
 
         return view('admin.users.active', compact('users'));
+    }
+
+    public function getRejected()
+    {
+        $users = User::whereHas(
+            'roles', function($q){
+                $q->where('name', 'user');
+            })
+            ->where('active', 2);
+
+        if (request()->get('search')) {
+            $users = $users->where('nickname', 'like', '%' . request()->get('search') . '%');
+        }
+
+        $users = $users->get();
+
+        return view('admin.users.rejected', compact('users'));
+    }
+
+    public function changeStatus(Request $request, $id) {
+        $user = User::find($id);
+
+        if(!$user) {
+            return back()->with('error', 'Usuario no encontrado');
+        }
+
+        $status = $request->get('status');
+
+        $user->active = $status;
+        $user->reject_reason = $request->get('rejected_reason');
+        $user->update();
+
+        if ($status == 1) {
+                if(is_null($user->first_time)){
+                    try {
+                        \Mail::to($user->email)->send(new \App\Mail\BienvenidaHotspania($user->email, $user->dni));
+                    } catch (\Exception $e) {
+                        \Log::error('Error enviando email de bienvenida: ' . $e->getMessage());
+                    }
+
+                    $user->first_time = 1;
+                    $user->update();
+                }
+            return back()->with('exito', 'Usuario activado correctamente.');
+        } elseif ($status == 2) {
+            return back()->with('exito', 'Usuario rechazado correctamente.');
+        } else {
+            return back()->with('exito', 'Estado de usuario actualizado.');
+        }
     }
 
     public function getPositionals()

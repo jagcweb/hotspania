@@ -24,35 +24,26 @@
 
             <div class="card-body">
                 @if(count($images) > 0)
-                    <p class="w-100 text-center">
-                        <a style="color:green; font-size:20px;" href="{{ route('admin.images.approveall', ['user' => $u->id]) }}">
+                    <div class="mt-3" style="width:100%; display:flex; flex-direction:row; justify-content:center;">
+                        <a style="color:green; text-align:center; border: 1px solid green; padding:10px;" href="{{ route('admin.images.approveall', ['user' => $u->id]) }}">
                             Aprobar todas
                         </a>
-                    </p>
-
-                    <p class="w-100 text-center">
-                        <a style="color:red; font-size:20px;" href="{{ route('admin.images.unapproveall', ['user' => $u->id]) }}">
+                        <a class="ml-2" style="color:red; text-align:center; border: 1px solid red; padding:10px;" href="{{ route('admin.images.unapproveall', ['user' => $u->id]) }}">
                             Desaprobar todas
                         </a>
-                    </p>
-
-                    <p class="w-100 text-center">
-                        <a style="color:red; font-size:20px;" href="{{ route('admin.images.deleteall', ['user' => $u->id]) }}">
+                        <a class="ml-2" style="color:red; text-align:center; border: 1px solid red; padding:10px;" href="{{ route('admin.images.deleteall', ['user' => $u->id]) }}">
                             Borrar todas
                         </a>
-                    </p>
-
-                    <p class="w-100 text-center">
-                        <a style="color:black; font-size:20px;" href="{{ route('admin.images.visibleall', ['user' => $u->id]) }}">
+                        <a class="ml-2" style="color:black; text-align:center; border: 1px solid #000; padding:10px;" href="{{ route('admin.images.visibleall', ['user' => $u->id]) }}">
                             Aplicar visible a todas
                         </a>
-                    </p>
-
-                    <p class="w-100 text-center">
-                        <a style="color:black; font-size:20px;" href="{{ route('admin.images.invisibleall', ['user' => $u->id]) }}">
+                        <a class="ml-2" style="color:black; text-align:center; border: 1px solid #000; padding:10px;" href="{{ route('admin.images.invisibleall', ['user' => $u->id]) }}">
                             Aplicar oculto a todas
                         </a>
-                    </p>
+                        <a class="ml-2" style="color:black; text-align:center; border: 1px solid #000; padding:10px;" href="{{ route('admin.images.download', ['id' => $u->id]) }}">
+                           Descargar todas
+                        </a>
+                    </div>
                     <div style="max-width: 100%; display:flex; flex-direction:row; justify-content:space-around; align-items:center; flex-wrap: wrap;">
                         @foreach ($images as $i=>$image)
                         

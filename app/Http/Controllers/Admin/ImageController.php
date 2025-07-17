@@ -782,4 +782,78 @@ class ImageController extends Controller
         return new Response($file, 200);
     }
 
+    public function downloadImages($id) {
+        $user = User::findOrFail($id);
+        $images = Image::where('user_id', $id)->get();
+        
+        // Debug: verificar si hay imágenes
+        if ($images->isEmpty()) {
+            return redirect()->back()->with('error', 'No hay imágenes para este usuario.');
+        }
+        
+        $zip = new \ZipArchive();
+        $zipFileName = 'images_' . $user->name . '_' . time() . '.zip';
+        $zipFilePath = storage_path('app/public/' . $zipFileName);
+        
+        if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
+            $filesAdded = 0;
+            
+            foreach ($images as $image) {
+                try {
+                    // Obtener el disco correcto usando StorageHelper
+                    $disk = \Storage::disk(StorageHelper::getDisk('images'));
+                    
+                    // Debug: mostrar información sobre cada imagen
+                    \Log::info("Processing image: {$image->route}");
+                    \Log::info("Disk: " . StorageHelper::getDisk('images'));
+                    
+                    // Probar diferentes rutas posibles
+                    $possiblePaths = [
+                        'images/' . $image->route,
+                        $image->route,
+                        'public/images/' . $image->route
+                    ];
+                    
+                    $fileContent = null;
+                    $foundPath = null;
+                    
+                    foreach ($possiblePaths as $path) {
+                        if ($disk->exists($path)) {
+                            $fileContent = $disk->get($path);
+                            $foundPath = $path;
+                            break;
+                        }
+                    }
+                    
+                    if ($fileContent) {
+                        // Agregar el archivo al ZIP usando addFromString
+                        $zip->addFromString($image->route, $fileContent);
+                        $filesAdded++;
+                        \Log::info("Added to ZIP: {$image->route} from path: {$foundPath}");
+                    } else {
+                        \Log::warning("Image not found in any path: " . json_encode($possiblePaths));
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("Error processing image {$image->route}: " . $e->getMessage());
+                }
+            }
+            
+            $zip->close();
+            
+            // Debug: mostrar información del ZIP
+            \Log::info("ZIP created at: {$zipFilePath}");
+            \Log::info("ZIP file size: " . (file_exists($zipFilePath) ? filesize($zipFilePath) : 'File not found'));
+            \Log::info("Files added to ZIP: {$filesAdded}");
+            
+            // Verificar que el ZIP se creó correctamente y tiene contenido
+            if (file_exists($zipFilePath) && filesize($zipFilePath) > 0 && $filesAdded > 0) {
+                return response()->download($zipFilePath)->deleteFileAfterSend(true);
+            } else {
+                return redirect()->back()->with('error', "No se encontraron imágenes para descargar. Imágenes procesadas: {$filesAdded}");
+            }
+        } else {
+            return redirect()->back()->with('error', 'No se pudo crear el archivo ZIP.');
+        }
+    }
+
 }

@@ -266,7 +266,7 @@
             <span id="username">{{ $user->nickname }}</span> <!-- Aquí puedes poner el nombre de usuario dinámicamente -->
         </div>
         <div class="contact-icons">
-            <a href="https://api.whatsapp.com/send/?phone=+34{{ $user->phone }}&text=¡Hola%20{{ $user->nickname }}!%20Acabo%20de%20ver%20tu%20ficha%20en%20Hotspania.es%20¿Me%20comentas%20sobre%20tus%20servicios?" target="_blank" id="whatsappIcon" aria-label="WhatsApp">
+            <a href="https://api.whatsapp.com/send/?phone=+34{{ $user->phone }}&text=Hola%20{{ $user->nickname }}%20Acabo%20de%20ver%20tu%20ficha%20en%20Hotspania.es%20y%20quisiera%20información,%20que%20me%20cuentes%20un%20poco" target="_blank" id="whatsappIcon" aria-label="WhatsApp">
                 <i class="fab fa-whatsapp"></i> <!-- Icono de WhatsApp -->
             </a>
             <a href="tel:+34{{ $user->phone }}" id="phoneIcon" aria-label="Llamar">

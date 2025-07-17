@@ -206,7 +206,8 @@
 
 
         @endif
-         <ul class="list ullist">
+        @if(\Auth::user() && \Auth::user()->getRoleNames()[0] == "admin")
+        <ul class="list ullist">
             {{--<li><a class="text-white" href="#">Inicio</a></li>
             <li><a class="text-white" href="#">Mi cuenta</a></li>
             <li>
@@ -218,11 +219,11 @@
             </li>--}}
             <li>
               @if(\Auth::user())
-                @if(\Auth::user()->getRoleNames()[0] == "admin")
+                {{-- @if(\Auth::user()->getRoleNames()[0] == "admin")  --}}
                   <a href="{{ route('admin.citychanges') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
-                @else
+                {{-- @else
                   <a href="{{ route('account.index') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
-                @endif
+                @endif --}}
                 @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
                 @if(is_object($frontimage))
                     @if(!is_null($frontimage->route_gif))
@@ -236,23 +237,74 @@
                     <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
                 </a>
                @else
-                @if(!str_contains(url()->current(), '/login') && !str_contains(url()->current(), '/register'))
+                {{--  @if(!str_contains(url()->current(), '/login') && !str_contains(url()->current(), '/register'))
                     <a title="Anúnciate" href="{{ route('user.register', ['step' => 1]) }}" class="btn btn-primary mt-2" style="background:#f36e00!important; color:#fff;min-width: 100px;min-height: 35px;display: flex;align-items: center;justify-content: center;font-size: 13px;">
                         Anúnciate
                         <i class="fa-solid fa-rocket ml-1"></i>
                     </a>
-                @endif
+                @endif--}}
               @endif
             </li>
           </form>
         </ul>
-        @if(!\Auth::user())
-        <li class="lilist">
-            <a class="ml-3" href="javascript:void(0);">
-                <i class="fa-solid fa-bars text-white" style="font-size: 22px; line-height:20px;"></i>
-            </a>
-        </li>
         @endif
+        <li class="lilist dropdown">
+            <a class="ml-3 dropdown-toggle" href="#" id="guestMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+               style="font-size: 26px; line-height:24px;">
+            <i class="fa-solid fa-bars text-white"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end custom-guest-dropdown" aria-labelledby="guestMenuDropdown" style="min-width: 200px;">
+                @if(!\Auth::user())
+                    <li><a class="dropdown-item custom-guest-item" href="{{ route('login') }}">Iniciar sesión</a></li>
+                    <li><a class="dropdown-item custom-guest-item" href="{{ route('user.register', ['step' => 1]) }}">Registrarse</a></li>
+                @else
+                    <li><a class="dropdown-item custom-guest-item" href="{{ route('account.index') }}">Mi cuenta</a></li>
+                @endif
+                <hr style="border-color: #f36e00; border-width: 2px; width: 80%; margin: 8px auto;">
+                <li>
+                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Terminos_y_Condiciones.pdf']) }}">
+                        Términos y Condiciones
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Cookies.pdf']) }}">
+                        Política de Cookies
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Privacidad.pdf']) }}">
+                        Política de Privacidad
+                    </a>
+                </li>
+                <li>
+                    <a id="chatbotBtn" class="dropdown-item custom-guest-item" href="javascript:void(0);">
+                        Chatbot
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <style>
+            .custom-guest-dropdown {
+            background: #111111 !important;
+            color: #f36e00 !important;
+            font-size: 18px;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            }
+            .custom-guest-dropdown .custom-guest-item {
+            color: #f36e00 !important;
+            background: #111111 !important;
+            font-size: 18px;
+            padding: 12px 24px;
+            transition: background 0.2s, color 0.2s;
+            }
+            .custom-guest-dropdown .custom-guest-item:hover,
+            .custom-guest-dropdown .custom-guest-item:focus {
+            background: #f36e00 !important;
+            color: #111111 !important;
+            }
+        </style>
     </nav>
 
     @include('partial_msg')
@@ -626,7 +678,7 @@
     </script>
 
 <!-- Botón flotante circular -->
-<div id="chatbot-float-btn" style="
+{{-- <div id="chatbot-float-btn" style="
     position: fixed;
     bottom: 30px;
     right: 30px;
@@ -648,7 +700,7 @@
         <circle cx="12" cy="15" r="1.2" fill="#fff"/>
         <circle cx="15" cy="15" r="1.2" fill="#fff"/>
     </svg>
-</div>
+</div> --}}
 </div>
 
 <!-- Modal del chatbot (oculto por defecto) -->
@@ -916,13 +968,23 @@
 <script>
 (function() {
     // Botón flotante y modal
-    const floatBtn = document.getElementById('chatbot-float-btn');
+    //const floatBtn = document.getElementById('chatbot-float-btn');
+    
+    const floatBtn = document.getElementById('chatbotBtn');
     const modal = document.getElementById('chatbot-modal');
     const closeBtn = document.getElementById('chatbot-close-btn');
     let messagesContainer, messageInput, sendButton, typingIndicator;
 
     // Mostrar el modal y preparar el chat
     floatBtn.onclick = function() {
+        var lilist = document.querySelector('.lilist');
+        if (lilist) {
+            lilist.classList.remove('show');
+        }
+        var guestDropdown = document.querySelector('.custom-guest-dropdown');
+        if (guestDropdown) {
+            guestDropdown.classList.remove('show');
+        }
         modal.style.display = 'flex';
         setTimeout(() => {
             messagesContainer = document.getElementById('messagesContainer');

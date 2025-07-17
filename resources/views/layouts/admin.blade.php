@@ -131,6 +131,12 @@
                                         >
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.users.getRejected') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getRejected') ? '#f36e00' : '#FFFFFF' }}"
+                                            ><i class="fa-solid fa-user-xmark"></i>
+                                            Fichas rechazadas</a
+                                        >
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.users.getPositionals') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getPositionals') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fa-solid fa-up-down-left-right"></i>
                                             Posicionar Fichas Activas</a

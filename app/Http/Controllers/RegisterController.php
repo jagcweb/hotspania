@@ -18,6 +18,7 @@ use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use FFMpeg\Format\Video\X264;
 use FFMpeg\Coordinate\TimeCode;
+use App\Models\Notification;
 
 class RegisterController extends Controller
 {
@@ -206,13 +207,6 @@ class RegisterController extends Controller
                 } catch (\Exception $e) {
                     \Log::error("Error al notificar al administrador: " . $e->getMessage());
                 }
-
-                try {
-                    \Mail::to($user->email)->send(new \App\Mail\BienvenidaHotspania($user->email, $request->dni));
-                } catch (\Exception $e) {
-                    \Log::error('Error enviando email de bienvenida: ' . $e->getMessage());
-                }
-
                 
                 return redirect()->route('login')->with('exito', 'Paso 3 completado. Usuario creado.');
             break;
@@ -468,5 +462,35 @@ class RegisterController extends Controller
         // You might need to implement login history functionality or use an existing package
 
         return view('admin.users.login-records');
+    }
+
+    /**
+     * Check if a username or email already exists.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkUsernameOrEmail(Request $request)
+    {
+        $request->validate([
+            'nickname' => 'nullable|string',
+            'email' => 'nullable|email',
+        ]);
+
+        $nicknameExists = false;
+        $emailExists = false;
+
+        if ($request->filled('nickname')) {
+            $nicknameExists = User::where('nickname', $request->nickname)->exists();
+        }
+
+        if ($request->filled('email')) {
+            $emailExists = User::where('email', $request->email)->exists();
+        }
+
+        return response()->json([
+            'nickname_exists' => $nicknameExists,
+            'email_exists' => $emailExists,
+        ]);
     }
 }
