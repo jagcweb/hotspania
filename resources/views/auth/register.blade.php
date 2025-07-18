@@ -325,7 +325,7 @@
             
 
             @if($step == 3)
-                <form method="POST" action="{{ route('user.save', ['step' => 'step-3', 'id' => \Crypt::encryptString($user->id)]) }}" enctype="multipart/form-data">
+                <form id="last-form" method="POST" action="{{ route('user.save', ['step' => 'step-3', 'id' => \Crypt::encryptString($user->id)]) }}" enctype="multipart/form-data">
                     @csrf
                     <section id="step-3" class="form-step">
                         <h2 class="font-normal">Datos Personales</h2>
@@ -365,7 +365,7 @@
                                 </label>
                             </div>
                         </div>
-                        <button class="w-100 btnstep3 disabled button submit_btn submit_btn_finish submit-btn" type="submit" disabled data="step-3">Guardar</button>
+                        <button id="last-submit" class="w-100 btnstep3 disabled button submit_btn submit_btn_finish submit-btn" type="submit" disabled data="step-3">Guardar</button>
                     </section>
                 </form>
             @endif
@@ -378,66 +378,84 @@
 <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.7.0/dist/ffmpeg.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Helper to create or update validation message
-    function setValidationMessage(input, message, isError) {
-        let small = input.parentNode.querySelector('small.validation-msg');
-        if (!small) {
-            small = document.createElement('small');
-            small.className = 'validation-msg';
-            input.parentNode.appendChild(small);
-        }
-        small.textContent = message;
-        small.style.color = isError ? '#ff4d4f' : '#13da35';
-        small.style.display = message ? 'block' : 'none';
-    }
-
-    // AJAX check function
-    async function checkUsernameOrEmail(type, value) {
-        if (!value) {
-            setValidationMessage(document.getElementById(type), '', false);
-            return;
-        }
-        try {
-            const params = new URLSearchParams();
-            params.append(type, value);
-            const response = await fetch(`/register/check-username-or-email?${params.toString()}`);
-            const data = await response.json();
-            if (type === 'nickname') {
-                if (data.nickname_exists) {
-                    setValidationMessage(document.getElementById('nickname'), 'Este nombre ya está en uso.', true);
-                } else {
-                    setValidationMessage(document.getElementById('nickname'), 'Nombre disponible.', false);
-                }
+    const lastSubmitBtn = document.getElementById('last-submit');
+    if (lastSubmitBtn) {
+        lastSubmitBtn.addEventListener('click', function (e) {
+            // Obtener el user_id encriptado desde Blade
+            const userId = "{{ isset($user) ? $user->id : '' }}";
+            const cookieName = "ficheros_guardados_" + userId;
+            // Eliminar la cookie (establecer expiración en el pasado)
+            document.cookie = cookieName + "=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+            // Enviar el formulario
+            const lastForm = document.getElementById('last-form');
+            if (lastForm) {
+                lastForm.submit();
             }
-            if (type === 'email') {
-                if (data.email_exists) {
-                    setValidationMessage(document.getElementById('email'), 'Este email ya está registrado.', true);
-                } else {
-                    setValidationMessage(document.getElementById('email'), 'Email disponible.', false);
-                }
-            }
-        } catch (e) {
-            // Optionally handle error
-        }
-    }
-
-    // Nickname AJAX validation
-    const nicknameInput = document.getElementById('nickname');
-    if (nicknameInput) {
-        nicknameInput.addEventListener('blur', function () {
-            checkUsernameOrEmail('nickname', nicknameInput.value.trim());
         });
     }
+</script>
 
-    // Email AJAX validation
-    const emailInput = document.getElementById('email');
-    if (emailInput) {
-        emailInput.addEventListener('blur', function () {
-            checkUsernameOrEmail('email', emailInput.value.trim());
-        });
-    }
-});
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Helper to create or update validation message
+        function setValidationMessage(input, message, isError) {
+            let small = input.parentNode.querySelector('small.validation-msg');
+            if (!small) {
+                small = document.createElement('small');
+                small.className = 'validation-msg';
+                input.parentNode.appendChild(small);
+            }
+            small.textContent = message;
+            small.style.color = isError ? '#ff4d4f' : '#13da35';
+            small.style.display = message ? 'block' : 'none';
+        }
+
+        // AJAX check function
+        async function checkUsernameOrEmail(type, value) {
+            if (!value) {
+                setValidationMessage(document.getElementById(type), '', false);
+                return;
+            }
+            try {
+                const params = new URLSearchParams();
+                params.append(type, value);
+                const response = await fetch(`/register/check-username-or-email?${params.toString()}`);
+                const data = await response.json();
+                if (type === 'nickname') {
+                    if (data.nickname_exists) {
+                        setValidationMessage(document.getElementById('nickname'), 'Este nombre ya está en uso.', true);
+                    } else {
+                        setValidationMessage(document.getElementById('nickname'), 'Nombre disponible.', false);
+                    }
+                }
+                if (type === 'email') {
+                    if (data.email_exists) {
+                        setValidationMessage(document.getElementById('email'), 'Este email ya está registrado.', true);
+                    } else {
+                        setValidationMessage(document.getElementById('email'), 'Email disponible.', false);
+                    }
+                }
+            } catch (e) {
+                // Optionally handle error
+            }
+        }
+
+        // Nickname AJAX validation
+        const nicknameInput = document.getElementById('nickname');
+        if (nicknameInput) {
+            nicknameInput.addEventListener('blur', function () {
+                checkUsernameOrEmail('nickname', nicknameInput.value.trim());
+            });
+        }
+
+        // Email AJAX validation
+        const emailInput = document.getElementById('email');
+        if (emailInput) {
+            emailInput.addEventListener('blur', function () {
+                checkUsernameOrEmail('email', emailInput.value.trim());
+            });
+        }
+    });
 </script>
 
 <script>
@@ -600,9 +618,37 @@ document.addEventListener('DOMContentLoaded', function () {
                     await processVideo(file);  // Procesar videos
                 }
             }
-            
-            // Una vez procesados los archivos, enviamos el formulario
-            form.submit();
+
+            const uploadBtn = document.getElementById('upload-btn');
+            if (uploadBtn) {
+                uploadBtn.disabled = false;  // Habilitar el botón de carga
+            }
+        });
+    }
+
+    const uploadBtn = document.getElementById('upload-btn');
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', function (e) {
+            // Obtener el user_id encriptado desde Blade
+            const userId = "{{ isset($user) ? $user->id : '' }}";
+            // Nombre de la cookie con el user_id encriptado
+            const cookieName = "ficheros_guardados_" + userId;
+            // Verificar si la cookie existe para este user_id
+            if (document.cookie.split(';').some((item) => item.trim().startsWith(cookieName + '='))) {
+                e.preventDefault();
+                alert('ficheros ya subidos');
+                setTimeout(function() {
+                    window.location.href = '/register/paso-3/{{ isset($user) ? \Crypt::encryptString($user->id) : '' }}';
+                }, 300);
+                return;
+            }
+            // Guardar la cookie por 60 días
+            document.cookie = cookieName + "=true; path=/; max-age=5184000";
+            // Ejecutar el formulario
+            const form = document.getElementById('upload-form');
+            if (form) {
+                form.submit();
+            }
         });
     }
 </script>
@@ -677,7 +723,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const value = field.value.trim();
             let valid = true;
             let errorMessage = '';
-            console.log('efe', field.id)
             switch (field.id) {
                 case 'full_name':
                     valid = value.length > 0 && value.length <= 255;

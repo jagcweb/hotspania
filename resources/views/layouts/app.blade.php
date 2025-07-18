@@ -249,38 +249,55 @@
         </ul>
         @endif
         <li class="lilist dropdown">
-            <a class="ml-3 dropdown-toggle" href="#" id="guestMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+            <a class="ml-3 dropdown-toggle d-flex align-items-center" href="#" id="guestMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
                style="font-size: 26px; line-height:24px;">
+            @if(\Auth::user())
+                @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
+                @if(is_object($frontimage))
+                @if(!is_null($frontimage->route_gif))
+                    <img class="rounded-circle" style="width:40px; height:40px; border-radius:9999px; margin-right:10px;" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                @else
+                    <img class="rounded-circle" style="width:40px; height:40px; border-radius:9999px; margin-right:10px;" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                @endif
+                @else
+                <img src="{{ asset('images/user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; border-radius:9999px; margin-right:10px;"/>
+                @endif
+            @endif
             <i class="fa-solid fa-bars text-white"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end custom-guest-dropdown" aria-labelledby="guestMenuDropdown" style="min-width: 200px;">
-                @if(!\Auth::user())
-                    <li><a class="dropdown-item custom-guest-item" href="{{ route('login') }}">Iniciar sesión</a></li>
-                    <li><a class="dropdown-item custom-guest-item" href="{{ route('user.register', ['step' => 1]) }}">Registrarse</a></li>
-                @else
-                    <li><a class="dropdown-item custom-guest-item" href="{{ route('account.index') }}">Mi cuenta</a></li>
-                @endif
-                <hr style="border-color: #f36e00; border-width: 2px; width: 80%; margin: 8px auto;">
-                <li>
-                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Terminos_y_Condiciones.pdf']) }}">
-                        Términos y Condiciones
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Cookies.pdf']) }}">
-                        Política de Cookies
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Privacidad.pdf']) }}">
-                        Política de Privacidad
-                    </a>
-                </li>
-                <li>
-                    <a id="chatbotBtn" class="dropdown-item custom-guest-item" href="javascript:void(0);">
-                        Chatbot
-                    </a>
-                </li>
+            @if(!\Auth::user())
+                <li><a class="dropdown-item custom-guest-item" href="{{ route('login') }}">Iniciar sesión</a></li>
+                <li><a class="dropdown-item custom-guest-item" href="{{ route('user.register', ['step' => 1]) }}">Registrarse</a></li>
+            @else
+                <li><a class="dropdown-item custom-guest-item" href="{{ route('account.index') }}">Mi cuenta</a></li>
+            @endif
+            <li>
+               <a title="Anúnciate" href="{{ route('user.register', ['step' => 1]) }}" class="btn btn-primary mt-2" style="background:#f36e00!important; color:#fff;min-width: 100px;min-height: 35px;display: flex;align-items: center;justify-content: center;font-size: 13px;">
+                    Anúnciate
+                    <i class="fa-solid fa-rocket ml-1"></i>
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Terminos_y_Condiciones.pdf']) }}">
+                Términos y Condiciones
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Cookies.pdf']) }}">
+                Política de Cookies
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Privacidad.pdf']) }}">
+                Política de Privacidad
+                </a>
+            </li>
+            <li>
+                <a id="chatbotBtn" class="dropdown-item custom-guest-item" href="javascript:void(0);">
+                Chatbot
+                </a>
+            </li>
             </ul>
         </li>
         <style>

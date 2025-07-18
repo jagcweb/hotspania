@@ -44,7 +44,7 @@ class RegisterController extends Controller
         }
         
 
-        $cities = City::orderBy('id', 'asc')->get();
+        $cities = City::where('name', 'Barcelona')->orderBy('id', 'asc')->get();
 
         if(count($cities) == 0){
             return redirect()->route('admin.utilities.zones')->with('error', 'Antes de crear un usuario, debes tener alguna ciudad creada para poder asignarsela.');

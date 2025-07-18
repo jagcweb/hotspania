@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 
+
 class ImageController extends Controller
 {
     public function saveBlur(Request $request, $id)

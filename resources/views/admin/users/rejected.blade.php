@@ -136,32 +136,34 @@
     }
 
     .overlay {
-        display: none;  /* Oculto por defecto */
+        display: none;
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 2;
-        display: none;  /* Aseguramos que esté oculto */
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(3, 1fr);
-        gap: 15px;  /* Aumentado el espacio entre iconos */
-        padding: 15px;  /* Aumentado el padding */
-        width: 80%;  /* Ancho relativo al contenedor */
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        height: 54px; /* 2 filas x 24px + margen */
+        width: 78px;  /* 3 columnas x 18px + margen */
     }
 
     .overlay.visible {
-        display: grid;
+        display: flex;
     }
 
     .icon {
         color: white;
-        font-size: 20px;  /* Reducido de 24px a 20px */
+        font-size: 18px;
+        margin: 3px;
         transition: transform 0.2s ease;
+        width: 18px;
+        height: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 6px;  /* Reducido de 8px a 6px */
     }
 
     .icon:hover {
@@ -171,6 +173,12 @@
 
     .image-darkened {
         filter: brightness(0.4);
+    }
+
+    /* 3 iconos por fila, 2 filas */
+    .overlay .icon {
+        box-sizing: border-box;
+        display: inline-flex;
     }
 </style>
 
