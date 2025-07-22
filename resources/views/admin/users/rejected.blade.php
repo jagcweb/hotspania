@@ -23,6 +23,7 @@
                                 $frontimage = \App\Models\Image::where('user_id', $u->id)
                                     ->whereNotNull('frontimage')
                                     ->first();
+                                $randomImage = \App\Models\Image::where('user_id', $u->id)->first();
                             @endphp
                             <div class="col-md-1">
                                 <div class="image-container">
