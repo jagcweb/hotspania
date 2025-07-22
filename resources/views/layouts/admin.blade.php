@@ -137,6 +137,18 @@
                                         >
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ route('admin.users.getInactive') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getInactive') ? '#f36e00' : '#FFFFFF' }}"
+                                            ><i class="fa-solid fa-user-slash"></i>
+                                            Fichas inactivas</a
+                                        >
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.users.getApproved') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getApproved') ? '#f36e00' : '#FFFFFF' }}"
+                                            ><i class="fa-solid fa-user-check"></i>
+                                            Fichas aprobadas</a
+                                        >
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ route('admin.users.getPositionals') }}" class="nav-link" style="color: {{ Request::routeIs('admin.users.getPositionals') ? '#f36e00' : '#FFFFFF' }}"
                                             ><i class="fa-solid fa-up-down-left-right"></i>
                                             Posicionar Fichas Activas</a

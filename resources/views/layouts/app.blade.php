@@ -186,7 +186,10 @@
                 </form>
             </li>
 
-            @php $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : ''; @endphp
+            {{-- @php 
+                $cookie = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : '';
+                $selected_city = \App\Models\City::find($cookie) ? \App\Models\City::find($cookie)->name : ''; 
+            @endphp
             <li class="nav-item" style="font-size:14px; margin-top:10px;">
                 <div class="dropdown">
                     <button class="btn dropdown-toggle text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -202,11 +205,11 @@
                         </div>
                     </div>
                 </div>
-            </li>
+            </li> --}}
 
 
         @endif
-        @if(\Auth::user() && \Auth::user()->getRoleNames()[0] == "admin")
+        @if(\Auth::user() && \Auth::user()->getRoleNames()[0] == "admin" && str_contains(url()->full(), '/admin'))
         <ul class="list ullist">
             {{--<li><a class="text-white" href="#">Inicio</a></li>
             <li><a class="text-white" href="#">Mi cuenta</a></li>
@@ -237,12 +240,12 @@
                     <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
                 </a>
                @else
-                {{--  @if(!str_contains(url()->current(), '/login') && !str_contains(url()->current(), '/register'))
+                @if(!str_contains(url()->current(), '/login') && !str_contains(url()->current(), '/register'))
                     <a title="Anúnciate" href="{{ route('user.register', ['step' => 1]) }}" class="btn btn-primary mt-2" style="background:#f36e00!important; color:#fff;min-width: 100px;min-height: 35px;display: flex;align-items: center;justify-content: center;font-size: 13px;">
                         Anúnciate
                         <i class="fa-solid fa-rocket ml-1"></i>
                     </a>
-                @endif--}}
+                @endif
               @endif
             </li>
           </form>
@@ -272,12 +275,6 @@
             @else
                 <li><a class="dropdown-item custom-guest-item" href="{{ route('account.index') }}">Mi cuenta</a></li>
             @endif
-            <li>
-               <a title="Anúnciate" href="{{ route('user.register', ['step' => 1]) }}" class="btn btn-primary mt-2" style="background:#f36e00!important; color:#fff;min-width: 100px;min-height: 35px;display: flex;align-items: center;justify-content: center;font-size: 13px;">
-                    Anúnciate
-                    <i class="fa-solid fa-rocket ml-1"></i>
-                </a>
-            </li>
             <li>
                 <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Terminos_y_Condiciones.pdf']) }}">
                 Términos y Condiciones
@@ -562,9 +559,56 @@
         </div>
     </div>
       
-
     <script>
-        $(document).ready(function() {
+            $(document).ready(function() {
+
+            var $dropdownMenu = $('.dropdown-menu.dropdown-menu-end.custom-guest-dropdown');
+            $dropdownMenu.css('display', 'none');
+            
+            $('#guestMenuDropdown').on('click', function(e) {
+                e.preventDefault();
+                
+                if ($dropdownMenu.is(':visible')) {
+                    $dropdownMenu.slideUp(200, function() {
+                        // Limpiar transform y top al cerrar
+                        $dropdownMenu.css({
+                            'transform': '',
+                            'top': ''
+                        });
+                    });
+                } else {
+                    var $toggle = $(this);
+                    
+                    // Mostrar para calcular dimensiones
+                    $dropdownMenu.css('visibility', 'hidden').show();
+                    
+                    var toggleWidth = $toggle.outerWidth();
+                    var menuWidth = $dropdownMenu.outerWidth();
+                    var offset = (menuWidth - toggleWidth) / 2;
+                    
+                    // Aplicar transform y top
+                    $dropdownMenu.hide().css({
+                        'visibility': 'visible',
+                        'transform': `translateX(-${offset}px)`,
+                        'top': '100%'
+                    });
+                    
+                    $dropdownMenu.slideDown(200);
+                }
+            });
+        
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.lilist.dropdown').length) {
+                    $dropdownMenu.slideUp(200, function() {
+                        $dropdownMenu.css({
+                            'transform': '',
+                            'top': ''
+                        });
+                    });
+                }
+            });
+
+
             // Cookie consent handling
             function setCookie(name, value, days) {
                 var expires = "";
@@ -652,7 +696,7 @@
                 });
 
                 $(document).on('click', () => {
-                    if ($input.val().trim() === '') {
+                    if ($input && (String($input.val()).trim() === '')) {
                         cerrarBusqueda();
                     }
                 });

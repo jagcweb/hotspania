@@ -53,6 +53,7 @@ Route::get('/home/image-get/{filename}',  [App\Http\Controllers\HomeController::
 Route::get('/home/gif-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getGif'])->name('home.gifget');
 Route::get('/document/{filename}',  [App\Http\Controllers\HomeController::class, 'getDocument'])->name('home.document');
 Route::get('/home/load-more/{page}', [App\Http\Controllers\HomeController::class, 'loadMore'])->name('home.loadmore');
+Route::get('/home/get-zones/{cityId}', [App\Http\Controllers\HomeController::class, 'getZonesFromCity'])->name('home.getZonesFromCity');
 
 //AccountController
 Route::get('/account', [App\Http\Controllers\AccountController::class, 'index'])->name('account.index');
@@ -113,6 +114,8 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('users/getPending', 'App\Http\Controllers\Admin\UserController@getPending')->name('admin.users.getPending');
     Route::get('users/getActive', 'App\Http\Controllers\Admin\UserController@getActive')->name('admin.users.getActive');
     Route::get('users/getRejected', 'App\Http\Controllers\Admin\UserController@getRejected')->name('admin.users.getRejected');
+    Route::get('users/getInactive', 'App\Http\Controllers\Admin\UserController@getInactive')->name('admin.users.getInactive');
+    Route::get('users/getApproved', 'App\Http\Controllers\Admin\UserController@getApproved')->name('admin.users.getApproved');
     Route::post('users/changeStatus/{id}', 'App\Http\Controllers\Admin\UserController@changeStatus')->name('admin.users.changeStatus');
     Route::get('users/getRequests', 'App\Http\Controllers\Admin\UserController@getRequests')->name('admin.users.getRequests');
     Route::get('users/getLoginRecords', 'App\Http\Controllers\Admin\UserController@getLoginRecords')->name('admin.users.getLoginRecords');
@@ -176,6 +179,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
 
 //HomeController
 Route::get('/privacy-policies', [App\Http\Controllers\HomeController::class, 'privacyPolicies'])->name('home.privacy_policies');
+
 
 //UserController
 Route::get('/admin/users/get', [App\Http\Controllers\Admin\UserController::class, 'get'])->name('admin.user.get');

@@ -29,6 +29,7 @@ class HomeController extends Controller
      */
     public function index(Request $request) {
         $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : null;
+        $selected_zone = isset($_COOKIE['selected_zone']) ? $_COOKIE['selected_zone'] : null;
 
         $query = User::whereHas('roles', function ($q) {
             $q->where('name', 'user');
@@ -45,9 +46,16 @@ class HomeController extends Controller
         // Filtrar por ciudad si hay una seleccionada
         if (!empty($selected_city)) {
             $query->whereHas('cities', function($q) use ($selected_city) {
-                $q->where('name', $selected_city);
+                $q->where('cities.id', $selected_city);
             });
         }
+
+        // Filtrar por zona si hay una seleccionada
+        /*if (!empty($selected_zone)) {
+            $query->whereHas('zones', function($q) use ($selected_zone) {
+                $q->where('zones.id', $selected_zone);
+            });
+        }*/
 
         // Add search condition if search parameter exists
         if ($request->has('search')) {
@@ -196,9 +204,16 @@ class HomeController extends Controller
         // Filtrar por ciudad si hay una seleccionada
         if (!empty($selected_city)) {
             $query->whereHas('cities', function($q) use ($selected_city) {
-                $q->where('name', $selected_city);
+                $q->where('cities.id', $selected_city);
             });
         }
+
+        // Filtrar por zona si hay una seleccionada
+        /*if (!empty($selected_zone)) {
+            $query->whereHas('zones', function($q) use ($selected_zone) {
+                $q->where('zones.id', $selected_zone);
+            });
+        }*/
 
         // Add search condition if search parameter exists
         if (request()->has('search')) {
@@ -377,5 +392,15 @@ class HomeController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . $filename . '"'
         ]);
+    }
+
+    public function getZonesFromCity($cityId) {
+        $zones = \App\Models\Zone::where('city_id', $cityId)->orderBy('name', 'asc')->get();
+
+        if ($zones->isEmpty()) {
+            return response()->json(['error' => 'No se encontraron zonas para esta ciudad.'], 404);
+        }
+
+        return response()->json($zones);
     }
 }

@@ -13,6 +13,8 @@
                         <select name="status" id="status-{{ $u->id }}" class="form-control" onchange="document.getElementById('rejected-reason-{{ $u->id }}').style.display = this.value == 2 ? 'block' : 'none';">
                             <option value="1" {{ $u->active == 1 ? 'selected' : '' }}>Activo</option>
                             <option value="2" {{ $u->active == 2 ? 'selected' : '' }}>Rechazado</option>
+                            <option value="3" {{ $u->active == 3 ? 'selected' : '' }}>Inactivo</option>
+                            <option value="4" {{ $u->active == 4 ? 'selected' : '' }}>Aprobado</option>
                         </select>
                     </div>
                     <div class="form-group" id="rejected-reason-{{ $u->id }}" style="display: {{ $u->active == 2 ? 'block' : 'none' }};">

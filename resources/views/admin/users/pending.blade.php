@@ -23,6 +23,10 @@
                                 $frontimage = \App\Models\Image::where('user_id', $u->id)
                                     ->whereNotNull('frontimage')
                                     ->first();
+
+                                $randomImage = \App\Models\Image::where('user_id', $u->id)
+                                    ->inRandomOrder()
+                                    ->first();
                             @endphp
                             <div class="col-md-1">
                                 <div class="image-container">
@@ -36,7 +40,15 @@
                                             <img src="{{ route('home.imageget', ['filename' => $frontimage->route_frontimage]) }}" class="img-fluid" alt="{{ $u->full_name }}">
                                         @endif
                                     @else
+                                        @if(is_object($randomImage))
+                                            @if(!is_null($randomImage->route_gif))
+                                                <img src="{{ route('home.gifget', ['filename' => $randomImage->route_gif]) }}" class="img-fluid" alt="{{ $u->full_name }}">
+                                            @else
+                                            <img src="{{ route('home.imageget', ['filename' => $frontimage->route_frontimage]) }}" class="img-fluid" alt="{{ $u->full_name }}">
+                                            @endif
+                                        @else
                                         <img src="{{ asset('images/user.jpg') }}" class="img-fluid" alt="Usuario sin imagen">
+                                        @endif
                                     @endif
                                     <div class="overlay">
                                         <a href="{{ route('admin.images.getFilter', ['id'=> $u->id, 'name' => $u->full_name, 'filter' => 'todas']) }}" class="icon">

@@ -215,23 +215,31 @@
                 <h1 class="profile-user-name text-white">
                     {{ \Auth::user()->nickname }}
                     <span class="badge-inline-container">
-                        @if (is_null($active))
+                        @if (is_null($active) || $active === 0)
                             <span class="badge badge-pending">
                                 <span style="margin-left: 15px;">Pendiente</span>
                             </span>
                         @elseif ($active === 1)
                             <span class="badge badge-active">
-                                <span style="margin-left: 15px;">Activa</span>
+                                <span style="margin-left: 15px;">Activo</span>
                             </span>
                         @elseif ($active === 2)
                             <span class="badge badge-rejected">
-                                <span style="margin-left: 15px;">Rechazada</span>
+                                <span style="margin-left: 15px;">Rechazado</span>
                             </span>
                             @if(!empty(\Auth::user()->reject_reason))
                                 <div style="color:#ff416c; font-size:13px; margin-top:4px;">
                                     Motivo: {{ \Auth::user()->reject_reason }}
                                 </div>
                             @endif
+                        @elseif ($active === 3)
+                            <span class="badge badge-pending" style="background: linear-gradient(135deg, #bdbdbd 0%, #757575 100%);">
+                                <span style="margin-left: 15px;">Inactivo</span>
+                            </span>
+                        @elseif ($active === 4)
+                            <span class="badge badge-active" style="background: linear-gradient(135deg, #56ab2f 0%, #00e676 100%);">
+                                <span style="margin-left: 15px;">Aprobado</span>
+                            </span>
                         @endif
                     </span>
                 </h1>

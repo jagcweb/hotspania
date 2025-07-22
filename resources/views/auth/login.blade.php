@@ -35,7 +35,7 @@
       </div>
       <div class="col-xl-6 col-sm-12 fondo">
         <div class="d-flex flex-column align-items-center align-content-center vh-100 justify-content-center">
-          <div class="mb-3">
+          {{-- <div class="mb-3">
             <h4 class="text-white">¿Aún no eres anunciante?</h4>
           </div>
           <div>
@@ -45,21 +45,39 @@
           </div>
           <div class="mb-3">
             <h4 class="text-white">Todo esto ¡Y mucho más!</h4>
-          </div>
+          </div> --}}
           <div>
-            <button class="btn boton_registro mt-4" id="registerButton">
+            {{-- button class="btn boton_registro mt-4" id="registerButton">
                 Regístrate gratis
             </button>
-            <hr>
+            <hr> --}}
             @php $cities = \App\Models\City::orderBy('id', 'asc')->get(); @endphp
             <select class="form-control" id="city_id" name="city" style="border: 2px solid #f76e08;" required autocomplete="off">
-                <option hidden selected disabled>
+                <option value="" hidden selected disabled>
                     Escoge una ciudad...
                 </option>
                 @foreach($cities as $c)
-                    <option value="{{strtolower($c->name)}}">{{$c->name}}</option>
+                    <option value="{{strtolower($c->id)}}">{{$c->name}}</option>
                 @endforeach
             </select>
+            @php 
+                if(isset($_COOKIE['selected_city'])){
+                    $zones = \App\Models\Zone::where('city_id', $_COOKIE['selected_city'])->orderBy('name', 'asc')->get();
+                } else {
+                    $zones = [];
+                }
+            @endphp
+           
+            <div id="appened-zones" class="mt-3">
+                    @if(count($zones) > 0)
+                    <select class="form-control mt-2" id="zone_id" name="zone" style="border: 2px solid #f76e08;" required autocomplete="off">
+                        <option value="" hidden selected disabled>Escoge una zona...</option>
+                        @foreach($zones as $z)
+                            <option value="{{$z->id}}">{{$z->name}}</option>
+                        @endforeach
+                    </select>
+                @endif
+            </div>
             <button class="btn acceder mt-4" id="log" disabled>
                 Acceder
             </button>
@@ -94,50 +112,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!getCookie('terms')) {
-            const modalElement = document.getElementById('imageGuidelinesModal');
-            const bootstrapModal = new bootstrap.Modal(modalElement, {
-                backdrop: 'static',
-                keyboard: false
-            });
-
-            // Guardar la instancia como propiedad del elemento para reutilizar
-            modalElement._bootstrapModal = bootstrapModal;
-            bootstrapModal.show();
-        }
-    });
-
-    // ✅ Botón que cierra el modal y guarda la cookie
-    function acceptTerms() {
-        const expirationDate = new Date();
-        expirationDate.setFullYear(expirationDate.getFullYear() + 1);
-        document.cookie = `terms=accepted; expires=${expirationDate.toUTCString()}; path=/`;
-
-        const modalElement = document.getElementById('imageGuidelinesModal');
-
-        // Usamos la instancia previamente almacenada o creamos una nueva
-        let modalInstance = bootstrap.Modal.getInstance?.(modalElement);
-
-        // Si getInstance no está disponible, usa la instancia guardada manualmente
-        if (!modalInstance && modalElement._bootstrapModal) {
-            modalInstance = modalElement._bootstrapModal;
-        } else if (!modalInstance) {
-            modalInstance = new bootstrap.Modal(modalElement);
-        }
-
-        modalInstance.hide();
-    }
-
-    // ✅ Función para leer cookies sin jQuery
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
-    </script>
 
 
 <style>
@@ -463,6 +437,93 @@
 </style>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!getCookie('terms')) {
+            const modalElement = document.getElementById('imageGuidelinesModal');
+            const bootstrapModal = new bootstrap.Modal(modalElement, {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            // Guardar la instancia como propiedad del elemento para reutilizar
+            modalElement._bootstrapModal = bootstrapModal;
+            bootstrapModal.show();
+        }
+    });
+
+    function acceptTerms() {
+        const expirationDate = new Date();
+        expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+        document.cookie = `terms=accepted; expires=${expirationDate.toUTCString()}; path=/`;
+
+        const modalElement = document.getElementById('imageGuidelinesModal');
+
+        // Usamos la instancia previamente almacenada o creamos una nueva
+        let modalInstance = bootstrap.Modal.getInstance?.(modalElement);
+
+        // Si getInstance no está disponible, usa la instancia guardada manualmente
+        if (!modalInstance && modalElement._bootstrapModal) {
+            modalInstance = modalElement._bootstrapModal;
+        } else if (!modalInstance) {
+            modalInstance = new bootstrap.Modal(modalElement);
+        }
+
+        modalInstance.hide();
+    }
+</script>
+<script>
+    document.getElementById('city_id').addEventListener('change', function() {
+        const citySelect = document.getElementById('city_id');
+        const selectedCity = citySelect.value;
+        document.getElementById('log').disabled = !selectedCity;
+
+        // Guardar cookie con el nombre de la ciudad (expira en 30 días)
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + 30);
+        document.cookie = `selected_city=${selectedCity}; expires=${expirationDate.toUTCString()}; path=/`;
+
+        // AJAX para obtener zonas de la ciudad seleccionada
+        const appenedZones = document.getElementById('appened-zones');
+        appenedZones.innerHTML = '';
+        appenedZones.innerHTML = '<span style="color:#fff;">Cargando zonas...</span>';
+
+        fetch(`/home/get-zones/${selectedCity}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se encontraron zonas para esta ciudad.');
+                }
+                return response.json();
+            })
+            .then(zones => {
+                if (Array.isArray(zones) && zones.length > 0) {
+                    let html = '<select class="form-control mt-2" id="zone_id" name="zone" style="border: 2px solid #f76e08;" required autocomplete="off">';
+                    html += '<option value="" hidden selected disabled>Escoge una zona...</option>';
+                    zones.forEach(zone => {
+                        html += `<option value="${zone.id}">${zone.name}</option>`;
+                    });
+                    html += '</select>';
+                    appenedZones.innerHTML = html;
+
+                    // Ahora sí, el elemento existe y puedes añadir el event listener
+                    document.getElementById('zone_id').addEventListener('change', function() {
+                        const zoneSelect = document.getElementById('zone_id');
+                        const selectedZone = zoneSelect.value;
+                        const zoneExpirationDate = new Date();
+                        zoneExpirationDate.setDate(zoneExpirationDate.getDate() + 30);
+                        document.cookie = `selected_zone=${selectedZone}; expires=${zoneExpirationDate.toUTCString()}; path=/`;
+                        document.getElementById('log').disabled = !selectedCity || !this.value;
+                        console.log("Selected zone:", selectedZone);
+                    });
+                } else {
+                    appenedZones.innerHTML = '<span style="color:#fff;">No hay zonas disponibles para esta ciudad.</span>';
+                }
+            })
+            .catch(error => {
+                appenedZones.innerHTML = `<span style="color:#fff;">${error.message}</span>`;
+            });
+    });
+</script>
+<script>
     // Función para obtener el valor de una cookie
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -473,22 +534,26 @@
     // Al cargar la página, verificar si existe la cookie
     document.addEventListener('DOMContentLoaded', function() {
         const savedCity = getCookie('selected_city');
+        const savedZone = getCookie('selected_zone');
         if (savedCity) {
+            console.log("Cookie city:", savedCity);
             const citySelect = document.getElementById('city_id');
             citySelect.value = savedCity;
-            document.getElementById('log').disabled = false;
         }
-    });
-
-    document.getElementById('city_id').addEventListener('change', function() {
-        const citySelect = document.getElementById('city_id');
-        const selectedCity = citySelect.value;
-        document.getElementById('log').disabled = !selectedCity;
-        
-        // Guardar cookie con el nombre de la ciudad (expira en 30 días)
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + 30);
-        document.cookie = `selected_city=${selectedCity}; expires=${expirationDate.toUTCString()}; path=/`;
+        if (savedZone) {
+            const zoneSelect = document.getElementById('zone_id');
+            console.log("Cookie:", savedZone);
+console.log("Options:", Array.from(zoneSelect.options).map(o => o.value));
+            console.log(savedZone);
+            if (zoneSelect) {
+                zoneSelect.value = savedZone;
+            }
+        }
+        if(savedCity && savedZone) {
+            document.getElementById('log').disabled = false;
+        } else {
+            document.getElementById('log').disabled = true;
+        }
     });
 
     document.getElementById('registerButton').addEventListener('click', function() {
@@ -496,11 +561,18 @@
     });
 
     document.getElementById('log').addEventListener('click', function() {
-        window.location.href = '/home';
+        const citySelect = document.getElementById('city_id');
+        console.log(citySelect.value);
+        if (citySelect.value) {
+            window.location.href = '/home';
+        } else {
+            alert('Escoge una ciudad');
+        }
     });
 </script>
+</script>
   
-  <script>
+<script>
     const inputFields = document.querySelectorAll('.form-field');
 
     inputFields.forEach(field => {

@@ -76,6 +76,10 @@ class User extends Authenticatable
         return $this->belongsToMany(City::class, 'city_users');
     }
 
+    /*public function zones(){
+        return $this->belongsToMany(Zone::class, 'zone_users');
+    }*/
+
     public function packageUser(){
         return $this->hasOne('App\Models\PackageUser', 'user_id','id');
     }

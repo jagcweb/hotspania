@@ -109,7 +109,7 @@ class UserController extends Controller
             'end_time' => !is_null($request->get('fulltime_time')) ? 'fulltime' : $request->end_time,
             'status' => 0,
             'profile_image' => NULL,
-            'active' => 1,
+            'active' => 4,
             'frozen' => NULL,
             'visible' => NULL,
             'online' => NULL,
@@ -319,6 +319,40 @@ class UserController extends Controller
                 $q->where('name', 'user');
             })
             ->where('active', 2);
+
+        if (request()->get('search')) {
+            $users = $users->where('nickname', 'like', '%' . request()->get('search') . '%');
+        }
+
+        $users = $users->get();
+
+        return view('admin.users.rejected', compact('users'));
+    }
+
+    public function getInactive()
+    {
+        $users = User::whereHas(
+            'roles', function($q){
+                $q->where('name', 'user');
+            })
+            ->where('active', 3);
+
+        if (request()->get('search')) {
+            $users = $users->where('nickname', 'like', '%' . request()->get('search') . '%');
+        }
+
+        $users = $users->get();
+
+        return view('admin.users.rejected', compact('users'));
+    }
+
+    public function getApproved()
+    {
+        $users = User::whereHas(
+            'roles', function($q){
+                $q->where('name', 'user');
+            })
+            ->where('active', 4);
 
         if (request()->get('search')) {
             $users = $users->where('nickname', 'like', '%' . request()->get('search') . '%');
