@@ -33,7 +33,7 @@
                                         @if(!is_null($frontimage->route_gif))
                                             <img src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" class="img-fluid" alt="{{ $u->full_name }}">
                                         @else
-                                            <img src="{{ route('home.imageget', ['filename' => $frontimage->route_frontimage]) }}" class="img-fluid" alt="{{ $u->full_name }}">
+                                            <img src="{{ route('home.imageget', ['filename' => $randomImage->route_frontimage]) }}" class="img-fluid" alt="{{ $u->full_name }}">
                                         @endif
                                     @else
                                         @if(is_object($randomImage))

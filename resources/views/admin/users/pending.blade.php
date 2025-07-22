@@ -44,7 +44,7 @@
                                             @if(!is_null($randomImage->route_gif))
                                                 <img src="{{ route('home.gifget', ['filename' => $randomImage->route_gif]) }}" class="img-fluid" alt="{{ $u->full_name }}">
                                             @else
-                                            <img src="{{ route('home.imageget', ['filename' => $frontimage->route_frontimage]) }}" class="img-fluid" alt="{{ $u->full_name }}">
+                                            <img src="{{ route('home.imageget', ['filename' => $randomImage->route_frontimage]) }}" class="img-fluid" alt="{{ $u->full_name }}">
                                             @endif
                                         @else
                                         <img src="{{ asset('images/user.jpg') }}" class="img-fluid" alt="Usuario sin imagen">
