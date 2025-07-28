@@ -1931,17 +1931,13 @@
     const nicknameInput = document.querySelector('.user_nickname');
     const nickname = nicknameInput.value;
     document.querySelector('.whatsapp_btn').addEventListener('click', function() {
-        // Replace the URL with your desired WhatsApp link
-
-
-
-        let inputStr = `¡Hola ${nickname}! Acabo de ver tu ficha en Hotspania.es ¿Me comentas sobre tus servicios?`;
+        let inputStr = `Hola ${nickname} Acabo de ver tu ficha en Hotspania.es y quisiera información, que me cuentes un poco`;
         let outputStr = '';
         for (let i = 0; i < inputStr.length; i++) {
             if (inputStr[i] === ' ') {
                 outputStr += '%20';
             } else {
-                outputStr[i];
+                outputStr += inputStr[i];
             }
         }
 
