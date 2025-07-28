@@ -92,8 +92,16 @@
                         </div>
                     
                         <div class="form-group">
-                            <label for="working_zone">Zona donde Trabajara</label>
-                            <input type="text" class="form-control" id="working_zone" name="working_zone" value="{{ old('working_zone') }}" required>
+                            <label for="working_zone">Zona</label>
+                            @php $zones = \App\Models\Zone::where('city_id', 2)->orderBy('name', 'asc')->get(); @endphp
+                            <select class="form-control" id="working_zone" name="working_zone" required>
+                                <option class="option" value="" disabled {{ old('working_zone') ? '' : 'selected' }}>Selecciona una zona</option>
+                                @foreach ($zones as $zone)
+                                    <option class="option" value="{{ $zone->name }}" {{ old('working_zone') == $zone->name ? 'selected' : '' }}>
+                                        {{ $zone->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         
                         <div class="form-group">

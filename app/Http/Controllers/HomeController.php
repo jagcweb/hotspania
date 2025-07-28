@@ -34,7 +34,7 @@ class HomeController extends Controller
         $query = User::whereHas('roles', function ($q) {
             $q->where('name', 'user');
         })
-        ->whereNotNull('active')
+        ->where('active', 1)
         ->whereNotNull('completed')
         ->whereNull('banned')
         ->whereNotNull('users.visible')
@@ -56,6 +56,14 @@ class HomeController extends Controller
                 $q->where('zones.id', $selected_zone);
             });
         }*/
+
+        if (!empty($selected_zone)) {
+            $zone = \App\Models\Zone::find($selected_zone);
+            if (!$zone) {
+                return redirect()->back()->withErrors(['error' => 'Zona no encontrada']);
+            }
+            $query->where('working_zone', $zone->name);
+        }
 
         // Add search condition if search parameter exists
         if ($request->has('search')) {
@@ -187,11 +195,12 @@ class HomeController extends Controller
         $perPage = 20;
         $loadedUsers = json_decode(request()->input('loaded_users', '[]'));
         $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : null;
+        $selected_zone = isset($_COOKIE['selected_zone']) ? $_COOKIE['selected_zone'] : null;
         
         $query = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })
-            ->whereNotNull('active')
+            ->where('active', 1)
             ->whereNotNull('completed')
             ->whereNull('banned')
             ->whereNotIn('id', $loadedUsers)
@@ -214,6 +223,14 @@ class HomeController extends Controller
                 $q->where('zones.id', $selected_zone);
             });
         }*/
+
+        if (!empty($selected_zone)) {
+            $zone = \App\Models\Zone::find($selected_zone);
+            if (!$zone) {
+                return redirect()->back()->withErrors(['error' => 'Zona no encontrada']);
+            }
+            $query->where('working_zone', $zone->name);
+        }
 
         // Add search condition if search parameter exists
         if (request()->has('search')) {
@@ -336,7 +353,7 @@ class HomeController extends Controller
         $totalRemaining = User::whereHas('roles', function ($q) {
                 $q->where('name', 'user');
             })
-            ->whereNotNull('active')
+            ->where('active', 1)
             ->whereNotNull('completed')
             ->whereNull('banned')
             ->whereHas('packageUser', function ($q) {

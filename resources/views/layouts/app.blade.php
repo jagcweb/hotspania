@@ -172,7 +172,7 @@
             <img class="img_logo" src="{{ asset('images/logo.png') }}" alt="Logo"/>
         </a>
         @if(str_contains(url()->current(), '/home'))
-            <li class="nav-item search-container">
+            {{-- <li class="nav-item search-container">
                 <form action="{{ url()->current() }}" method="GET" class="d-flex align-items-center">
                     <a href="#" class="nav-link search-toggle">
                         <i class="fas fa-magnifying-glass search-icon"></i>
@@ -184,7 +184,7 @@
                         </a>
                     @endif
                 </form>
-            </li>
+            </li> --}}
 
             {{-- @php 
                 $cookie = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : '';
@@ -221,24 +221,24 @@
               </a>
             </li>--}}
             <li>
-              @if(\Auth::user())
+                @if(\Auth::user())
                 {{-- @if(\Auth::user()->getRoleNames()[0] == "admin")  --}}
-                  <a href="{{ route('admin.citychanges') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
-                {{-- @else
-                  <a href="{{ route('account.index') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
-                @endif --}}
-                @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
-                @if(is_object($frontimage))
-                    @if(!is_null($frontimage->route_gif))
-                      <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                    <a href="{{ route('admin.citychanges') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
+                    {{-- @else
+                    <a href="{{ route('account.index') }}" style="display: flex; flex-direction:row; justify-content:center; align-items:center;">
+                    @endif --}}
+                    @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
+                    @if(is_object($frontimage))
+                        @if(!is_null($frontimage->route_gif))
+                        <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                        @else
+                        <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                        @endif
                     @else
-                      <img class="rounded-circle"  style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                        <img src="{{ asset('images/user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; border-radius:9999px;"/>
                     @endif
-                @else
-                    <img src="{{ asset('images/user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; border-radius:9999px;"/>
-                @endif
-                    <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
-                </a>
+                        <i class="fa-solid fa-bars" style="font-size:18px; color:#fff; margin-left:15px; margin-top:5px;"></i>
+                    </a>
                @else
                 @if(!str_contains(url()->current(), '/login') && !str_contains(url()->current(), '/register'))
                     <a title="Anúnciate" href="{{ route('user.register', ['step' => 1]) }}" class="btn btn-primary mt-2" style="background:#f36e00!important; color:#fff;min-width: 100px;min-height: 35px;display: flex;align-items: center;justify-content: center;font-size: 13px;">
@@ -251,50 +251,108 @@
           </form>
         </ul>
         @endif
-        <li class="lilist dropdown">
-            <a class="ml-3 dropdown-toggle d-flex align-items-center" href="#" id="guestMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-               style="font-size: 26px; line-height:24px;">
+        @if(!\Auth::user() && !str_contains(url()->current(), '/login') && !str_contains(url()->current(), '/register'))
+            <li class="nav-announce-btn">
+                <a title="Anúnciate" href="{{ route('user.register', ['step' => 1]) }}" class="btn btn-primary mt-2" style="background:#f36e00!important; color:#fff;min-width: 100px;min-height: 35px;display: flex;align-items: center;justify-content: center;font-size: 13px;">
+                    Anúnciate
+                    <i class="fa-solid fa-rocket ml-1"></i>
+                </a>
+            </li>
+        @endif
+        <style>
+            .nav-announce-btn {
+                position: absolute;
+                right: 10%;
+                top: 15%;
+            }
+
+            @media (max-width: 1200px) {
+                .nav-announce-btn {
+                    right: 12%;
+                    top: 18%;
+                }
+            }
+
+            @media (max-width: 992px) {
+                .nav-announce-btn {
+                    right: 15%;
+                    top: 20%;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .nav-announce-btn {
+                    right: 18%;
+                    top: 25%;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .nav-announce-btn {
+                    right: 20%;
+                    top: 30%;
+                    transform: scale(0.9);
+                }
+            }
+
+            @media (max-width: 480px) {
+                .nav-announce-btn {
+                    right: 25%;
+                    top: 35%;
+                    transform: scale(0.8);
+                }
+            }
+        </style>
+        <li class="lilist dropdown d-flex align-items-center">
+            <!-- Imagen separada que va a una URL -->
             @if(\Auth::user())
                 @php $frontimage = \App\Models\Image::where('user_id', \Auth::user()->id)->whereNotNull('frontimage')->first(); @endphp
-                @if(is_object($frontimage))
-                @if(!is_null($frontimage->route_gif))
-                    <img class="rounded-circle" style="width:40px; height:40px; border-radius:9999px; margin-right:10px;" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
-                @else
-                    <img class="rounded-circle" style="width:40px; height:40px; border-radius:9999px; margin-right:10px;" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
-                @endif
-                @else
-                <img src="{{ asset('images/user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; border-radius:9999px; margin-right:10px;"/>
-                @endif
+                <a href="{{ route('account.index') }}" class="me-2" style="margin-right: 10px;">
+                    @if(is_object($frontimage))
+                        @if(!is_null($frontimage->route_gif))
+                            <img class="rounded-circle" style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                        @else
+                            <img class="rounded-circle" style="width:40px; height:40px; border-radius:9999px;" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                        @endif
+                    @else
+                        <img src="{{ asset('images/user.jpg') }}" class="rounded-circle" style="width:40px; height:40px; border-radius:9999px;"/>
+                    @endif
+                </a>
             @endif
-            <i class="fa-solid fa-bars text-white"></i>
+            
+            <!-- Botón del menú dropdown (solo el icono de hamburguesa) -->
+            <a class="dropdown-toggle d-flex align-items-center" href="#" id="guestMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+            style="font-size: 26px; line-height:24px;">
+                <i class="fa-solid fa-bars text-white"></i>
             </a>
+            
             <ul class="dropdown-menu dropdown-menu-end custom-guest-dropdown" aria-labelledby="guestMenuDropdown" style="min-width: 200px;">
-            @if(!\Auth::user())
-                <li><a class="dropdown-item custom-guest-item" href="{{ route('login') }}">Iniciar sesión</a></li>
-                <li><a class="dropdown-item custom-guest-item" href="{{ route('user.register', ['step' => 1]) }}">Registrarse</a></li>
-            @else
-                <li><a class="dropdown-item custom-guest-item" href="{{ route('account.index') }}">Mi cuenta</a></li>
-            @endif
-            <li>
-                <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Terminos_y_Condiciones.pdf']) }}">
-                Términos y Condiciones
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Cookies.pdf']) }}">
-                Política de Cookies
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Privacidad.pdf']) }}">
-                Política de Privacidad
-                </a>
-            </li>
-            <li>
-                <a id="chatbotBtn" class="dropdown-item custom-guest-item" href="javascript:void(0);">
-                Chatbot
-                </a>
-            </li>
+                @if(!\Auth::user())
+                    <li><a class="dropdown-item custom-guest-item" href="{{ route('login') }}">Iniciar sesión</a></li>
+                    <li><a class="dropdown-item custom-guest-item" href="{{ route('user.register', ['step' => 1]) }}">Registrarse</a></li>
+                @else
+                    <li><a class="dropdown-item custom-guest-item" href="{{ route('account.index') }}">Mi cuenta</a></li>
+                @endif
+                <li>
+                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Terminos_y_Condiciones.pdf']) }}">
+                    Términos y Condiciones
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Cookies.pdf']) }}">
+                    Política de Cookies
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item custom-guest-item" target="_blank" href="{{ route('home.document', ['filename' => 'Politica_de_Privacidad.pdf']) }}">
+                    Política de Privacidad
+                    </a>
+                </li>
+                <li>
+                    <a id="chatbotBtn" class="dropdown-item custom-guest-item" href="javascript:void(0);">
+                    Chatbot
+                    </a>
+                </li>
             </ul>
         </li>
         <style>
@@ -560,53 +618,96 @@
     </div>
       
     <script>
-            $(document).ready(function() {
+        $(document).ready(function() {
 
             var $dropdownMenu = $('.dropdown-menu.dropdown-menu-end.custom-guest-dropdown');
             $dropdownMenu.css('display', 'none');
-            
+
+            // Función para cerrar el menú manteniendo la posición durante la animación
+            function closeDropdownMenu() {
+                if ($dropdownMenu.is(':visible')) {
+                    console.log('Cerrando menú - Transform antes:', $dropdownMenu.css('transform'));
+                    
+                    // Guardar el transform actual
+                    var currentTransform = $dropdownMenu.css('transform');
+                    
+                    // Usar animate() en lugar de slideUp() para tener más control
+                    $dropdownMenu.animate({
+                        height: 'hide',
+                        opacity: 0
+                    }, {
+                        duration: 200,
+                        step: function() {
+                            // Mantener el transform durante toda la animación
+                            $(this).css('transform', currentTransform);
+                        },
+                        complete: function() {
+                            console.log('Animación completada');
+                            // Limpiar estilos DESPUÉS de que termine la animación
+                            $dropdownMenu.css({
+                                'transform': '',
+                                'top': '',
+                                'left': '',
+                                'right': '',
+                                'display': 'none',
+                                'overflow': '',
+                                'visibility': '',
+                                'opacity': ''
+                            });
+                        }
+                    });
+                }
+            }
+
             $('#guestMenuDropdown').on('click', function(e) {
                 e.preventDefault();
                 
                 if ($dropdownMenu.is(':visible')) {
-                    $dropdownMenu.slideUp(200, function() {
-                        // Limpiar transform y top al cerrar
-                        $dropdownMenu.css({
-                            'transform': '',
-                            'top': ''
-                        });
-                    });
+                    closeDropdownMenu();
                 } else {
                     var $toggle = $(this);
+                    var toggleOffset = $toggle.offset();
+                    var toggleWidth = $toggle.outerWidth();
+                    var windowWidth = $(window).width();
                     
                     // Mostrar para calcular dimensiones
-                    $dropdownMenu.css('visibility', 'hidden').show();
+                    $dropdownMenu.css({
+                        'visibility': 'hidden',
+                        'display': 'block'
+                    });
                     
-                    var toggleWidth = $toggle.outerWidth();
                     var menuWidth = $dropdownMenu.outerWidth();
-                    var offset = (menuWidth - toggleWidth) / 2;
                     
-                    // Aplicar transform y top
-                    $dropdownMenu.hide().css({
+                    // Calcular offset centrado inicialmente
+                    var offset = (menuWidth - toggleWidth) / 2;
+                    var leftPosition = toggleOffset.left - offset;
+                    
+                    // Ajuste si se sale del viewport
+                    if (leftPosition + menuWidth > windowWidth) {
+                        offset = menuWidth - toggleWidth;
+                    } else if (leftPosition < 0) {
+                        offset = 0;
+                    }
+                    
+                    $dropdownMenu.css({
                         'visibility': 'visible',
                         'transform': `translateX(-${offset}px)`,
-                        'top': '100%'
-                    });
-                    
-                    $dropdownMenu.slideDown(200);
+                        'top': '100%',
+                        'left': '0px',
+                        'right': 'auto',
+                        'overflow': 'visible',
+                        'opacity': 1
+                    }).slideDown(200);
                 }
             });
-        
+
+            // Ocultar al hacer click fuera
             $(document).on('click', function(e) {
                 if (!$(e.target).closest('.lilist.dropdown').length) {
-                    $dropdownMenu.slideUp(200, function() {
-                        $dropdownMenu.css({
-                            'transform': '',
-                            'top': ''
-                        });
-                    });
+                    closeDropdownMenu();
                 }
             });
+
 
 
             // Cookie consent handling

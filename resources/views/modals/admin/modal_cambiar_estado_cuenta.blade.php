@@ -11,6 +11,7 @@
                     <div class="form-group">
                         <label for="status">Estado de cuenta</label>
                         <select name="status" id="status-{{ $u->id }}" class="form-control" onchange="document.getElementById('rejected-reason-{{ $u->id }}').style.display = this.value == 2 ? 'block' : 'none';">
+                            <option value="0" {{ $u->active == 0 || is_null($u->active) ? 'selected' : '' }}>Pendiente</option>
                             <option value="1" {{ $u->active == 1 ? 'selected' : '' }}>Activo</option>
                             <option value="2" {{ $u->active == 2 ? 'selected' : '' }}>Rechazado</option>
                             <option value="3" {{ $u->active == 3 ? 'selected' : '' }}>Inactivo</option>

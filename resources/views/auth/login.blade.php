@@ -536,15 +536,11 @@
         const savedCity = getCookie('selected_city');
         const savedZone = getCookie('selected_zone');
         if (savedCity) {
-            console.log("Cookie city:", savedCity);
             const citySelect = document.getElementById('city_id');
             citySelect.value = savedCity;
         }
         if (savedZone) {
             const zoneSelect = document.getElementById('zone_id');
-            console.log("Cookie:", savedZone);
-console.log("Options:", Array.from(zoneSelect.options).map(o => o.value));
-            console.log(savedZone);
             if (zoneSelect) {
                 zoneSelect.value = savedZone;
             }
@@ -554,11 +550,27 @@ console.log("Options:", Array.from(zoneSelect.options).map(o => o.value));
         } else {
             document.getElementById('log').disabled = true;
         }
+
+        document.getElementById('zone_id').addEventListener('change', function() {
+            const newZoneSelect = document.getElementById('zone_id');
+            const selectedZone = newZoneSelect.value;
+            
+            // Expirar la cookie actual estableciendo una fecha en el pasado
+            document.cookie = `selected_zone=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+            
+            // Crear nueva cookie con el nuevo valor y fecha de expiración de 30 días
+            const zoneExpirationDate = new Date();
+            zoneExpirationDate.setDate(zoneExpirationDate.getDate() + 30);
+            document.cookie = `selected_zone=${selectedZone}; expires=${zoneExpirationDate.toUTCString()}; path=/`;
+            
+            document.getElementById('log').disabled = !selectedCity || !this.value;
+            console.log("Cookie anterior expirada y nueva cookie creada:", selectedZone);
+        });
     });
 
-    document.getElementById('registerButton').addEventListener('click', function() {
+    /*document.getElementById('registerButton').addEventListener('click', function() {
         window.location.href = '/register/paso-1';
-    });
+    });*/
 
     document.getElementById('log').addEventListener('click', function() {
         const citySelect = document.getElementById('city_id');
