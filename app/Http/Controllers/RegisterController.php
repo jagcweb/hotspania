@@ -141,19 +141,22 @@ class RegisterController extends Controller
                 // Process each file
                 foreach ($files as $file) {
                     $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
+                    $originalImageName = time() . '_' . bin2hex(random_bytes(10)) . '._original_' . $file->getClientOriginalExtension();
                     $mimeType = $file->getMimeType();
                     $extension = $file->getClientOriginalExtension();
                     $userId = $user->id;
                     $hideFace = !is_null($request->get('hide_face'));
 
                     \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
+                    \Storage::disk('original')->put($imageName, \File::get($file));
                     $tempImagePath = storage_path('app/public/temp_img_ia/' . $imageName);
+                    $originalImagePath = storage_path('app/public/original/' . $originalImageName);
 
-                    \App\Jobs\ProcesarImagen::dispatch($tempImagePath, $imageName, $mimeType, $extension, $userId, $hideFace, "pending");
+                    \App\Jobs\ProcesarImagen::dispatch($originalImagePath, $tempImagePath, $imageName, $originalImageName, $mimeType, $extension, $userId, $hideFace, "pending");
 
                     \Log::info("Imagen enviada a cola: {$imageName}");
                 }
-                
+
                 //return back()->with('success', 'Images uploaded with watermark pattern successfully!');
         
                 session(['paso-2-completado' => true]);

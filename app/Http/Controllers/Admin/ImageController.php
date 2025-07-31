@@ -170,15 +170,18 @@ class ImageController extends Controller
         // Process each file
         foreach ($files as $file) {
             $imageName = time() . '_' . bin2hex(random_bytes(10)) . '.' . $file->getClientOriginalExtension();
+            $originalImageName = time() . '_' . bin2hex(random_bytes(10)) . '._original_' . $file->getClientOriginalExtension();
             $mimeType = $file->getMimeType();
             $extension = $file->getClientOriginalExtension();
             $userId = $request->input('user_id');
             $hideFace = !is_null($request->get('hide_face'));
 
             \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
+            \Storage::disk('original')->put($imageName, \File::get($file));
             $tempImagePath = storage_path('app/public/temp_img_ia/' . $imageName);
+            $originalImagePath = storage_path('app/public/original/' . $originalImageName);
 
-            \App\Jobs\ProcesarImagen::dispatch($tempImagePath, $imageName, $mimeType, $extension, $userId, $hideFace, "pending");
+            \App\Jobs\ProcesarImagen::dispatch($originalImagePath, $tempImagePath, $imageName, $originalImageName, $mimeType, $extension, $userId, $hideFace, "pending");
 
             \Log::info("Imagen enviada a cola: {$imageName}");
         }
@@ -809,11 +812,18 @@ class ImageController extends Controller
                     \Log::info("Disk: " . StorageHelper::getDisk('images'));
                     
                     // Probar diferentes rutas posibles
-                    $possiblePaths = [
-                        'images/' . $image->route,
-                        $image->route,
-                        'public/images/' . $image->route
-                    ];
+                    $possiblePaths = [];
+
+                    if (!empty($image->original)) {
+                        $possiblePaths[] = 'images/' . $image->original;
+                        $possiblePaths[] = $image->original;
+                        $possiblePaths[] = 'public/images/' . $image->original;
+                    } else {
+                        $possiblePaths[] = 'images/' . $image->route;
+                        $possiblePaths[] = $image->route;
+                        $possiblePaths[] = 'public/images/' . $image->route;
+                    }
+
                     
                     $fileContent = null;
                     $foundPath = null;
