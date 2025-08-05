@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="col-xl-6 col-sm-12 fondo">
-        <div class="d-flex flex-column align-items-center align-content-center vh-100 justify-content-center">
+        <div id="second" class="d-flex flex-column align-items-center align-content-center vh-100 justify-content-center">
           {{-- <div class="mb-3">
             <h4 class="text-white">¿Aún no eres anunciante?</h4>
           </div>
@@ -397,7 +397,7 @@
 
     @media (max-width: 576px) {
         .form{
-            width: 90%!important;
+            width: 100%!important;
         }
         .img{
             width: 80vw;
@@ -422,7 +422,7 @@
 
     @media (max-width: 576px) {
         .form {
-            width: 90%!important;
+            width: 100%!important;
         }
 
         .boton_login, .boton_registro, .acceder {
@@ -432,6 +432,28 @@
         .col-xl-6 {
             /* Asegura que las columnas tomen todo el ancho en dispositivos móviles */
             width: 100%;
+        }
+
+        #second {
+            align-items: flex-start!important; 
+            align-content: flex-start!important;
+            height: auto!important; /* Permite que el contenido ocupe el espacio necesario */
+            justify-content: center!important; /* Alinea el contenido al inicio */
+            margin-top:20px!important;
+            width: 100%!important; /* Asegura que el contenedor ocupe todo el ancho */
+            display: flex !important;
+            flex-direction: column !important; /* Asegura que los elementos se apilen verticalmente */
+            margin-bottom: 30px!important; /* Añade un margen inferior para separar del contenido posterior */
+        }
+
+        #second div {
+            width: 100%!important; /* Asegura que los divs internos ocupen todo el ancho */
+            text-align: center; /* Centra el texto dentro de los divs */
+        }
+
+        .fondo{
+            min-height: auto; /* Asegura que el fondo ocupe toda la altura de la pantalla */
+            height: auto!important; /* Permite que el fondo se ajuste al contenido */
         }
     }
 </style>

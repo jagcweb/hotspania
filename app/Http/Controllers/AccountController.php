@@ -299,7 +299,7 @@ class AccountController extends Controller
     }
 
     public function editData(){
-        $cities = City::orderBy('name', 'asc')->get();
+        $cities = City::where('name', 'Barcelona')->orderBy('id', 'asc')->get();
 
         return view('account.edit-data', [
             'cities' => $cities

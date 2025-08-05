@@ -210,13 +210,13 @@ class RegisterController extends Controller
                 } catch (\Exception $e) {
                     \Log::error("Error al notificar al administrador: " . $e->getMessage());
                 }
-                
-                return redirect()->route('login')->with('exito', 'Paso 3 completado. Usuario creado.');
+
+                return redirect()->route('login')->with('exito', 'Paso 3 completado. Si tu ficha se aprueba, recibirás un correo en las próximas 48 horas.');
             break;
 
         }
 
-        return redirect()->route('admin.users.getActive')->with('exito', 'Usuario creado');
+        return redirect()->route('admin.users.getActive')->with('exito', ' Si tu ficha se aprueba, recibirás un correo en las próximas 48 horas.');
     }
 
     public function addWaterMark($file, $imageName, $extension, bool $generatedGif){

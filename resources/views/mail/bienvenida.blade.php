@@ -1,4 +1,3 @@
-<!-- Plantilla Blade de Email con Botón Estilizado -->
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
     
     <p style="font-size: 18px;"><strong>¡Enhorabuena!</strong><br>Tu perfil en Hotspania ha sido creado</p>
@@ -43,7 +42,6 @@
     
 </div>
 
-<!-- Código CSS para el head del email (opcional, para clientes que lo soporten) -->
 <style>
     .email-button:hover {
         background: linear-gradient(45deg, #ff8c42, #f36e00) !important;
