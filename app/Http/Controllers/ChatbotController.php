@@ -28,18 +28,19 @@ class ChatbotController extends Controller
         ]);
 
         try {
-            $userMessage = $request->input('message');
-            
+            // Asegurar codificación correcta
+            $userMessage = mb_convert_encoding($request->input('message'), 'UTF-8', 'UTF-8');
+
             // Buscar contenido relevante en la documentación
             $relevantDocs = $this->findRelevantDocumentation($userMessage);
             
-            // Construir el contexto
-            $context = $this->buildContext($relevantDocs);
-            
+            // Construir el contexto y asegurar UTF-8
+            $context = mb_convert_encoding($this->buildContext($relevantDocs), 'UTF-8', 'UTF-8');
+
             $messages = [
                 [
                     'role' => 'system',
-                    'content' => $this->getSystemPrompt($context)
+                    'content' => mb_convert_encoding($this->getSystemPrompt($context), 'UTF-8', 'UTF-8')
                 ],
                 [
                     'role' => 'user',
@@ -48,11 +49,16 @@ class ChatbotController extends Controller
             ];
 
             $response = $this->openaiService->chat($messages);
+
+            // Asegurar UTF-8 en los títulos
+            $sources = $relevantDocs->pluck('title')->map(function($title) {
+                return mb_convert_encoding($title, 'UTF-8', 'UTF-8');
+            })->toArray();
             
             return response()->json([
                 'success' => true,
                 'response' => $response,
-                'sources' => $relevantDocs->pluck('title')->toArray()
+                'sources' => $sources
             ]);
 
         } catch (\Exception $e) {
@@ -95,8 +101,10 @@ class ChatbotController extends Controller
         $context = "Documentación relevante:\n\n";
         
         foreach ($docs as $doc) {
-            $context .= "=== {$doc->title} ===\n";
-            $context .= substr($doc->content, 0, 500) . "...\n\n";
+            $title = mb_convert_encoding($doc->title, 'UTF-8', 'UTF-8');
+            $content = mb_convert_encoding($doc->content, 'UTF-8', 'UTF-8');
+            $context .= "=== {$title} ===\n";
+            $context .= substr($content, 0, 500) . "...\n\n";
         }
 
         return $context;
