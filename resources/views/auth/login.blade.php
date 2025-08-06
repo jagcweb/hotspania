@@ -51,7 +51,7 @@
                 Regístrate gratis
             </button>
             <hr> --}}
-            @php $cities = City::where('name', 'Barcelona')->orderBy('id', 'asc')->get(); @endphp
+            @php $cities = \App\Models\City::where('name', 'Barcelona')->orderBy('id', 'asc')->get(); @endphp
             <select class="form-control" id="city_id" name="city" style="border: 2px solid #f76e08;" required autocomplete="off">
                 <option value="" hidden selected disabled>
                     Escoge una ciudad...
