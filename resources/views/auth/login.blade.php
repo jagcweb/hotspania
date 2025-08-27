@@ -5,7 +5,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="row text-center vh-100">
-        <div class="col-xl-6 col-sm-12 textura">
+        <div class="col-xl-12 col-sm-12 textura">
             <div class="d-flex flex-column align-items-center align-content-center vh-100 justify-content-start">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="img-fluid" width="200"/>
             <div>
@@ -33,6 +33,8 @@
           </div>
         </div>
       </div>
+      
+      <!--
       <div class="col-xl-6 col-sm-12 fondo">
         <div id="second" class="d-flex flex-column align-items-center align-content-center vh-100 justify-content-center">
           {{-- <div class="mb-3">
@@ -84,6 +86,7 @@
           </div>
         </div>
       </div>
+    -->
   
   
     </div>
@@ -458,6 +461,7 @@
     }
 </style>
 
+<!--
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (!getCookie('terms')) {
@@ -621,6 +625,6 @@
             }
         });
     });
-</script>
+</script> -->
 
 @endsection

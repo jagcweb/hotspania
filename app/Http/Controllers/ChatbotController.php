@@ -49,16 +49,10 @@ class ChatbotController extends Controller
             ];
 
             $response = $this->openaiService->chat($messages);
-
-            // Asegurar UTF-8 en los títulos
-            $sources = $relevantDocs->pluck('title')->map(function($title) {
-                return mb_convert_encoding($title, 'UTF-8', 'UTF-8');
-            })->toArray();
             
             return response()->json([
                 'success' => true,
                 'response' => $response,
-                'sources' => $sources
             ]);
 
         } catch (\Exception $e) {
@@ -99,31 +93,36 @@ class ChatbotController extends Controller
         }
 
         $context = "Documentación relevante:\n\n";
-        
+
         foreach ($docs as $doc) {
             $title = mb_convert_encoding($doc->title, 'UTF-8', 'UTF-8');
             $content = mb_convert_encoding($doc->content, 'UTF-8', 'UTF-8');
+
+            // Dividir el contenido en frases por puntos, signos de exclamación o interrogación
+            $sentences = preg_split('/(?<=[.?!])\s+/', $content, -1, PREG_SPLIT_NO_EMPTY);
+
+            // Tomar máximo 3 frases
+            $snippet = implode(' ', array_slice($sentences, 0, 3));
+
             $context .= "=== {$title} ===\n";
-            $context .= substr($content, 0, 500) . "...\n\n";
+            $context .= $snippet . "...\n\n";
         }
 
         return $context;
     }
 
+
     private function getSystemPrompt($context)
     {
-        return "Eres un asistente especializado en ayudar con consultas basándote en la documentación proporcionada.
+        return "Eres un asistente amigable y profesional que responde en español, usando como referencia la documentación que te paso. 
 
-INSTRUCCIONES:
-1. Responde únicamente basándote en la documentación proporcionada
-2. Si la información no está en la documentación, indica claramente que no tienes esa información
-3. Sé preciso y útil en tus respuestas
-4. Proporciona ejemplos cuando sea posible
-5. Responde en español
+        Instrucciones:
+        - Usa un tono natural, como si hablaras con una persona.
+        - Si la información no aparece en la documentación, dilo con sinceridad.
+        - Explica de forma breve, clara y fácil de entender.
+        - Puedes dar ejemplos prácticos si ayudan.
 
-DOCUMENTACIÓN DISPONIBLE:
-{$context}
-
-Responde de manera clara y profesional.";
+        Documentación disponible:
+        {$context}";
     }
 }

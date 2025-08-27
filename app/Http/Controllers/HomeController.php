@@ -22,6 +22,10 @@ class HomeController extends Controller
         //$this->middleware('auth')->except(['getImage']);
     }
 
+    public function start() {
+        return view('layouts.start');
+    }
+
     /**
      * Show the application dashboard.
      *

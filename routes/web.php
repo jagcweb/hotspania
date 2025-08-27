@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Artisan;
 |
 */
 
+Route::get('/index', [App\Http\Controllers\HomeController::class, 'start'])->name('start');
+
 Route::get('/currentjobs', function () {
     $jobs = \App\Models\Job::all();
     $failedJobs = \App\Models\FailedJob::all();
@@ -30,7 +32,7 @@ Route::get('/delete-all-failed-jobs', [App\Http\Controllers\JobController::class
 
 Route::get('/', function () {
     if(!Auth::check()){
-        return redirect()->route('login');
+        return redirect()->route('start');
     } else {
         if (\Auth::user()->getRoleNames()[0] == 'admin') {
             return redirect()->route('admin.citychanges');
