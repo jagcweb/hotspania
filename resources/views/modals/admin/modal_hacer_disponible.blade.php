@@ -30,6 +30,9 @@
                                 <option value="1">1 hora</option>
                                 <option value="2">2 horas</option>
                                 <option value="3">3 horas</option>
+                                @if(str_contains(request()->fullUrl(), 'admin'))
+                                    <option value="9999">9999 horas</option>
+                                @endif
                             </select>
                         </div>
                         <div class="text-right">
@@ -53,7 +56,7 @@
                                 <option value="1">1 hora</option>
                                 <option value="2">2 horas</option>
                                 <option value="3">3 horas</option>
-                                @if(!str_contains(request()->fullUrl(), 'account/edit'))
+                                @if(str_contains(request()->fullUrl(), 'admin'))
                                     <option value="9999">9999 horas</option>
                                 @endif
                             </select>

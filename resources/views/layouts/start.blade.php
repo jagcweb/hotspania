@@ -880,7 +880,7 @@
             const appenedZones = document.getElementById('appened-zones');
             appenedZones.innerHTML = '';
             
-            if (selectedCity) {
+            /*if (selectedCity) {
                 appenedZones.innerHTML = '<div class="loading-text">Cargando zonas...</div>';
 
                 // Simular petición AJAX (puedes reemplazar con tu endpoint real)
@@ -927,7 +927,7 @@
                     .catch(error => {
                         appenedZones.innerHTML = `<div style="color: #ff6b35; font-size: 14px;">${error.message}</div>`;
                     });
-            }
+            }*/
         });
 
         // === FUNCIÓN DEL BOTÓN ENTRAR SIMPLIFICADA ===
@@ -944,7 +944,7 @@
                 return;
             }
             
-            if (!zoneSelect || !zoneSelect.value) {
+            /*if (!zoneSelect || !zoneSelect.value) {
                 const zoneWrapper = document.querySelector('#appened-zones .select-wrapper');
                 if (zoneWrapper) {
                     zoneWrapper.style.animation = 'shake 0.5s';
@@ -953,7 +953,7 @@
                     }, 500);
                 }
                 return;
-            }
+            }*/
             
             const button = event.currentTarget;
             const span = button.querySelector('span');
@@ -1010,7 +1010,8 @@
             }
             
             // Verificar estado del botón
-            if (savedCity && savedZone) {
+            //if (savedCity && savedZone) {
+            if (savedCity) {
                 document.getElementById('log').disabled = false;
             } else {
                 document.getElementById('log').disabled = true;
