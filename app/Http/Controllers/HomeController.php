@@ -47,12 +47,16 @@ class HomeController extends Controller
               ->orderBy('end_date', 'desc');
         });
 
-        // Filtrar por ciudad si hay una seleccionada
-        if (!empty($selected_city)) {
-            $query->whereHas('cities', function($q) use ($selected_city) {
-                $q->where('cities.id', $selected_city);
+        var_dump(count($query->get()));
+
+        $selected_city = (int) $selected_city;
+        if ($selected_city) {
+            $query->whereHas('cities.city', function ($q) use ($selected_city) {
+                $q->where('id', $selected_city);
             });
         }
+
+
 
         // Filtrar por zona si hay una seleccionada
         /*if (!empty($selected_zone)) {
@@ -215,9 +219,10 @@ class HomeController extends Controller
             });
 
         // Filtrar por ciudad si hay una seleccionada
-        if (!empty($selected_city)) {
-            $query->whereHas('cities', function($q) use ($selected_city) {
-                $q->where('cities.id', $selected_city);
+        $selected_city = (int) $selected_city;
+        if ($selected_city) {
+            $query->whereHas('cities.city', function ($q) use ($selected_city) {
+                $q->where('id', $selected_city);
             });
         }
 

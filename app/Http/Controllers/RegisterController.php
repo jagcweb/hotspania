@@ -148,7 +148,7 @@ class RegisterController extends Controller
                     $hideFace = !is_null($request->get('hide_face'));
 
                     \Storage::disk('temp_img_ia')->put($imageName, \File::get($file));
-                    \Storage::disk('original')->put($imageName, \File::get($file));
+                    \Storage::disk('original')->put($originalImageName, \File::get($file));
                     $tempImagePath = storage_path('app/public/temp_img_ia/' . $imageName);
                     $originalImagePath = storage_path('app/public/original/' . $originalImageName);
 

@@ -39,6 +39,7 @@ use App\Models\Package;
 use App\Models\PackageUser;
 use App\Models\PackageUserHistory;
 use App\Models\Notification;
+use App\Models\Report;
 
 class AccountController extends Controller
 {
@@ -49,7 +50,7 @@ class AccountController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('logged')->except(['get', 'loadMore', 'show', 'like', 'checkLike', 'removeLike']);
+        $this->middleware('logged')->except(['get', 'loadMore', 'show', 'like', 'checkLike', 'removeLike', 'addVisitProfile', 'report']);
     }
 
     public function makeUnavailable($id) {
@@ -373,7 +374,7 @@ class AccountController extends Controller
     public function get($nickname) {
         $user = User::where('nickname', $nickname)->first();
 
-        if (!$user) {
+        if (!$user || $user->active != 1) {
             abort(404, 'Usuario no encontrado');
         }
 
@@ -389,8 +390,7 @@ class AccountController extends Controller
                           ->first();
 
         \Log::info('Total images for user ' . $user->id . ': ' . $images->count());
-
-        // Obtener los likes para todas las imágenes
+        
         $likedImages = [];
         if (Auth::check()) {
             $likedImages = ImageLike::where('user_id', Auth::id())
@@ -590,6 +590,44 @@ class AccountController extends Controller
         $image->update();
 
         return redirect()->back()->with('exito', 'Imagen oculta.');
+    }
+
+    public function report($id, Request $request)
+    {
+        $id = \Crypt::decryptString($id);
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'reason'  => 'required|string|max:32',
+            'details' => 'nullable|string|max:1000',
+        ]);
+
+        $reporterId = \Auth::id();
+        $sessionId = !$reporterId ? $request->session()->getId() : null;
+
+        $report = Report::create([
+            'user_id'          => $reporterId,
+            'session_id'       => $sessionId,
+            'reported_user_id' => $user->id,
+            'reason'           => $request->input('reason'),
+            'details'          => $request->input('details'),
+        ]);
+
+        $adminUserId = app()->make(\App\Http\Controllers\AuxiliarController::class)->getAdminUserId();
+
+        Notification::create([
+            'user_id' => $adminUserId,
+            'subject' => 'Nuevo reporte de usuario',
+            'text' => 'El usuario ' . ($reporterId ? \Auth::user()->nickname : 'Invitado') . ' ha reportado al usuario ' . $user->nickname . '. Motivo: ' . $request->input('reason'),
+            'type' => 'report',
+            'type_id' => $report->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'report_id' => $report->id,
+            'message' => 'Reporte enviado correctamente.'
+        ]);
     }
 
     public function loadMore($page, $userId)

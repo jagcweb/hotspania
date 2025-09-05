@@ -73,7 +73,7 @@ class User extends Authenticatable
     }
 
     public function cities(){
-        return $this->belongsToMany(City::class, 'city_users');
+        return $this->hasMany('App\Models\CityUser', 'user_id','id');
     }
 
     /*public function zones(){

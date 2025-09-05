@@ -408,6 +408,11 @@
                                             <i class="fas fa-images"></i> Ver imágenes
                                         </a>
                                         @break
+                                        @case('report')
+                                            <a href="#" class="btn-details">
+                                                <i class="fas fa-exclamation-triangle"></i> Ver reporte
+                                            </a>
+                                        @break
                                     @default
                                        
                                 @endswitch

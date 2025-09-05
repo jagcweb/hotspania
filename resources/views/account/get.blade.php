@@ -62,7 +62,7 @@
 
                 <div class="profile-user-settings">
 
-                    <h1 class="profile-user-name text-white">{{ $user->nickname }}</h1>
+                    <h1 class="profile-user-name text-white">{{ $user->nickname }}<i style="font-size: 14px; vertical-align: middle; cursor: pointer;" class="ml-2 fa-solid fa-ellipsis report"></i></h1>
                     @if($isAvailable)
                         <small class="availability-text" style="margin-top: -10px; margin-left:2px;">Disponible ahora</small>
                     @endif
@@ -259,6 +259,7 @@
     <div id="floatingHeart" class="floating-heart">🤍</div>
 </div>
 
+
 <!-- Barra Sticky -->
 <div id="stickyBar" class="sticky-bar">
     <div class="container">
@@ -274,6 +275,81 @@
             </a>
         </div>
     </div>
+</div>
+
+<div id="reportModal" style=" display: none; position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;">
+  <div style="
+    background: #111111;
+    color: #fff;
+    padding: 28px 24px 20px 24px;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.20);
+    min-width: 280px;
+    max-width: 95vw;
+    margin: auto;
+    text-align: center;
+    position: relative;
+    width: 320px;
+  ">
+    <button id="closeReportModal" style="
+      position: absolute;
+      top: 14px; right: 14px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #fff;
+      cursor: pointer;
+    " aria-label="Cerrar">&times;</button>
+    <h2 style="margin-top:0; margin-bottom:18px; font-size:1.35em; color:#fff;">Reportar usuario</h2>
+    <form>
+      <label for="reportReason" style="display:block; text-align:left; margin-bottom:6px; font-size: 0.98em;">Motivo</label>
+      <select id="reportReason" style="
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #333;
+        background: #222;
+        color: #fff;
+        margin-bottom: 16px;
+        font-size: 1em;
+      ">
+        <option value="perfil-falso">Perfil falso</option>
+        <option value="fotos-falsas">Fotos falsas</option>
+        <option value="otro">Otro</option>
+      </select>
+      <label for="reportDetails" style="display:block; text-align:left; margin-bottom:6px; font-size: 0.98em;">Detalles</label>
+      <textarea id="reportDetails" rows="4" style="
+        width: 100%;
+        border-radius: 5px;
+        border: 1px solid #333;
+        background: #222;
+        color: #fff;
+        resize: vertical;
+        font-size: 1em;
+        margin-bottom: 18px;
+        padding: 8px;
+      " placeholder="Describe el problema..."></textarea>
+      <button type="button" style="
+        width: 100%;
+        margin-top: 6px;
+        padding: 10px 0;
+        background: #f65807;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.08em;
+        cursor: pointer;
+        transition: background 0.2s;
+      ">Enviar reporte</button>
+    </form>
+  </div>
 </div>
 
 <style>
@@ -469,7 +545,43 @@
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Check if profile visit should be counted
+        $('.report').on('click', function() {
+            $('#reportModal').css('display', 'flex');
+        });
+        $('#closeReportModal').on('click', function() {
+            $('#reportModal').css('display', 'none');
+        });
+
+        var encryptedUserId = "{{ \Crypt::encryptString($user->id) }}";
+        $('#reportModal button[type="button"]').on('click', function() {
+            var reason = $('#reportReason').val();
+            var details = $('#reportDetails').val();
+
+            $.ajax({
+            url: '/account/report/' + encryptedUserId,
+            method: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify({
+                reason: reason,
+                details: details
+            }),
+            success: function(response) {
+                if (response.success) {
+                alert('Reporte enviado correctamente.');
+                $('#reportModal').hide();
+                $('#reportReason').prop('selectedIndex', 0);
+                $('#reportDetails').val('');
+                } else {
+                alert('Error: ' + (response.message || 'Inténtalo de nuevo.'));
+                }
+            },
+            error: function(xhr) {
+                alert('No se pudo enviar el reporte. Intenta de nuevo.');
+            }
+            });
+        });
+
         let profileVisitKey = 'profile_visits_{{ $user->id }}';
         let lastProfileVisit = localStorage.getItem(profileVisitKey);
         let shouldCountProfileVisit = true;

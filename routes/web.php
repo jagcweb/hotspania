@@ -73,6 +73,7 @@ Route::get('/account/{nickname}', [App\Http\Controllers\AccountController::class
 Route::get('/account/images/{image}/setfront', [App\Http\Controllers\AccountController::class, 'setFront'])->name('account.images.setfront');
 Route::get('/account/images/{image}/visible', [App\Http\Controllers\AccountController::class, 'visible'])->name('account.images.visible');
 Route::get('/account/images/{image}/invisible', [App\Http\Controllers\AccountController::class, 'invisible'])->name('account.images.invisible');
+Route::post('/account/report/{id}', [App\Http\Controllers\AccountController::class, 'report'])->name('account.report');
 Route::get('/account/load-more/{page}/{userId}', [App\Http\Controllers\AccountController::class, 'loadMore'])
     ->middleware(['web'])
     ->name('account.loadMore');
@@ -168,6 +169,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::post('utilities/package-user-save', 'App\Http\Controllers\Admin\UtilityController@savePackageUser')->name('admin.utilities.packages_users_save');
     Route::get('utilities/package-user-delete/{id}', 'App\Http\Controllers\Admin\UtilityController@deletePackageUser')->name('admin.utilities.packages_users_delete');
     Route::get('utilities/news', 'App\Http\Controllers\Admin\UtilityController@news')->name('admin.utilities.news');
+    Route::get('utilities/reports', 'App\Http\Controllers\Admin\UtilityController@reports')->name('admin.utilities.reports');
 
     //NotificationController
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('admin.notifications.index');

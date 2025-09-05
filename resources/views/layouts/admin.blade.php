@@ -204,6 +204,11 @@
                                             Noticias</a
                                         >
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.utilities.reports') }}" class="nav-link" style="color: {{ Request::routeIs('admin.utilities.reports') ? '#f36e00' : '#FFFFFF' }}">
+                                            <i class="fas fa-chart-pie"></i> Reportes
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>
@@ -538,7 +543,7 @@
                                 });
                         
                                 $(document).on('click', () => {
-                                    if ($input.val().trim() === '') {
+                                    if ($input && (String($input.val()).trim() === '')) {
                                         cerrarBusqueda();
                                     }
                                 });

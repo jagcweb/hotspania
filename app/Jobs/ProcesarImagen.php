@@ -125,8 +125,8 @@ class ProcesarImagen implements ShouldQueue
 
         // Procesar y guardar la imagen original
         $manager = new ImageManager(new Driver());
-        $originalImage = $manager->make($originalImageFile->getPathname());
-        
+        $originalImage = $manager->read($originalImageFile->getPathname());
+
         $originalDisk = \App\Helpers\StorageHelper::getDisk('images');
         
         if ($this->extension === 'gif' || strpos($this->extension, 'gif') !== false) {

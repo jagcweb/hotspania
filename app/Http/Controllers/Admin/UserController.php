@@ -92,7 +92,7 @@ class UserController extends Controller
             'phone' => $request->phone,
             'is_smoker' => $request->smoker,
             'working_zone' => $request->working_zone,
-            'service_location' => $request->service_location,
+            'service_location' => json_encode($request->service_location, JSON_FORCE_OBJECT),
             'gender' => $request->gender,
             'dni' => $request->dni,
             'dni_file' => $imageName,
@@ -496,7 +496,7 @@ class UserController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'tiempo' => 'required|integer|min:1|max:3'
+            'tiempo' => 'required|integer|min:1|max:99999'
         ]);
 
         if ($validator->fails()) {

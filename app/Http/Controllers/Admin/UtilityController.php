@@ -11,6 +11,7 @@ use App\Models\Package;
 use App\Models\PackageUser;
 use App\Models\PackageUserHistory;
 use App\Models\User;
+use App\Models\Report;
 
 class UtilityController extends Controller
 {
@@ -65,6 +66,15 @@ class UtilityController extends Controller
         return view('admin.utilities.zones', [
             'zones' => $zones,
             'cities' => $cities,
+        ]);
+    }
+
+    public function reports(Request $request)
+    {
+        $reports = Report::orderBy('created_at', 'desc')->get();
+
+        return view('admin.utilities.reports', [
+            'reports' => $reports,
         ]);
     }
 

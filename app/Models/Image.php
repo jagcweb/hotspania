@@ -23,7 +23,8 @@ class Image extends Model
         'vision_data',
         'route_frontimage',
         'visits',
-        'likes'
+        'likes',
+        'original'
     ];
 
     public function user()
