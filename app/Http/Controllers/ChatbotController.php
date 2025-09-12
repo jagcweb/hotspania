@@ -189,4 +189,27 @@ class ChatbotController extends Controller
         Documentación disponible:
         {$context}";
     }
+
+    public function saveTranscript(Request $request)
+    {
+        $transcript = $request->input('transcript');
+        $endedAt = $request->input('ended_at');
+        $userId = auth()->check() ? auth()->id() : 'null';
+
+        if ($transcript) {
+            // Generamos el nombre del archivo
+            $filename = 'chat_user_' . $userId . '_' . date('Ymd_His') . '.txt';
+
+            // Contenido del archivo
+            $content = "=== Chat terminado a las {$endedAt} ===\n\n" . $transcript;
+
+            // Guardar usando el disco configurado en config/filesystems.php
+            \Storage::disk('chatbot_chats')->put($filename, $content);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+
+
 }

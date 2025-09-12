@@ -209,6 +209,12 @@
                                             <i class="fas fa-chart-pie"></i> Reportes
                                         </a>
                                     </li>
+
+                                    <li class="nav-item">
+                                        <a href="{{ route('admin.utilities.chats') }}" class="nav-link" style="color: {{ Request::routeIs('admin.utilities.chats') ? '#f36e00' : '#FFFFFF' }}">
+                                            <i class="fas fa-chart-pie"></i> Transcripciones chatbot
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>

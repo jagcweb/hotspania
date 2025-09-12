@@ -1126,27 +1126,92 @@
     }
 </style>
 
-<!-- SCRIPT -->
 <script>
 (function() {
-    // Botón flotante y modal
-    //const floatBtn = document.getElementById('chatbot-float-btn');
-    
     const floatBtn = document.getElementById('chatbotBtn');
     const modal = document.getElementById('chatbot-modal');
     const closeBtn = document.getElementById('chatbot-close-btn');
     let messagesContainer, messageInput, sendButton, typingIndicator;
+    let inactivityTimer = null;
+
+    // === Funciones de almacenamiento ===
+    function saveChatState() {
+        if (!messagesContainer) return;
+        const messages = Array.from(messagesContainer.children).map(div => ({
+            html: div.outerHTML
+        }));
+        localStorage.setItem('chatMessages', JSON.stringify(messages));
+        localStorage.setItem('chatOpen', modal.style.display === 'flex');
+    }
+
+    function restoreChatState() {
+        const savedMessages = localStorage.getItem('chatMessages');
+        if (savedMessages) {
+            const messages = JSON.parse(savedMessages);
+            messages.forEach(m => {
+                messagesContainer.insertAdjacentHTML('beforeend', m.html);
+            });
+            scrollToBottom();
+        }
+    }
+
+    function clearChatState() {
+        localStorage.removeItem('chatMessages');
+        localStorage.removeItem('chatOpen');
+    }
+    // === Recopilar transcripción en texto ===
+    function collectChatTranscript() {
+        if (!messagesContainer) return null;
+
+        const messages = Array.from(messagesContainer.children).map(div => {
+            let role = "Usuario";
+            @if(isset(\Auth::user()->username))
+                role = "{{ \Auth::user()->username }}";
+            @endif
+
+            if (div.classList.contains('bot')) role = "Bot";
+            else if (div.classList.contains('system')) role = "Sistema";
+
+            let text = div.innerText.trim();
+            return { role, text, isUser: div.classList.contains('user') };
+        });
+
+        // Filtrar solo si hay al menos un mensaje del usuario
+        const hasUserMessage = messages.some(m => m.isUser);
+        if (!hasUserMessage) return null;
+
+        // Construir la transcripción
+        return messages.map(m => `[${m.role}] ${m.text}`).join("\n");
+    }
+
+    // === Enviar transcripción al backend ===
+    async function sendTranscriptToServer() {
+        const transcript = collectChatTranscript();
+        if (!transcript) return; // No hay mensajes del usuario, no enviamos
+        try {
+            await fetch('/chatbot/save-transcript', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    transcript: transcript,
+                    ended_at: new Date().toISOString()
+                })
+            });
+        } catch (error) {
+            console.error('Error enviando transcripción:', error);
+        }
+    }
+
 
     // Mostrar el modal y preparar el chat
     floatBtn.onclick = function() {
-        var lilist = document.querySelector('.lilist');
-        if (lilist) {
-            lilist.classList.remove('show');
-        }
-        var guestDropdown = document.querySelector('.custom-guest-dropdown');
-        if (guestDropdown) {
-            guestDropdown.classList.remove('show');
-        }
+        openChat();
+    };
+
+    function openChat() {
         modal.style.display = 'flex';
         setTimeout(() => {
             messagesContainer = document.getElementById('messagesContainer');
@@ -1154,15 +1219,16 @@
             sendButton = document.getElementById('sendButton');
             typingIndicator = document.getElementById('typingIndicator');
 
-            // Mensaje de bienvenida solo si está vacío
+            // Restaurar historial si existe
+            restoreChatState();
+
+            // Mensaje de bienvenida si está vacío
             if (messagesContainer && messagesContainer.childElementCount === 0) {
-                addMessage('¡Hola! Soy tu asistente especializado. Puedo ayudarte con consultas basadas en la documentación disponible. ¿En qué puedo ayudarte hoy?', false);
+                addMessage('¡Hola! Soy tu asistente especializado. ¿En qué puedo ayudarte hoy?', false);
             }
 
-            // Focus en el input
             if (messageInput) messageInput.focus();
 
-            // Listener para Enter
             if (messageInput) {
                 messageInput.onkeypress = function(e) {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1172,25 +1238,28 @@
                 }
             }
 
-            // Listener para botón enviar
             if (sendButton) {
                 sendButton.onclick = function() {
                     sendMessage();
                 }
             }
+            localStorage.setItem('chatOpen', true);
         }, 100);
-    };
+    }
 
-    // Cerrar el modal
-    closeBtn.onclick = function() {
+    async function closeChat() {
+        await sendTranscriptToServer(); // Guardar en el backend
         modal.style.display = 'none';
-        // Limpia el input
         if (messageInput) messageInput.value = '';
-    };
+        localStorage.setItem('chatOpen', false);
+        clearChatState();
+    }
+
+    closeBtn.onclick = closeChat;
 
     window.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
-            modal.style.display = 'none';
+            closeChat();
         }
     });
 
@@ -1213,6 +1282,7 @@
         }
         messagesContainer.appendChild(messageDiv);
         scrollToBottom();
+        saveChatState(); // Guardar en localStorage
     }
 
     function showTyping() {
@@ -1249,10 +1319,15 @@
         errorDiv.textContent = message;
         messagesContainer.appendChild(errorDiv);
         scrollToBottom();
-        
-        setTimeout(() => {
-            errorDiv.remove();
-        }, 5000);
+        setTimeout(() => errorDiv.remove(), 5000);
+        saveChatState();
+    }
+
+    function resetInactivityTimer() {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            closeChat();
+        }, 5 * 60 * 1000); // 5 minutos
     }
 
     async function sendMessage() {
@@ -1262,6 +1337,7 @@
         messageInput.value = '';
         setLoading(true);
         showTyping();
+        resetInactivityTimer(); // empieza a contar desde el envío
         try {
             const response = await fetch('/chatbot/chat', {
                 method: 'POST',
@@ -1275,6 +1351,7 @@
             hideTyping();
             if (data.success) {
                 addMessage(data.response, false, data.sources);
+                resetInactivityTimer(); // reinicia cuando llega respuesta
             } else {
                 showError(data.response || 'Error al procesar la respuesta');
             }
@@ -1286,8 +1363,19 @@
             messageInput.focus();
         }
     }
+
+    // Restaurar chat abierto si estaba abierto antes de recargar
+    window.addEventListener('load', () => {
+        const wasOpen = localStorage.getItem('chatOpen') === 'true';
+        if (wasOpen) {
+            openChat();
+        }
+    });
 })();
 </script>
+
+
+
 </body>
 </html>
  

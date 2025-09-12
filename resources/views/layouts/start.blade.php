@@ -702,8 +702,8 @@
     <!-- Contenedor principal -->
     <div class="container">
         <!-- Logo placeholder -->
-        <div class="logo-placeholder">🔥</div>
-        
+        <img class="img_logo" src="{{ asset('images/logo2.png') }}" alt="Logo" style="max-width: 150px;"/>
+
         <!-- Título -->
         <h1 class="title">HOTSPANIA</h1>
         <p class="subtitle">Enciende tu pasión</p>
@@ -714,11 +714,11 @@
             <div class="select-wrapper">
                  @php $cities = \App\Models\City::where('name', 'Barcelona')->orderBy('id', 'asc')->get(); @endphp
                 <select id="city_id" name="city" required autocomplete="off">
-                    <option value="" hidden selected disabled>
+                    <!--<option value="" hidden selected disabled>
                         Escoge una ciudad...
-                    </option>
+                    </option>-->
                     @foreach($cities as $c)
-                        <option value="{{strtolower($c->id)}}">{{$c->name}}</option>
+                        <option selected value="{{strtolower($c->id)}}">{{$c->name}}</option>
                     @endforeach
                 </select>
             </div>
@@ -728,7 +728,7 @@
         <div id="appened-zones"></div>
         
         <!-- Botón con efecto de fuego simple -->
-        <button class="enter-btn" id="log" disabled>
+        <button class="enter-btn" id="log" {{-- disabled --}}>
             <span>ENTRAR</span>
             <div class="loading-spinner" style="display: none;"></div>
         </button>
@@ -859,10 +859,10 @@
         }
 
         // === AJAX Y FUNCIONALIDAD DEL FORMULARIO ===
-        document.getElementById('city_id').addEventListener('change', function() {
-            const citySelect = document.getElementById('city_id');
-            const selectedCity = citySelect.value;
-            
+        document.addEventListener("DOMContentLoaded", function() {
+            const citySelect = document.getElementById("city_id");
+            let selectedCity = citySelect.value;
+            document.getElementById('log').disabled = !selectedCity;
             if (selectedCity) {
                 citySelect.style.color = '#F76E08';
                 citySelect.style.fontWeight = '600';
@@ -870,71 +870,81 @@
                 citySelect.style.color = '#ffffff';
                 citySelect.style.fontWeight = '500';
             }
-            
-            document.getElementById('log').disabled = !selectedCity;
+            document.getElementById('city_id').addEventListener('change', function() {
+                selectedCity = citySelect.value;
+                if (selectedCity) {
+                    citySelect.style.color = '#F76E08';
+                    citySelect.style.fontWeight = '600';
+                } else {
+                    citySelect.style.color = '#ffffff';
+                    citySelect.style.fontWeight = '500';
+                }
+                
+                document.getElementById('log').disabled = !selectedCity;
 
-            // Guardar cookie de ciudad
-            setCookie('selected_city', selectedCity, 30);
+                // Guardar cookie de ciudad
+                setCookie('selected_city', selectedCity, 30);
 
-            // AJAX para obtener zonas
-            const appenedZones = document.getElementById('appened-zones');
-            appenedZones.innerHTML = '';
-            
-            /*if (selectedCity) {
-                appenedZones.innerHTML = '<div class="loading-text">Cargando zonas...</div>';
+                // AJAX para obtener zonas
+                const appenedZones = document.getElementById('appened-zones');
+                appenedZones.innerHTML = '';
+                
+                /*if (selectedCity) {
+                    appenedZones.innerHTML = '<div class="loading-text">Cargando zonas...</div>';
 
-                // Simular petición AJAX (puedes reemplazar con tu endpoint real)
-                fetch(`/home/get-zones/${selectedCity}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('No se encontraron zonas para esta ciudad.');
-                        }
-                        return response.json();
-                    })
-                    .then(zones => {
-                        if (Array.isArray(zones) && zones.length > 0) {
-                            let html = '<label for="zone_id" class="zone-label">Selecciona tu zona:</label>';
-                            html += '<div class="select-wrapper">';
-                            html += '<select id="zone_id" name="zone" required autocomplete="off">';
-                            html += '<option value="" hidden selected disabled>-- Elige tu zona --</option>';
-                            zones.forEach(zone => {
-                                html += `<option value="${zone.id}">${zone.name}</option>`;
-                            });
-                            html += '</select>';
-                            html += '</div>';
-                            appenedZones.innerHTML = html;
+                    // Simular petición AJAX (puedes reemplazar con tu endpoint real)
+                    fetch(`/home/get-zones/${selectedCity}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('No se encontraron zonas para esta ciudad.');
+                            }
+                            return response.json();
+                        })
+                        .then(zones => {
+                            if (Array.isArray(zones) && zones.length > 0) {
+                                let html = '<label for="zone_id" class="zone-label">Selecciona tu zona:</label>';
+                                html += '<div class="select-wrapper">';
+                                html += '<select id="zone_id" name="zone" required autocomplete="off">';
+                                html += '<option value="" hidden selected disabled>-- Elige tu zona --</option>';
+                                zones.forEach(zone => {
+                                    html += `<option value="${zone.id}">${zone.name}</option>`;
+                                });
+                                html += '</select>';
+                                html += '</div>';
+                                appenedZones.innerHTML = html;
 
-                            // Event listener para el selector de zona
-                            document.getElementById('zone_id').addEventListener('change', function() {
-                                const zoneSelect = document.getElementById('zone_id');
-                                const selectedZone = zoneSelect.value;
-                                
-                                if (selectedZone) {
-                                    zoneSelect.style.color = '#F76E08';
-                                    zoneSelect.style.fontWeight = '600';
-                                } else {
-                                    zoneSelect.style.color = '#ffffff';
-                                    zoneSelect.style.fontWeight = '500';
-                                }
-                                
-                                setCookie('selected_zone', selectedZone, 30);
-                                document.getElementById('log').disabled = !selectedCity || !selectedZone;
-                            });
-                        } else {
-                            appenedZones.innerHTML = '<div style="color: rgba(255,255,255,0.7); font-size: 14px;">No hay zonas disponibles para esta ciudad.</div>';
-                        }
-                    })
-                    .catch(error => {
-                        appenedZones.innerHTML = `<div style="color: #ff6b35; font-size: 14px;">${error.message}</div>`;
-                    });
-            }*/
+                                // Event listener para el selector de zona
+                                document.getElementById('zone_id').addEventListener('change', function() {
+                                    const zoneSelect = document.getElementById('zone_id');
+                                    const selectedZone = zoneSelect.value;
+                                    
+                                    if (selectedZone) {
+                                        zoneSelect.style.color = '#F76E08';
+                                        zoneSelect.style.fontWeight = '600';
+                                    } else {
+                                        zoneSelect.style.color = '#ffffff';
+                                        zoneSelect.style.fontWeight = '500';
+                                    }
+                                    
+                                    setCookie('selected_zone', selectedZone, 30);
+                                    document.getElementById('log').disabled = !selectedCity || !selectedZone;
+                                });
+                            } else {
+                                appenedZones.innerHTML = '<div style="color: rgba(255,255,255,0.7); font-size: 14px;">No hay zonas disponibles para esta ciudad.</div>';
+                            }
+                        })
+                        .catch(error => {
+                            appenedZones.innerHTML = `<div style="color: #ff6b35; font-size: 14px;">${error.message}</div>`;
+                        });
+                }*/
+            });
         });
 
         // === FUNCIÓN DEL BOTÓN ENTRAR SIMPLIFICADA ===
         function enterApp(event) {
             const citySelect = document.getElementById('city_id');
             const zoneSelect = document.getElementById('zone_id');
-            
+            console.log('City selected:', citySelect.value);
             if (!citySelect.value) {
                 const select = document.querySelector('.city-selector .select-wrapper');
                 select.style.animation = 'shake 0.5s';
@@ -1011,11 +1021,11 @@
             
             // Verificar estado del botón
             //if (savedCity && savedZone) {
-            if (savedCity) {
+            /*if (savedCity) {
                 document.getElementById('log').disabled = false;
             } else {
                 document.getElementById('log').disabled = true;
-            }
+            }*/
 
             // Inicializar efectos
             createFireParticles();

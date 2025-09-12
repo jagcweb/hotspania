@@ -159,6 +159,11 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::get('utilities/zone-delete/{id}', 'App\Http\Controllers\Admin\UtilityController@deleteZone')->name('admin.utilities.zones_delete');
     Route::post('utilities/zone-update', 'App\Http\Controllers\Admin\UtilityController@updateZone')->name('admin.utilities.zones_update');
     Route::get('utilities/tags', 'App\Http\Controllers\Admin\UtilityController@tags')->name('admin.utilities.tags');
+    Route::get('utilities/chats', 'App\Http\Controllers\Admin\UtilityController@chats')->name('admin.utilities.chats');
+    Route::get('/chat-transcript/download/{filename}', [App\Http\Controllers\Admin\UtilityController::class, 'downloadTranscript'])
+     ->where('filename', '.*')
+     ->name('chat.transcript.download');
+
     Route::post('utilities/tag-save', 'App\Http\Controllers\Admin\UtilityController@saveTag')->name('admin.utilities.tags_save');
     Route::get('utilities/tag-delete/{id}', 'App\Http\Controllers\Admin\UtilityController@deleteTag')->name('admin.utilities.tags_delete');
     Route::post('utilities/tag-update', 'App\Http\Controllers\Admin\UtilityController@updateTag')->name('admin.utilities.tags_update');
@@ -195,6 +200,7 @@ Route::get('/admin/users/get-pdf/{name_pdf}', [App\Http\Controllers\Admin\UserCo
 //ChatbotController
 Route::get('/chatbot', [App\Http\Controllers\ChatbotController::class, 'index'])->name('chatbot.index');
 Route::post('/chatbot/chat', [App\Http\Controllers\ChatbotController::class, 'chat'])->name('chatbot.chat');
+Route::post('/chatbot/save-transcript', [App\Http\Controllers\ChatbotController::class, 'saveTranscript']);
 
 
 Route::get('/check-dns-records', function () {

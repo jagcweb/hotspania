@@ -73,6 +73,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'chatbot_chats' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/chatbot_chats'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),

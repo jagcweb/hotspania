@@ -175,6 +175,18 @@ class UtilityController extends Controller
         ]);
     }
 
+    public function chats(Request $request)
+    {
+        $files = \Storage::disk('chatbot_chats')->files(); // Lista de archivos en el disk
+
+        // Si quieres ordenarlos por fecha descendente:
+        usort($files, function ($a, $b) {
+            return strcmp($b, $a);
+        });
+
+        return view('admin.utilities.chats', compact('files'));
+    }
+
     public function saveTag(Request $request)
     {
         $request->validate([
@@ -332,5 +344,18 @@ class UtilityController extends Controller
     {
         // Implement logic to manage news (e.g., listing, creating, editing, deleting)
         return view('admin.utilities.news');
+    }
+
+    public function downloadTranscript($filename)
+    {
+        // Validar que el archivo exista
+        if (!\Storage::disk('chatbot_chats')->exists($filename)) {
+            abort(404);
+        }
+
+        // Retornar el archivo como response para descargar
+        return response()->streamDownload(function() use ($filename) {
+            echo \Storage::disk('chatbot_chats')->get($filename);
+        }, $filename);
     }
 }

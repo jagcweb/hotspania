@@ -47,8 +47,6 @@ class HomeController extends Controller
               ->orderBy('end_date', 'desc');
         });
 
-        var_dump(count($query->get()));
-
         $selected_city = (int) $selected_city;
         if ($selected_city) {
             $query->whereHas('cities.city', function ($q) use ($selected_city) {

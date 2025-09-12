@@ -12,7 +12,15 @@
         @php
             $lastUserWithImage = \App\Models\User::whereHas('images', function($query) {
             $query->whereNotNull('route_frontimage');
-            })->latest()->first();
+            })
+            ->where('active', 1)
+            ->whereNotNull('completed')
+            ->whereNull('banned')
+            ->whereHas('packageUser', function ($q) {
+                $q->where('end_date', '>=', now())
+                ->orderBy('end_date', 'desc');
+            })
+            ->latest()->first();
 
             $mostLikedImage = \App\Models\Image::select('images.*')
             ->selectRaw('(visits * 0.2 + (SELECT COUNT(*) FROM image_likes WHERE image_id = images.id) * 0.5) as score')
