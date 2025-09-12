@@ -212,7 +212,7 @@
 
                                     <li class="nav-item">
                                         <a href="{{ route('admin.utilities.chats') }}" class="nav-link" style="color: {{ Request::routeIs('admin.utilities.chats') ? '#f36e00' : '#FFFFFF' }}">
-                                            <i class="fas fa-chart-pie"></i> Transcripciones chatbot
+                                            <i class="fa-solid fa-robot"></i> Transcripciones chatbot
                                         </a>
                                     </li>
                                 </ul>
