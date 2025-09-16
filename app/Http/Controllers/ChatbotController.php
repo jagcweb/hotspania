@@ -193,23 +193,61 @@ class ChatbotController extends Controller
     public function saveTranscript(Request $request)
     {
         $transcript = $request->input('transcript');
-        $endedAt = $request->input('ended_at');
+        $startedAt = $request->input('started_at') ? \Carbon\Carbon::parse($request->input('started_at'))->format('d/m/Y H:i') : '';
+        $endedAt = $request->input('ended_at') ? \Carbon\Carbon::parse($request->input('ended_at'))->format('d/m/Y H:i') : '';
+        $userName = auth()->check() ? auth()->user()->name : 'invitado';
         $userId = auth()->check() ? auth()->id() : 'null';
 
         if ($transcript) {
-            // Generamos el nombre del archivo
-            $filename = 'chat_user_' . $userId . '_' . date('Ymd_His') . '.txt';
+            try {
+                // Prompt para generar resumen
+                $summaryPrompt = <<<EOT
+                    Eres un asistente que genera resúmenes de conversaciones. 
 
-            // Contenido del archivo
-            $content = "=== Chat terminado a las {$endedAt} ===\n\n" . $transcript;
+                    Toma la siguiente conversación entre un usuario y un asistente y produce un resumen breve, en lenguaje claro y profesional, que capture:
+                    - Lo que el usuario pidió o necesitaba.
+                    - La respuesta o solución que se le dio.
+                    - Si la respuesta fue de utilidad (si el usuario lo indica).
+                    - El tono emocional general (ej. el usuario parecía frustrado, satisfecho, agradecido).
 
-            // Guardar usando el disco configurado en config/filesystems.php
-            \Storage::disk('chatbot_chats')->put($filename, $content);
+                    No copies literalmente frases de la conversación.
+                    No incluyas insultos, faltas de ortografía o contenido ofensivo.
+                    Haz el resumen en 1 a 3 frases, máximo.
+                    No menciones que es un resumen ni repitas el prompt.
+                    EOT
+                ;
+
+                $messages = [
+                    ['role' => 'system', 'content' => $summaryPrompt],
+                    ['role' => 'user', 'content' => mb_convert_encoding($transcript, 'UTF-8', 'UTF-8')]
+                ];
+
+                $summary = $this->openaiService->chat($messages);
+
+                // Generar nombre de archivo
+                $filename = 'chat_user_' . $userId . '_' . date('Ymd_His') . '.txt';
+
+                // Construir contenido del fichero con marcas claras
+                $content = "=== FECHA Y HORA INICIO: {$startedAt}. CHAT CON USUARIO: {$userName} ===\n\n";
+                $content .= "Resumen:\n{$summary}\n\n";
+                $content .= "=== Chat terminado a las {$endedAt} ===";
+
+                \Storage::disk('chatbot_chats')->put($filename, $content);
+
+            } catch (\Exception $e) {
+                \Log::error('Error al resumir chat: ' . $e->getMessage());
+
+                // Backup del transcript si falla el resumen
+                $filename = 'chat_user_' . $userId . '_' . date('Ymd_His') . '_RAW.txt';
+                $content = "=== FECHA Y HORA INICIO: {$startedAt}. CHAT CON USUARIO: {$userName} ===\n\n";
+                $content .= $transcript . "\n\n";
+                $content .= "=== Chat terminado a las {$endedAt} ===";
+
+                \Storage::disk('chatbot_chats')->put($filename, $content);
+            }
         }
 
         return response()->json(['success' => true]);
     }
-
-
 
 }

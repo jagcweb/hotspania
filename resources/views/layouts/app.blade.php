@@ -1188,6 +1188,10 @@
     async function sendTranscriptToServer() {
         const transcript = collectChatTranscript();
         if (!transcript) return; // No hay mensajes del usuario, no enviamos
+
+        // Obtener chat_start_at de localStorage
+        const chatStartAt = localStorage.getItem('chat_start_at');
+
         try {
             await fetch('/chatbot/save-transcript', {
                 method: 'POST',
@@ -1197,6 +1201,7 @@
                 },
                 body: JSON.stringify({
                     transcript: transcript,
+                    started_at: chatStartAt ? new Date(parseInt(chatStartAt)).toISOString() : null,
                     ended_at: new Date().toISOString()
                 })
             });
@@ -1221,6 +1226,11 @@
 
             // Restaurar historial si existe
             restoreChatState();
+
+            // Si no existe historial, guardar hora de inicio en localStorage
+            if (!localStorage.getItem('chatMessages')) {
+                localStorage.setItem('chat_start_at', Date.now());
+            }
 
             // Mensaje de bienvenida si está vacío
             if (messagesContainer && messagesContainer.childElementCount === 0) {
@@ -1323,21 +1333,54 @@
         saveChatState();
     }
 
+    // === Reinicia el temporizador y guarda la fecha de expiración en localStorage ===
     function resetInactivityTimer() {
         if (inactivityTimer) clearTimeout(inactivityTimer);
+
+        const expireAt = Date.now() + 15 * 1000; // 15 segundos
+        localStorage.setItem('chat_expire_at', expireAt);
+
         inactivityTimer = setTimeout(() => {
             closeChat();
-        }, 5 * 60 * 1000); // 5 minutos
+            localStorage.removeItem('chat_expire_at');
+        }, 15 * 1000);
     }
 
+    // === Restaura el temporizador al recargar/navegar ===
+    function restoreInactivityTimer() {
+        const expireAt = localStorage.getItem('chat_expire_at');
+        if (!expireAt) return;
+
+        const remaining = expireAt - Date.now();
+        if (remaining > 0) {
+            inactivityTimer = setTimeout(() => {
+                closeChat();
+                localStorage.removeItem('chat_expire_at');
+            }, remaining);
+        } else {
+            // Ya expiró
+            closeChat();
+            localStorage.removeItem('chat_expire_at');
+        }
+    }
+
+
+    // Llamamos a restore cuando la página termina de cargar
+    document.addEventListener("DOMContentLoaded", restoreInactivityTimer);
+
+
+    // === Enviar mensaje con timer persistente ===
     async function sendMessage() {
         const message = messageInput.value.trim();
         if (!message) return;
+
         addMessage(message, true);
         messageInput.value = '';
         setLoading(true);
         showTyping();
-        resetInactivityTimer(); // empieza a contar desde el envío
+
+        resetInactivityTimer(); // reinicia al enviar
+
         try {
             const response = await fetch('/chatbot/chat', {
                 method: 'POST',
@@ -1347,8 +1390,10 @@
                 },
                 body: JSON.stringify({ message })
             });
+
             const data = await response.json();
             hideTyping();
+
             if (data.success) {
                 addMessage(data.response, false, data.sources);
                 resetInactivityTimer(); // reinicia cuando llega respuesta
