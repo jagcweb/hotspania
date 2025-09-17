@@ -1337,13 +1337,13 @@
     function resetInactivityTimer() {
         if (inactivityTimer) clearTimeout(inactivityTimer);
 
-        const expireAt = Date.now() + 15 * 1000; // 15 segundos
+        const expireAt = Date.now() + 5 * 60 * 1000; // 5 minutos
         localStorage.setItem('chat_expire_at', expireAt);
 
         inactivityTimer = setTimeout(() => {
             closeChat();
             localStorage.removeItem('chat_expire_at');
-        }, 15 * 1000);
+        }, 5 * 60 * 1000); // 5 minutos
     }
 
     // === Restaura el temporizador al recargar/navegar ===
