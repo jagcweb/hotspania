@@ -164,6 +164,10 @@ Route::prefix('admin')->middleware('admin')->group(function () {
      ->where('filename', '.*')
      ->name('chat.transcript.download');
 
+    Route::get('/chat-transcript/view/{filename}', [App\Http\Controllers\Admin\UtilityController::class, 'viewTranscript'])
+     ->where('filename', '.*')
+     ->name('chat.transcript.view');
+
     Route::post('utilities/tag-save', 'App\Http\Controllers\Admin\UtilityController@saveTag')->name('admin.utilities.tags_save');
     Route::get('utilities/tag-delete/{id}', 'App\Http\Controllers\Admin\UtilityController@deleteTag')->name('admin.utilities.tags_delete');
     Route::post('utilities/tag-update', 'App\Http\Controllers\Admin\UtilityController@updateTag')->name('admin.utilities.tags_update');

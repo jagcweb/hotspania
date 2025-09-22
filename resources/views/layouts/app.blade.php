@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Hotspania">
+    <meta name="description" content="Descubre Hotspania, el portal de masajistas y anuncios para adultos en España. Perfiles verificados, máxima discreción y un sitio rápido pensado para tu comodidad">
     <meta name="author" content="jagcweb">
 
     <link rel="icon" type="image/x-icon" href="{{ asset('images/logo.png') }}">

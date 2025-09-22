@@ -42,10 +42,9 @@
                                         <td>{{$formattedDate}}</td>
                                         <td>{{$userName}}</td>
                                         <td>
-                                            <a href="{{ route('chat.transcript.download', $file) }}" target="_blank">
-                                                <i class="fas fa-download"></i>
+                                            <a href="{{ route('chat.transcript.view', $file) }}" target="_blank">
+                                                <i class="fas fa-eye text-dark"></i>
                                             </a>
-
                                         </td>
                                     </tr>
                                 @endforeach

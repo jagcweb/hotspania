@@ -358,4 +358,17 @@ class UtilityController extends Controller
             echo \Storage::disk('chatbot_chats')->get($filename);
         }, $filename);
     }
+
+    public function viewTranscript($filename)
+    {
+        // Validar que el archivo exista
+        if (!\Storage::disk('chatbot_chats')->exists($filename)) {
+            abort(404);
+        }
+
+        $content = \Storage::disk('chatbot_chats')->get($filename);
+
+        return response($content, 200)
+            ->header('Content-Type', 'text/plain');
+    }
 }
