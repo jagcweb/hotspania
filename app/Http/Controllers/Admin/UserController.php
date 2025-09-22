@@ -275,11 +275,18 @@ class UserController extends Controller
      */
     public function getPending()
     {
+        $u = User::find(87);
+        var_dump($u->nickname); die;
+
         $users = User::whereHas(
             'roles', function($q){
                 $q->where('name', 'user');
             })
-            ->whereNull('active');
+            ->whereNull('active')
+            ->orWhereHas('roles', function($q){
+                $q->where('name', 'user');
+            })
+            ->where('active', '=', 'NULL');
 
         if (request()->get('search')) {
             $users = $users->where('nickname', 'like', '%' . request()->get('search') . '%');
