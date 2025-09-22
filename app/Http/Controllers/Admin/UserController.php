@@ -276,7 +276,6 @@ class UserController extends Controller
     public function getPending()
     {
         $u = User::find(87);
-        var_dump($u->nickname); die;
 
         $users = User::whereHas(
             'roles', function($q){
