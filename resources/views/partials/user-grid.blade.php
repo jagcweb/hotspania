@@ -84,10 +84,12 @@
                             <span class="visually-hidden">Likes:</span>
                             <i class="fas fa-heart" aria-hidden="true"></i> {{$totalLikes}}
                         </li>
-                        {{-- <li class="gallery-item-points">
+                        @if(\Auth::user() && \Auth::user()->getRoleNames()[0] == "admin" && str_contains(url()->full(), '=ranking'))
+                        <li class="gallery-item-points">
                             <span class="visually-hidden">Points:</span>
                             <i class="fas fa-bullseye" aria-hidden="true"></i> {{$totalPoints}}
-                        </li> --}}
+                        </li>
+                        @endif
                     </ul>
                 </div>
             </div>

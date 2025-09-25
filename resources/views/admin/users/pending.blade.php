@@ -58,9 +58,9 @@
                                         <a title="Asignar Paquete" href="#" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-archive"></i>
                                         </a>
-                                        <a title="Editar Estado" href="#" data-toggle="modal" data-target="#editar-status-{{$u->id}}" class="icon">
+                                        {{-- <a title="Editar Estado" href="#" data-toggle="modal" data-target="#editar-status-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-pen"></i>
-                                        </a>
+                                        </a> --}}
                                         <a title="Historial Paquete" href="#" data-toggle="modal" data-target="#historial-paquete-{{$u->id}}" class="icon">
                                             <i class="fa-solid fa-clock-rotate-left"></i>
                                         </a>
