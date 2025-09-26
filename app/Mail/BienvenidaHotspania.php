@@ -25,6 +25,6 @@ class BienvenidaHotspania extends Mailable
     {
         return $this->from('consultas@hotspania.es', 'Hotspania')
                     ->subject('🎉 ¡Bienvenido a Hotspania!')
-                    ->view('mail.bienvenidad');
+                    ->view('mail.bienvenida');
     }
 }
