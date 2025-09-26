@@ -383,7 +383,8 @@ class UserController extends Controller
         $user->update();
 
         if ($status == 1) {
-                if(is_null($user->first_time)){
+                if(is_null($user->first_time) || $user->first_time == 0) {
+                     \Log::info('El usuario es de primera vez, le envio el email de bienvenida a: ' . $user->email);
                     try {
                         \Mail::to($user->email)->send(new \App\Mail\BienvenidaHotspania($user->email, $user->dni));
                     } catch (\Exception $e) {
