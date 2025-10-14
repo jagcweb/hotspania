@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Descubre Hotspania, el portal de masajistas y anuncios para adultos en España. Perfiles verificados, máxima discreción y un sitio rápido pensado para tu comodidad">
+    <meta name="author" content="jagcweb">
+
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/logo.png') }}">
     <title>Hotspania - Bienvenido</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap');
@@ -745,7 +749,6 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="ageCheck" checked>
                         <label class="form-check-label" for="ageCheck">
-                            Soy mayor de 18 años y 
                             <a target="_blank" style="color: #F76E08; text-decoration: underline!important;" href="/documents/Terminos_y_Condiciones.pdf">
                                 acepto los términos y condiciones.
                             </a>

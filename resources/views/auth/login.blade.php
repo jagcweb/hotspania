@@ -102,7 +102,6 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="ageCheck" checked style="accent-color: #f44806;">
                         <label class="form-check-label" for="ageCheck" style="letter-spacing: normal; text-transform: none;">
-                            Soy mayor de 18 años y 
                             <a target="_blank" style="color: #f44806; text-decoration: underline!important;" href="{{ route('home.document', ['filename' => 'Terminos_y_Condiciones.pdf']) }}">
                                 acepto los términos y condiciones.
                             </a>
