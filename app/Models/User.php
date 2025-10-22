@@ -7,8 +7,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Filament\Models\Contracts\FilamentUser;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
@@ -88,5 +89,25 @@ class User extends Authenticatable
     {
         // Assuming you have a 'roles' pivot table
         return $this->roles->pluck('name')->toArray();
+    }
+
+    public function canAccessFilament(): bool
+    {
+        return $this->email === 'admin@admin.es';
+    }
+
+    public function getFilamentName(): string
+    {
+        return trim($this->full_name ?? $this->nickname ?? $this->email ?? '') ?: 'Usuario';
+    }
+
+    public function getNameAttribute(): string
+    {
+        return $this->full_name ?? $this->nickname ?? $this->email ?? 'Usuario';
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 }
