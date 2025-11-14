@@ -62,9 +62,7 @@
 
                 <div class="profile-user-settings">
 
-                    <h1 class="profile-user-name text-white">{{ $user->nickname }}
-                        {{--<i style="font-size: 14px; vertical-align: middle; cursor: pointer;" class="ml-2 fa-solid fa-ellipsis report"></i>--}}
-                    </h1>
+                    <h1 class="profile-user-name text-white">{{ $user->nickname }}<i style="font-size: 14px; vertical-align: middle; cursor: pointer;" class="ml-2 fa-solid fa-ellipsis report"></i></h1>
                     @if($isAvailable)
                         <small class="availability-text" style="margin-top: -10px; margin-left:2px;">Disponible ahora</small>
                     @endif
