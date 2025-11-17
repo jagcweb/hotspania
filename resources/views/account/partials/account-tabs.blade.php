@@ -711,10 +711,188 @@
             <div class="section-empty-content">
                 <div class="empty-placeholder">
                     <i class="fas fa-euro-sign fa-3x"></i>
-                    <p>Próximamente...</p>
+                    <p style="margin-bottom: 30px;">Impulsa tu visibilidad con nuestros paquetes</p>
+                    
+                    <!-- Enlace atractivo para anunciarse -->
+                    <a href="javascript:void(0);" data-toggle="modal" data-target="#asignar-paquete-{{ $u->id }}" class="advertise-link">
+                        <span class="advertise-icon">
+                            <i class="fa-solid fa-rocket"></i>
+                        </span>
+                        <span class="advertise-text">
+                            <strong>Comprar paquete de anuncio</strong>
+                            <small>Anúnciate en inicio y visibiliza tu cuenta</small>
+                        </span>
+                        <span class="advertise-arrow">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
+                    </a>
                 </div>
             </div>
         </div>
+
+        @include('modals.admin.modal_asignar_paquete')
+
+        <style>
+            /* Estilos para el enlace de anunciarse */
+            .advertise-link {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: linear-gradient(135deg, #f36e00 0%, #ff8c42 100%);
+                padding: 25px 35px;
+                border-radius: 15px;
+                text-decoration: none;
+                color: #fff !important;
+                transition: all 0.3s ease;
+                max-width: 500px;
+                width: 100%;
+                box-shadow: 0 8px 25px rgba(243, 110, 0, 0.3);
+                position: relative;
+                overflow: hidden;
+                margin-top: 20px;
+                cursor: pointer;
+            }
+
+            .advertise-link::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transition: left 0.5s ease;
+            }
+
+            .advertise-link:hover::before {
+                left: 100%;
+            }
+
+            .advertise-link:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 35px rgba(243, 110, 0, 0.5);
+                text-decoration: none;
+                color: #fff !important;
+            }
+
+            .advertise-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 60px;
+                height: 60px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                font-size: 28px;
+                flex-shrink: 0;
+                transition: all 0.3s ease;
+            }
+
+            /* Asegurar que los SVG e iconos no tengan margen */
+            .advertise-icon svg,
+            .advertise-icon i {
+                margin: 0 !important;
+                color: #fff !important;
+                fill: #fff !important;
+            }
+
+            .advertise-arrow svg,
+            .advertise-arrow i {
+                margin: 0 !important;
+                color: #fff !important;
+                fill: #fff !important;
+            }
+
+            .advertise-link:hover .advertise-icon {
+                background: rgba(255, 255, 255, 0.3);
+                transform: rotate(10deg) scale(1.1);
+            }
+
+            .advertise-text {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+                margin: 0 20px;
+                text-align: left;
+            }
+
+            .advertise-text strong {
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 5px;
+                display: block;
+                color: #fff !important;
+            }
+
+            .advertise-text small {
+                font-size: 14px;
+                opacity: 0.9;
+                font-weight: 300;
+                color: #fff !important;
+            }
+
+            .advertise-arrow {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                transition: transform 0.3s ease;
+            }
+
+            .advertise-link:hover .advertise-arrow {
+                transform: translateX(5px);
+            }
+
+            /* Responsive */
+            @media screen and (max-width: 768px) {
+                .advertise-link {
+                    padding: 20px 25px;
+                    max-width: 100%;
+                }
+
+                .advertise-icon {
+                    width: 50px;
+                    height: 50px;
+                    font-size: 24px;
+                }
+
+                .advertise-text strong {
+                    font-size: 18px;
+                }
+
+                .advertise-text small {
+                    font-size: 13px;
+                }
+            }
+
+            @media screen and (max-width: 480px) {
+                .advertise-link {
+                    padding: 15px 20px;
+                }
+
+                .advertise-icon {
+                    width: 45px;
+                    height: 45px;
+                    font-size: 20px;
+                }
+
+                .advertise-text {
+                    margin: 0 15px;
+                }
+
+                .advertise-text strong {
+                    font-size: 16px;
+                }
+
+                .advertise-text small {
+                    font-size: 12px;
+                }
+
+                .advertise-arrow {
+                    font-size: 18px;
+                }
+            }
+        </style>
 
         <!-- TAB 5: ESTADÍSTICAS -->
         <div class="tab-pane" id="contenido-stats" role="tabpanel" aria-labelledby="tab-stats">

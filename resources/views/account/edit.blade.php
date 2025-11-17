@@ -660,12 +660,12 @@
 
     <div class="container mt-5 container_mobile">
         @php $u = \Auth::user(); @endphp
-        <a title="Anúnciate" href="javascript:void(0);" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+        {{--<a title="Anúnciate" href="javascript:void(0);" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
             Anúnciate
             <i class="fa-solid fa-rocket ml-1"></i>
         </a>
         @include('modals.admin.modal_asignar_paquete')
-        {{--<a title="Subir fotos" href="{{ route('account.edit-data') }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+        <a title="Subir fotos" href="{{ route('account.edit-data') }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
             Modificar datos
             <i class="fa-solid fa-user-pen ml-1"></i>
         </a>
