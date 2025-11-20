@@ -7,417 +7,709 @@
 <main role="main">
 
     <div id="miDiv" class="container">
-    <script>
-        function actualizarClaseSegunAnchoPantalla() {
-            const div = document.getElementById('miDiv');
-            if (window.innerWidth > 768) {
-                div.style.marginLeft = '';
-                div.style.marginRight = ''; 
-                div.classList.add('container');
-            } else {
-                div.classList.remove('container');
-                div.style.marginLeft = '10px';
-                div.style.marginRight = '10px';
+        <script>
+            function actualizarClaseSegunAnchoPantalla() {
+                const div = document.getElementById('miDiv');
+                if (window.innerWidth > 768) {
+                    div.style.marginLeft = '';
+                    div.style.marginRight = ''; 
+                    div.classList.add('container');
+                } else {
+                    div.classList.remove('container');
+                    div.style.marginLeft = '10px';
+                    div.style.marginRight = '10px';
+                }
             }
-        }
-        
-        // Ejecutar al cargar la página
-        actualizarClaseSegunAnchoPantalla();
-        
-        // Ejecutar al redimensionar la ventana
-        window.addEventListener('resize', actualizarClaseSegunAnchoPantalla);
-    </script>
+            
+            // Ejecutar al cargar la página
+            actualizarClaseSegunAnchoPantalla();
+            
+            // Ejecutar al redimensionar la ventana
+            window.addEventListener('resize', actualizarClaseSegunAnchoPantalla);
+        </script>
 
         <div class="profile">
 
             <div class="profile-image">
+                <!-- 1. Username -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <h1 class="profile-username-centered">
+                        {{ \Auth::user()->nickname }}
+                    </h1>
 
-                @if(is_object($frontimage))
-                    @if(!is_null($frontimage->route_gif))
-                        <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                    @if(is_object($frontimage))
+                        @if(!is_null($frontimage->route_gif))
+                            <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                        @else
+                            <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                        @endif
                     @else
-                        <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                        <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
                     @endif
-                @else
-                    <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
-                @endif
-
+                </div>
             </div>
 
             @php
-                $active = \Auth::user()->active;
-                $badgeText = 'Pendiente';
-                $badgeClass = 'badge-warning';
-                if ($active === 1) {
-                    $badgeText = 'Activa';
-                    $badgeClass = 'badge-success';
-                } elseif ($active === 2) {
-                    $badgeText = 'Rechazada';
-                    $badgeClass = 'badge-danger';
-                }
-            @endphp
-
-            <style>
-                .badge-inline-container {
-                    display: inline-flex;
-                    gap: 10px;
-                    align-items: center;
-                    vertical-align: middle;
-                    margin-left: 10px;
-                }
-                .badge {
-                    position: relative;
-                    padding: 8px 18px;
-                    border-radius: 25px;
-                    font-weight: 600;
-                    font-size: 13px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    backdrop-filter: blur(10px);
-                    border: 2px solid rgba(255, 255, 255, 0.1);
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-                    overflow: hidden;
-                    display: inline-flex;
-                    align-items: center;
-                    vertical-align: middle;
-                }
-                .badge::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                    transition: left 0.5s ease;
-                }
-                .badge:hover::before {
-                    left: 100%;
-                }
-                .badge:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-                }
-                .badge-pending {
-                    background: linear-gradient(135deg, #ff9a56 0%, #ff7b39 100%);
-                    color: white;
-                    position: relative;
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-                }
-                .badge-pending::after {
-                    content: '';
-                    position: absolute;
-                    top: 50%;
-                    left: 8px;
-                    width: 8px;
-                    height: 8px;
-                    background: rgba(255, 255, 255, 0.8);
-                    border-radius: 50%;
-                    transform: translateY(-50%);
-                    animation: pulse 2s infinite;
-                }
-                .badge-pending:hover {
-                    background: linear-gradient(135deg, #ff8c42 0%, #ff6b1a 100%);
-                }
-                .badge-active {
-                    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
-                    color: white;
-                    position: relative;
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-                }
-                .badge-active::after {
-                    content: '✓';
-                    position: absolute;
-                    top: 50%;
-                    left: 8px;
-                    transform: translateY(-50%);
-                    font-size: 12px;
-                    font-weight: bold;
-                }
-                .badge-active:hover {
-                    background: linear-gradient(135deg, #4e9a2a 0%, #90d4aa 100%);
-                }
-                .badge-rejected {
-                    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-                    color: white;
-                    position: relative;
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-                }
-                .badge-rejected::after {
-                    content: '✕';
-                    position: absolute;
-                    top: 50%;
-                    left: 8px;
-                    transform: translateY(-50%);
-                    font-size: 12px;
-                    font-weight: bold;
-                }
-                .badge-rejected:hover {
-                    background: linear-gradient(135deg, #e73c5e 0%, #e63946 100%);
-                }
-                @keyframes pulse {
-                    0% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                    100% { opacity: 1; }
-                }
-                @media (max-width: 768px) {
-                    .badge-inline-container {
-                        gap: 8px;
+                $isAvailable = false;
+                $remainingTime = '';
+                $isVisible = !is_null(\Auth::user()->visible);
+                $canMakeAvailable = true;
+                
+                if (\Auth::user()->available_until !== null) {
+                    $now = \Carbon\Carbon::now('Europe/Madrid');
+                    $endTime = \Carbon\Carbon::parse(\Auth::user()->available_until)->setTimezone('Europe/Madrid');
+                    $isAvailable = $now->lt($endTime);
+                    
+                    if ($isAvailable) {
+                        $canMakeAvailable = false;
+                        $diff = $now->diff($endTime);
+                        $remainingTime = sprintf('%d:%02d:%02d', ($diff->days * 24) + $diff->h, $diff->i, $diff->s);
                     }
-                    .badge {
-                        font-size: 12px;
-                        padding: 7px 14px;
-                    }
-                }
-                @media (max-width: 480px) {
-                    .badge-inline-container {
-                        gap: 6px;
-                        margin-left: 6px;
-                    }
-                    .badge {
-                        font-size: 10px;
-                        padding: 5px 10px;
-                    }
-                    .badge-pending::after,
-                    .badge-active::after,
-                    .badge-rejected::after {
-                        left: 5px;
-                        font-size: 10px;
-                        width: 6px;
-                        height: 6px;
-                    }
-                }
-                @media (max-width: 370px) {
-                    .badge-inline-container {
-                        gap: 4px;
-                        margin-left: 4px;
-                    }
-                    .badge {
-                        font-size: 8px;
-                        padding: 3px 7px;
-                    }
-                    .badge-pending::after,
-                    .badge-active::after,
-                    .badge-rejected::after {
-                        left: 3px;
-                        font-size: 8px;
-                        width: 5px;
-                        height: 5px;
-                    }
-                }
-            </style>
-
-            <div class="profile-user-settings">
-
-                <h1 class="profile-user-name text-white">
-                    {{ \Auth::user()->nickname }}
-                </h1>
-
-                <button class="btn profile-edit-btn" id="profile-edit-btn">Editar perfil</button>
-
-
-
-                <button class="btn profile-edit-btn" id="logout-edit-btn">Cerrar sesión</button>
-
-                <form class="d-none" id="logout-form" action="{{ url('logout') }}" method="POST">
-                    {{ csrf_field() }}
-                    <!-- Botón oculto (opcional) para mantener el formulario limpio -->
-                </form>
-
-                <script>
-                    // Vincular el clic del botón al envío del formulario
-                    document.getElementById('logout-edit-btn').addEventListener('click', function () {
-                        document.getElementById('logout-form').submit();
-                    });
-                </script>
-
-                <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog"
-                        aria-hidden="true"></i></button>
-
-                <span class="badge-inline-container">
-                    @if (is_null($active) || $active === 0)
-                        <span class="badge badge-pending">
-                            <span style="margin-left: 15px;">Pendiente</span>
-                        </span>
-                    @elseif ($active === 1)
-                        <span class="badge badge-active">
-                            <span style="margin-left: 15px;">Activo</span>
-                        </span>
-                    @elseif ($active === 2)
-                        <span class="badge badge-rejected">
-                            <span style="margin-left: 15px;">Rechazado</span>
-                        </span>
-                        @if(!empty(\Auth::user()->reject_reason))
-                            <div style="color:#ff416c; font-size:13px; margin-top:4px;">
-                                Motivo: {{ \Auth::user()->reject_reason }}
-                            </div>
-                        @endif
-                    @elseif ($active === 3)
-                        <span class="badge badge-pending" style="background: linear-gradient(135deg, #bdbdbd 0%, #757575 100%);">
-                            <span style="margin-left: 15px;">Inactivo</span>
-                        </span>
-                    @elseif ($active === 4)
-                        <span class="badge badge-active" style="background: linear-gradient(135deg, #56ab2f 0%, #00e676 100%);">
-                            <span style="margin-left: 15px;">Aprobado</span>
-                        </span>
-                    @endif
-                </span>
-
-            </div>
-
-            <p style="font-size:16px;" class="text-justify text-city">{{ \Auth::user()->working_zone ?? '' }} - <span id="selectedCity"></span></p>
-
-            <script>
-                // Get cookie value from JavaScript
-                function getCookie(name) {
-                    let value = `; ${document.cookie}`;
-                    let parts = value.split(`; ${name}=`);
-                    if (parts.length === 2) {
-                        return decodeURIComponent(parts.pop().split(';').shift());
-                    }
-                    return null;
                 }
                 
-                // Update the city name from cookie
-                document.addEventListener('DOMContentLoaded', function() {
-                    const selectedCity = getCookie('selected_city') || 'Barcelona';
-                    const cityElement = document.getElementById('selectedCity');
-                    if (cityElement) {
-                        cityElement.textContent = selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1);
-                    }
-                });
-                </script>
+                $u = \Auth::user();
+            @endphp
 
-            <div class="profile-bio mt-3">
-                <p class="mt-2"></p>
-                <div class="properties">
-                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->age }} Años</p>
-                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->weight }} KG</p>
-                </div>
-                <div class="properties">
-                    <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->height }} CM</p>
-                    <p style="font-size:16px; color:#fff;" class="text-justify">Fuma: {{ \Auth::user()->is_smoker === 1 ? 'Si' : 'No' }}</p>
-                </div>
-                <p style="font-size:16px; color:#fff;" class="text-justify">{{ \Auth::user()->bust }} - {{ \Auth::user()->waist }} - {{ \Auth::user()->hip }}</p>
-                <p style="font-size:16px; color:#fff;" class="text-justify">
-                    @if(\Auth::user()->start_day == "fulltime" && \Auth::user()->end_day == "fulltime")
-                    Todos los días
+            <!-- Contenedor centrado -->
+            <div class="profile-centered-container">
+                
+                <!-- 2. Badge Disponibilidad -->
+                <div class="availability-status-centered">
+                    @if($isAvailable)
+                        <span class="status-label status-available">Disponible</span>
                     @else
-                    {{ ucfirst(\Auth::user()->start_day) }} a {{ ucfirst(\Auth::user()->end_day) }}
+                        <span class="status-label status-unavailable">No disponible</span>
                     @endif
-                </p>
-                <p style="font-size:16px; color:#fff;">
-                    Horario: 
-                    @if(\Auth::user()->start_time == 0 && \Auth::user()->end_time == 0 || \Auth::user()->start_time == "fulltime" && \Auth::user()->end_time == "fulltime")
-                    Todo el día
-                    @else
-                        @if(\Auth::user()->start_time == 0)
-                            00
-                        @else
-                            {{ \Auth::user()->start_time }}
-                        @endif 
-                        
-                        a 
-                        
-                        @if(\Auth::user()->end_time == 0)
-                            00
-                        @else
-                            {{ \Auth::user()->end_time }}
-                        @endif 
-                    @endif 
-                </p>
-                @if(!is_null(\Auth::user()->link))
-                    <p class="link" style="font-size:16px; color:#fff;">
-                         <a href="{{ \Auth::user()->link }}" target="_blank" style="color:#fff; font-size:16px; text-decoration:underline!important;">{{ str_replace(['http://', 'https://'], '', \Auth::user()->link) }}</a>
-                    </p>
+                </div>
+
+                <!-- 3. Timer (solo si está disponible) -->
+                @if($isAvailable)
+                <div class="countdown-timer-centered" id="availability-countdown">
+                    {{ $remainingTime }}
+                </div>
                 @endif
+
+                <!-- 4. Botón para controlar disponibilidad -->
+                @if($isAvailable)
+                    <!-- Botón para apagar disponibilidad -->
+                    {{--<a href="{{ route('account.make_unavailable', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" 
+                    class="btn-availability-control btn-turn-off">
+                        <i class="fa-solid fa-power-off"></i>
+                        <span>Apagar disponibilidad</span>
+                    </a>--}}
+                @else
+                    <!-- Botón para activar disponibilidad (abre modal) -->
+                    <a href="javascript:void(0);" 
+                    data-toggle="modal" 
+                    data-target="#hacer-disponible-{{ $u->id }}" 
+                    class="btn-availability-control btn-turn-on">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Ponte disponible</span>
+                    </a>
+                @endif
+
+                <!-- 5. Slider "Desliza para Off" (visible solo si la ficha está visible) -->
+                @if($isVisible)
+                <div class="slider-container">
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="slider-thumb" id="sliderThumb">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </div>
+                        <span class="slider-text" id="sliderText">Ocultar ficha</span>
+                    </div>
+                </div>
+
+                <!-- 6. "Tu ficha está visible" -->
+                <p class="visibility-message">
+                    <i class="fa-solid fa-eye"></i> Tu ficha está visible
+                </p>
+                @else
+                <!-- Mensaje cuando la ficha no está visible -->
+                <div class="ficha-invisible-message">
+                    <p class="visibility-message" style="color: rgba(255, 107, 107, 0.8);">
+                        <i class="fa-solid fa-eye-slash"></i> Tu ficha NO está visible
+                    </p>
+                    <a href="{{ route('account.visible', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" class="btn-make-visible">
+                        <i class="fa-solid fa-eye"></i>
+                        Hacer visible
+                    </a>
+                </div>
+                @endif
+
+                <!-- 7. Botón Chat/Consulta -->
+                <a href="javascript:void(0);" class="chat-consult-btn-centered" onclick="openChatConsult()">
+                    Chat/Consulta
+                </a>
+
             </div>
+
+            <div class="profile-stats" style="display: none;"></div>
+            <div class="profile-bio" style="display: none;"></div>
 
         </div>
         <!-- End of profile section -->
 
+        <!-- Incluir modal de hacer disponible -->
+        @include('modals.admin.modal_hacer_disponible')
+
+        <!-- Modal de confirmación para apagar visibilidad -->
+        <div class="modal fade" id="confirmVisibilityOffModal" tabindex="-1" role="dialog" aria-labelledby="confirmVisibilityOffLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content" style="background: #1a1a1a; border: 2px solid #f36e00; border-radius: 15px;">
+                    <div class="modal-header" style="border-bottom: 1px solid rgba(243, 110, 0, 0.3);">
+                        <h5 class="modal-title" id="confirmVisibilityOffLabel" style="color: #fff; font-weight: 700;">
+                            <i class="fa-solid fa-exclamation-triangle" style="color: #f36e00;"></i>
+                            Confirmar ocultar ficha
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff; opacity: 0.8;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="padding: 30px; text-align: center;">
+                        <i class="fa-solid fa-eye-slash" style="font-size: 60px; color: #f36e00; margin-bottom: 20px;"></i>
+                        <p style="color: #fff; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                            <strong>Tu ficha se ocultará y perderás tu visibilidad.</strong><br>
+                            Ya no aparecerás en Hotspania.
+                        </p>
+                        <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
+                            ¿Estás seguro de que deseas continuar?
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid rgba(243, 110, 0, 0.3); display: flex; justify-content: center; gap: 15px;">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background: #757575; border: none; padding: 10px 25px; border-radius: 25px; font-weight: 600;">
+                            <i class="fa-solid fa-times"></i> Cancelar
+                        </button>
+                        <a href="{{ route('account.visible', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" class="btn btn-danger" style="background: linear-gradient(135deg, #f36e00 0%, #ff8c42 100%); border: none; padding: 10px 25px; border-radius: 25px; font-weight: 600; color: #fff; text-decoration: none;">
+                            <i class="fa-solid fa-eye-slash"></i> Sí, ocultar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            @if($isAvailable)
+            // Update countdown timer
+            function updateAvailabilityCountdown() {
+                const endTime = new Date("{{ \Auth::user()->available_until }}").getTime();
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    location.reload();
+                    return;
+                }
+
+                const totalHours = Math.floor(distance / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const countdownElement = document.getElementById("availability-countdown");
+                if (countdownElement) {
+                    countdownElement.textContent = 
+                        totalHours + ":" +
+                        minutes.toString().padStart(2,'0') + ":" + 
+                        seconds.toString().padStart(2,'0');
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                updateAvailabilityCountdown();
+                setInterval(updateAvailabilityCountdown, 1000);
+            });
+            @endif
+
+            @if($isVisible)
+            // Slider functionality para ocultar la ficha
+            document.addEventListener('DOMContentLoaded', function() {
+                initSlider();
+            });
+
+            function initSlider() {
+                const sliderThumb = document.getElementById('sliderThumb');
+                const sliderTrack = document.getElementById('sliderTrack');
+                const sliderText = document.getElementById('sliderText');
+                
+                if (!sliderThumb || !sliderTrack) return;
+
+                let isDragging = false;
+                let startX = 0;
+                let currentX = 0;
+                const maxSlide = sliderTrack.offsetWidth - sliderThumb.offsetWidth;
+
+                // Mouse events
+                sliderThumb.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', endDrag);
+
+                // Touch events
+                sliderThumb.addEventListener('touchstart', startDrag);
+                document.addEventListener('touchmove', drag);
+                document.addEventListener('touchend', endDrag);
+
+                function startDrag(e) {
+                    isDragging = true;
+                    startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                    sliderThumb.style.transition = 'none';
+                }
+
+                function drag(e) {
+                    if (!isDragging) return;
+                    
+                    e.preventDefault();
+                    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                    currentX = clientX - startX;
+                    
+                    // Limitar el movimiento
+                    if (currentX < 0) currentX = 0;
+                    if (currentX > maxSlide) currentX = maxSlide;
+                    
+                    sliderThumb.style.transform = `translateX(${currentX}px)`;
+                    
+                    // Cambiar opacidad del texto mientras se desliza
+                    const opacity = 1 - (currentX / maxSlide);
+                    sliderText.style.opacity = opacity;
+                }
+
+                function endDrag() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    
+                    // Si se deslizó más del 80%, mostrar modal de confirmación
+                    if (currentX > maxSlide * 0.8) {
+                        sliderThumb.style.transition = 'transform 0.3s ease';
+                        sliderThumb.style.transform = `translateX(${maxSlide}px)`;
+                        sliderText.style.opacity = '0';
+                        
+                        // Mostrar modal de confirmación
+                        setTimeout(() => {
+                            $('#confirmVisibilityOffModal').modal('show');
+                            
+                            // Resetear slider cuando se cierra el modal sin confirmar
+                            $('#confirmVisibilityOffModal').on('hidden.bs.modal', function () {
+                                sliderThumb.style.transform = 'translateX(0)';
+                                sliderText.style.opacity = '1';
+                                currentX = 0;
+                            });
+                        }, 300);
+                    } else {
+                        // Volver a la posición inicial
+                        sliderThumb.style.transition = 'transform 0.3s ease';
+                        sliderThumb.style.transform = 'translateX(0)';
+                        sliderText.style.opacity = '1';
+                        currentX = 0;
+                    }
+                }
+            }
+            @endif
+
+            function openChatConsult() {
+                // Aquí puedes añadir la lógica para abrir el chat/consulta
+                alert('Función de Chat/Consulta - Implementar según necesidades');
+            }
+        </script>
+
+        <style>
+            /* Contenedor centrado */
+            .profile-centered-container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+                margin-top: 20px;
+                padding: 0 20px;
+            }
+
+            /* 1. Username centrado */
+            .profile-username-centered {
+                color: #fff;
+                font-size: 28px;
+                font-weight: 700;
+                margin: 0;
+                text-align: center;
+            }
+
+            /* 2. Badge de disponibilidad */
+            .availability-status-centered {
+                display: flex;
+                justify-content: center;
+            }
+
+            .status-label {
+                padding: 10px 30px;
+                border-radius: 25px;
+                font-size: 14px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .status-available {
+                background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+                color: #fff;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            }
+
+            .status-unavailable {
+                background: linear-gradient(135deg, #757575 0%, #9E9E9E 100%);
+                color: #fff;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 4px 15px rgba(117, 117, 117, 0.3);
+            }
+
+            /* 3. Timer */
+            .countdown-timer-centered {
+                color: #f36e00;
+                font-size: 36px;
+                font-weight: 700;
+                font-family: 'Courier New', monospace;
+                letter-spacing: 3px;
+                text-align: center;
+                text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+            }
+
+            /* 4. Botones de control de disponibilidad */
+            .btn-availability-control {
+                width: 100%;
+                max-width: 350px;
+                padding: 15px 30px;
+                border-radius: 30px;
+                color: #fff !important;
+                text-decoration: none !important;
+                font-weight: 600;
+                font-size: 15px;
+                text-align: center;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                border: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .btn-turn-on {
+                background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            }
+
+            .btn-turn-on:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+                text-decoration: none !important;
+                color: #fff !important;
+            }
+
+            .btn-turn-off {
+                background: linear-gradient(135deg, #f36e00 0%, #ff8c42 100%);
+                box-shadow: 0 4px 15px rgba(243, 110, 0, 0.3);
+            }
+
+            .btn-turn-off:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(243, 110, 0, 0.5);
+                text-decoration: none !important;
+                color: #fff !important;
+            }
+
+            .btn-availability-control i {
+                font-size: 18px;
+                margin: 0 !important;
+            }
+
+            /* 5. Slider */
+            .slider-container {
+                width: 100%;
+                max-width: 350px;
+                padding: 10px 0;
+            }
+
+            .slider-track {
+                position: relative;
+                width: 100%;
+                height: 60px;
+                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+                border: 2px solid #757575;
+                border-radius: 35px;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .slider-text {
+                position: absolute;
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 13px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .slider-thumb {
+                position: absolute;
+                left: 5px;
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #757575 0%, #9E9E9E 100%);
+                border-radius: 50%;
+                cursor: grab;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+                font-size: 20px;
+                box-shadow: 0 4px 15px rgba(117, 117, 117, 0.5);
+                transition: transform 0.3s ease;
+                z-index: 10;
+            }
+
+            .slider-thumb:active {
+                cursor: grabbing;
+                transform: scale(1.1);
+            }
+
+            .slider-thumb i {
+                margin: 0 !important;
+                pointer-events: none;
+            }
+
+            /* 6. Mensaje de visibilidad */
+            .visibility-message {
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 13px;
+                margin: 0;
+                font-style: italic;
+                text-align: center;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .visibility-message i {
+                font-size: 16px;
+                margin: 0 !important;
+            }
+
+            /* Cuando la ficha no está visible */
+            .ficha-invisible-message {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .btn-make-visible {
+                background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 30px;
+                padding: 12px 30px;
+                color: #fff !important;
+                text-decoration: none !important;
+                font-weight: 600;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-make-visible:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+                text-decoration: none !important;
+                color: #fff !important;
+            }
+
+            .btn-make-visible i {
+                margin: 0 !important;
+            }
+
+            /* 7. Botón Chat/Consulta */
+            .chat-consult-btn-centered {
+                width: 100%;
+                max-width: 350px;
+                background: #1a1a1a;
+                border: 2px solid #f36e00;
+                border-radius: 8px;
+                padding: 15px 30px;
+                color: #fff !important;
+                text-decoration: none !important;
+                font-weight: 600;
+                font-size: 16px;
+                text-align: center;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                display: block;
+            }
+
+            .chat-consult-btn-centered:hover {
+                background: #f36e00;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(243, 110, 0, 0.5);
+                text-decoration: none !important;
+                color: #fff !important;
+            }
+
+            /* Estilos del modal */
+            .modal-content {
+                animation: modalFadeIn 0.3s ease;
+            }
+
+            @keyframes modalFadeIn {
+                from {
+                    opacity: 0;
+                    transform: scale(0.9);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            /* Responsive */
+            @media screen and (max-width: 768px) {
+                .profile-username-centered {
+                    font-size: 24px;
+                }
+
+                .countdown-timer-centered {
+                    font-size: 30px;
+                }
+
+                .btn-availability-control {
+                    max-width: 300px;
+                    padding: 12px 25px;
+                    font-size: 14px;
+                }
+
+                .slider-container {
+                    max-width: 300px;
+                }
+
+                .slider-track {
+                    height: 55px;
+                }
+
+                .slider-thumb {
+                    width: 45px;
+                    height: 45px;
+                    font-size: 18px;
+                }
+
+                .chat-consult-btn-centered {
+                    max-width: 300px;
+                    font-size: 14px;
+                    padding: 12px 25px;
+                }
+            }
+
+            @media screen and (max-width: 480px) {
+                .profile-username-centered {
+                    font-size: 20px;
+                }
+
+                .countdown-timer-centered {
+                    font-size: 26px;
+                }
+
+                .btn-availability-control {
+                    max-width: 280px;
+                    padding: 10px 20px;
+                    font-size: 13px;
+                }
+
+                .slider-container {
+                    max-width: 280px;
+                }
+
+                .slider-track {
+                    height: 50px;
+                }
+
+                .slider-thumb {
+                    width: 40px;
+                    height: 40px;
+                    font-size: 16px;
+                }
+
+                .slider-text {
+                    font-size: 11px;
+                    margin-left: 40px;
+                }
+
+                .visibility-message {
+                    font-size: 11px;
+                }
+
+                .chat-consult-btn-centered {
+                    max-width: 280px;
+                    font-size: 13px;
+                    padding: 10px 20px;
+                }
+            }
+        </style>
     </div>
 
-    <div class="container mt-5 container_mobile">
-        <div class="gallery" id="gallery">
-            @foreach ($images->take(8) as $i=>$image)
-                @php
-                    $mimeType = \Storage::disk(\App\Helpers\StorageHelper::getDisk('images'))->mimeType($image->route);
-                    $width = \App\Helpers\StorageHelper::getSize($image, 'images')["width"];
-                    $height = \App\Helpers\StorageHelper::getSize($image, 'images')["height"];
-                @endphp
-                @if ($mimeType && strpos($mimeType, 'image/') === 0)
-                    <div class="gallery-item image-hover-zoom" tabindex="0">
+    <div class="container container_mobile">
+        @php $u = \Auth::user(); @endphp
+        {{--<a title="Anúnciate" href="javascript:void(0);" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Anúnciate
+            <i class="fa-solid fa-rocket ml-1"></i>
+        </a>
+        @include('modals.admin.modal_asignar_paquete')
+        <a title="Subir fotos" href="{{ route('account.edit-data') }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Modificar datos
+            <i class="fa-solid fa-user-pen ml-1"></i>
+        </a>
+        <a title="Subir fotos" href="javascript:void(0);" data-toggle="modal" data-target="#subir-fotos-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Subir fotos
+            <i class="fa-solid fa-upload ml-1"></i>
+        </a>
+        @include('modals.admin.fotos.modal_subir_fotos') --}}
+        {{--<a title="Hacer cuenta visible" href="{{ route('account.visible', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            @if(!is_null(\Auth::user()->visible))
+                Cuenta: Visible <i class="fa-solid fa-eye-slash ml-1"></i>
+            @else
+                Cuenta: NO visible <i class="fa-solid fa-eye ml-1"></i>
+            @endif
+        </a>
 
-                        <img src="{{ route('home.imageget', ['filename' => $image->route]) }}"
-                            class="gallery-image" alt="" loading="lazy">
-
-                        @if(!is_null($image->frontimage))
-                        <div class="gallery-item-type">
-
-                            <span class="visually-hidden">Portada</span><i class="fa-solid fa-star" aria-hidden="true"></i>
-
-                        </div>
-                        @endif
-
-                        <div class="gallery-item-info">
-
-                        @php
-                            $totalVisits = $images->sum('visits') ?? 0;
-                            $totalLikes = \App\Models\ImageLike::whereIn('image_id', $images->pluck('id'))->count() ?? 0;
-                            $totalPoints = floor($totalVisits * 0.2 + $totalLikes * 0.5);
-                        @endphp
-                            <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Vistas:</span><i
-                                        class="fas fa-eye" aria-hidden="true"></i> {{ $totalVisits ?? 0 }}</li>
-                                    <li class="gallery-item-comments"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-heart" aria-hidden="true"></i> {{ $totalLikes ?? 0 }}</li>
-                                    <li class="gallery-item-points">
-                                        <span class="visually-hidden">Points:</span>
-                                        <i class="fas fa-bullseye" aria-hidden="true"></i> {{$totalPoints ?? 0}}
-                                    </li>
-                            </ul>
-
-                        </div>
-
-                    </div>
-                @elseif ($mimeType && strpos($mimeType, 'video/') === 0)
-                    <div class="gallery-item" tabindex="0">
-
-                        <video crossorigin="anonymous" controls class="gallery-image">
-                            <source src="{{ route('home.imageget', ['filename' => $image->route]) }}" type="{{ $mimeType }}" class="gallery-image">
-                            Your browser does not support the video tag.
-                        </video>
-
-                        <div class="gallery-item-type">
-
-                            <span class="visually-hidden">Video</span><i class="fas fa-video" aria-hidden="true"></i>
-
-                        </div>
-
-                        <div class="gallery-item-info">
-
-                            <ul>
-                                <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i
-                                        class="fas fa-heart" aria-hidden="true"></i> 30</li>
-                                {{--
-                                <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i
-                                        class="fas fa-comment" aria-hidden="true"></i> 2</li> --}}
-                            </ul>
-                        </div>
-                    </div>
-                @endif
-
-            @endforeach
-
-        </div>
-        <div id="loading" style="display: block; text-align: center; padding: 20px; margin: 20px 0;">
-            <div class="modern-loader"></div>
-        </div>
+        @php
+            $canMakeAvailable = true;
+            if ($u->available_until !== null) {
+                $now = \Carbon\Carbon::now('Europe/Madrid');
+                $startTime = $now;
+                $endTime = \Carbon\Carbon::parse($u->available_until)->setTimezone('Europe/Madrid');
+                
+                if ($now->lt($endTime)) {
+                    $canMakeAvailable = false;
+                    $remainingMinutes = $now->diffInMinutes($endTime);
+                }
+            }
+        @endphp
+        <a title="Ponte disponible" href="javascript:void(0);" data-toggle="modal" data-target="#hacer-disponible-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Ponte disponible
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </a>
+        @include('modals.admin.modal_hacer_disponible')
+        @if (!$canMakeAvailable)
+        <a title="Apagar disponibilidad" href="{{ route('account.make_unavailable', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
+            Apagar disponibilidad
+            <i class="fa-solid fa-power-off"></i>
+        </a>
+        @endif --}}
+        @include('account.partials.account-tabs')
     </div>
-    <!-- End of container -->
 
 </main>
 
@@ -436,7 +728,6 @@
         Your browser does not support the video tag.
     </video>
 </div>
-
 
 <!-- Barra Sticky -->
 <div id="stickyBar" class="sticky-bar">
@@ -507,8 +798,8 @@
     .sticky-bar.show {
         top: 0; /* Cuando la barra está activa, la movemos hacia la parte superior */
     }
-</style>
 
+</style>
 
 <style>
     /* Modal Styles */
@@ -1088,7 +1379,6 @@
 
         .container_mobile {
             margin: 0 !important;
-            margin-top: 20px !important;
             padding: 0 !important;
             width: 100% !important;
         }
@@ -1795,6 +2085,7 @@
         text-align: justify;
     }
 </style>
+
 <script>
     document.getElementById('profile-edit-btn').addEventListener('click', function() {
         window.location.href = '/account/edit';

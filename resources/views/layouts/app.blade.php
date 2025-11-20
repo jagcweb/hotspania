@@ -550,7 +550,15 @@
     right: 5%; 
     top: 26%;
   }
+
+   @media screen and (max-width: 640px) {
+        .lilist{
+            top: 0%;
+        }
+    }
 </style>
+
+
 
 <svg style="position:fixed; top:100vh">
   <defs>

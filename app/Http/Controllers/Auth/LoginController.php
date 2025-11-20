@@ -60,7 +60,7 @@ class LoginController extends Controller
                 \Auth::logout();
                 return back()->with('error', 'El usuario ha sido baneado. Si crees que es un error ponte en contacto con nosotros.');
             } else {
-                return redirect()->route('home');
+                return redirect()->route('account');
             }
 
         }

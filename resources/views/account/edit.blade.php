@@ -31,15 +31,22 @@
         <div class="profile">
 
             <div class="profile-image">
-                @if(is_object($frontimage))
-                    @if(!is_null($frontimage->route_gif))
-                        <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                <!-- 1. Username -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <h1 class="profile-username-centered">
+                        {{ \Auth::user()->nickname }}
+                    </h1>
+
+                    @if(is_object($frontimage))
+                        @if(!is_null($frontimage->route_gif))
+                            <img class="img_profile" src="{{ route('home.gifget', ['filename' => $frontimage->route_gif]) }}" />
+                        @else
+                            <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                        @endif
                     @else
-                        <img class="img_profile" src="{{ route('home.imageget', ['filename' => $frontimage->route]) }}" />
+                        <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
                     @endif
-                @else
-                    <img class="img_profile" src="{{ asset('images/user.jpg') }}"/>
-                @endif
+                </div>
             </div>
 
             @php
@@ -66,11 +73,6 @@
             <!-- Contenedor centrado -->
             <div class="profile-centered-container">
                 
-                <!-- 1. Username -->
-                <h1 class="profile-username-centered">
-                    {{ \Auth::user()->nickname }}
-                </h1>
-
                 <!-- 2. Badge Disponibilidad -->
                 <div class="availability-status-centered">
                     @if($isAvailable)
@@ -167,7 +169,7 @@
                         <i class="fa-solid fa-eye-slash" style="font-size: 60px; color: #f36e00; margin-bottom: 20px;"></i>
                         <p style="color: #fff; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
                             <strong>Tu ficha se ocultará y perderás tu visibilidad.</strong><br>
-                            Ya no aparecerás en el inicio.
+                            Ya no aparecerás en Hotspania.
                         </p>
                         <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px;">
                             ¿Estás seguro de que deseas continuar?
@@ -658,7 +660,7 @@
         </style>
     </div>
 
-    <div class="container mt-5 container_mobile">
+    <div class="container container_mobile">
         @php $u = \Auth::user(); @endphp
         {{--<a title="Anúnciate" href="javascript:void(0);" data-toggle="modal" data-target="#asignar-paquete-{{$u->id}}" class="btn btn-primary" style="background:#f36e00!important; color:#fff;">
             Anúnciate
@@ -1377,7 +1379,6 @@
 
         .container_mobile {
             margin: 0 !important;
-            margin-top: 20px !important;
             padding: 0 !important;
             width: 100% !important;
         }

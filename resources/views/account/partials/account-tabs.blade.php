@@ -181,7 +181,7 @@
     /* ==================== FIN ESTILOS TABS ==================== */
 </style>
 
-<div class="mt-5">
+<div>
     <!-- Nav Tabs -->
     <ul class="nav nav-tabs" id="seccionesTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -708,6 +708,7 @@
                     font-size: 18px;
                 }
             }
+
         </style>
 
         <!-- TAB 4: PRECIO -->
@@ -895,6 +896,12 @@
                 .advertise-arrow {
                     font-size: 18px;
                 }
+            }
+
+            .section-empty-content,
+            .empty-placeholder {
+                padding-top: 0 !important;
+                margin-top: -50px !important;
             }
         </style>
 
