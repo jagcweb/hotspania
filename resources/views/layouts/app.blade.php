@@ -380,7 +380,7 @@
     </nav>
 
     @include('partial_msg')
-    <div id="app" style="margin-top: 85px; min-height: 82vh;  display: flex;
+    <div id="app" style="@if(str_contains(request()->fullUrl(), 'account')) margin-top: 60px; @else margin-top: 85px; @endif min-height: 82vh;  display: flex;
     flex-direction: column;">
         <main>
             @yield('content')
@@ -1137,6 +1137,7 @@
 <script>
 (function() {
     const floatBtn = document.getElementById('chatbotBtn');
+    const consultarChat = document.getElementById('consultarChat');
     const modal = document.getElementById('chatbot-modal');
     const closeBtn = document.getElementById('chatbot-close-btn');
     let messagesContainer, messageInput, sendButton, typingIndicator;
@@ -1221,6 +1222,10 @@
 
     // Mostrar el modal y preparar el chat
     floatBtn.onclick = function() {
+        openChat();
+    };
+
+    consultarChat.onclick = function() {
         openChat();
     };
 

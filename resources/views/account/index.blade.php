@@ -77,16 +77,14 @@
                 <div class="availability-status-centered">
                     @if($isAvailable)
                         <span class="status-label status-available">Disponible</span>
-                    @else
-                        <span class="status-label status-unavailable">No disponible</span>
                     @endif
                 </div>
 
                 <!-- 3. Timer (solo si está disponible) -->
                 @if($isAvailable)
-                <div class="countdown-timer-centered" id="availability-countdown">
-                    {{ $remainingTime }}
-                </div>
+                    <div class="countdown-timer-centered" id="availability-countdown">
+                        {{ $remainingTime }}
+                    </div>
                 @endif
 
                 <!-- 4. Botón para controlar disponibilidad -->
@@ -137,7 +135,7 @@
                 @endif
 
                 <!-- 7. Botón Chat/Consulta -->
-                <a href="javascript:void(0);" class="chat-consult-btn-centered" onclick="openChatConsult()">
+                <a id="consultarChat" href="javascript:void(0);" class="chat-consult-btn-centered" onclick="openChatConsult()">
                     Chat/Consulta
                 </a>
 
@@ -206,10 +204,21 @@
 
                 const countdownElement = document.getElementById("availability-countdown");
                 if (countdownElement) {
-                    countdownElement.textContent = 
-                        totalHours + ":" +
-                        minutes.toString().padStart(2,'0') + ":" + 
+                    const timeStr = totalHours + ":" +
+                        minutes.toString().padStart(2,'0') + ":" +
                         seconds.toString().padStart(2,'0');
+
+                    // Mostrar el tiempo y el botón "Apagar disponibilidad" al lado
+                    countdownElement.innerHTML = `
+                        <span class="countdown-text" style="vertical-align:middle; font-family: inherit;">
+                            ${timeStr}
+                        </span>
+                        <a title="Apagar disponibilidad"
+                           href="{{ route('account.make_unavailable', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}"
+                           style="font-size: 16px!important;">
+                            <i class="fa-solid fa-power-off"></i>
+                        </a>
+                    `;
                 }
             }
 
@@ -302,11 +311,6 @@
                 }
             }
             @endif
-
-            function openChatConsult() {
-                // Aquí puedes añadir la lógica para abrir el chat/consulta
-                alert('Función de Chat/Consulta - Implementar según necesidades');
-            }
         </script>
 
         <style>
@@ -360,7 +364,7 @@
             }
 
             /* 3. Timer */
-            .countdown-timer-centered {
+            .countdown-timer-centered, .countdown-timer-centered a {
                 color: #f36e00;
                 font-size: 36px;
                 font-weight: 700;
