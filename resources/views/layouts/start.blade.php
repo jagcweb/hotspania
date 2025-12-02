@@ -154,7 +154,7 @@
 
         .subtitle {
             color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 50px;
+            margin-bottom: 20px;
             font-size: 1.1em;
             font-weight: 300;
             letter-spacing: 0.5px;
@@ -723,13 +723,13 @@
         <div class="city-selector">
             <label for="city_id">Selecciona tu ciudad:</label>
             <div class="select-wrapper">
-                 @php $cities = \App\Models\City::where('name', 'Barcelona')->orderBy('id', 'asc')->get(); @endphp
+                 @php $cities = \App\Models\City::where('name', 'Barcelona')->orWhere('name', 'Madrid')->orderBy('name', 'asc')->get(); @endphp
                 <select id="city_id" name="city" required autocomplete="off">
                     <!--<option value="" hidden selected disabled>
                         Escoge una ciudad...
                     </option>-->
-                    @foreach($cities as $c)
-                        <option selected value="{{strtolower($c->id)}}">{{$c->name}}</option>
+                    @foreach($cities as $i=>$c)
+                        <option @if($i == 0) selected @endif value="{{strtolower($c->id)}}">{{$c->name}}</option>
                     @endforeach
                 </select>
             </div>

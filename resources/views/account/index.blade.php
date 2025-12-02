@@ -75,9 +75,9 @@
                 
                 <!-- 2. Badge Disponibilidad -->
                 <div class="availability-status-centered">
-                    @if($isAvailable)
+                    {{--@if($isAvailable)
                         <span class="status-label status-available">Disponible</span>
-                    @endif
+                    @endif--}}
                 </div>
 
                 <!-- 3. Timer (solo si está disponible) -->
@@ -124,13 +124,13 @@
                 @else
                 <!-- Mensaje cuando la ficha no está visible -->
                 <div class="ficha-invisible-message">
-                    <p class="visibility-message" style="color: rgba(255, 107, 107, 0.8);">
-                        <i class="fa-solid fa-eye-slash"></i> Tu ficha NO está visible
-                    </p>
                     <a href="{{ route('account.visible', ['id' => \Crypt::encryptString(\Auth::user()->id)]) }}" class="btn-make-visible">
                         <i class="fa-solid fa-eye"></i>
                         Hacer visible
                     </a>
+                    <p class="visibility-message" style="color: rgba(255, 107, 107, 0.8);">
+                        <i class="fa-solid fa-eye-slash"></i> Tu ficha NO está visible
+                    </p>
                 </div>
                 @endif
 
@@ -470,7 +470,7 @@
                 font-size: 20px;
                 box-shadow: 0 4px 15px rgba(117, 117, 117, 0.5);
                 transition: transform 0.3s ease;
-                z-index: 10;
+                z-index: 1;
             }
 
             .slider-thumb:active {
