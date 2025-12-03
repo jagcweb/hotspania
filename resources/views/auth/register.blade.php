@@ -206,27 +206,53 @@
                                                 </div>
                                             </div>
 
-                                           {{-- <div class="col-md-6 col-sm-6 col-6 form-group">
-                                                <div class="form-group">
-                                                    <label for="working_zone">Zona</label>
-                                                    <input type="text" class="form-control" id="working_zone" name="working_zone" value="{{ old('working_zone') }}" required>
-                                                </div>
-                                            </div> --}}
                                             <div class="col-md-6 col-sm-6 col-6 form-group">
                                                 <div class="form-group">
                                                     <label for="working_zone">Zona</label>
-                                                    @php $zones = \App\Models\Zone::where('city_id', 2)->orderBy('name', 'asc')->get(); @endphp
                                                     <select class="form-control" id="working_zone" name="working_zone" required>
-                                                        <option class="option" value="" disabled {{ old('working_zone') ? '' : 'selected' }}>Selecciona una zona</option>
-                                                        @foreach ($zones as $zone)
-                                                            <option class="option" value="{{ $zone->name }}" {{ old('working_zone') == $zone->name ? 'selected' : '' }}>
-                                                                {{ $zone->name }}
-                                                            </option>
-                                                        @endforeach
+                                                        <option value="" disabled selected>Selecciona primero una ciudad</option>
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                const ciudadesSelect = document. getElementById('ciudades');
+                                                const zonaSelect = document. getElementById('working_zone');
+                                                
+                                                ciudadesSelect.addEventListener('change', function() {
+                                                    // Obtener los IDs de las ciudades seleccionadas
+                                                    const selectedCities = Array.from(this. selectedOptions).map(option => option.value);
+                                                    
+                                                    if (selectedCities. length === 0) {
+                                                        zonaSelect. innerHTML = '<option value="" disabled selected>Selecciona primero una ciudad</option>';
+                                                        return;
+                                                    }
+                                                    
+                                                    // Hacer petición AJAX
+                                                    fetch('{{ route("user.cities") }}', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                        },
+                                                        body: JSON.stringify({ city_ids: selectedCities })
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(zones => {
+                                                        zonaSelect.innerHTML = '<option value="" disabled selected>Selecciona una zona</option>';
+                                                        zones.forEach(zone => {
+                                                            const option = document.createElement('option');
+                                                            option.value = zone. name;
+                                                            option.textContent = zone.name;
+                                                            zonaSelect.appendChild(option);
+                                                        });
+                                                    })
+                                                    .catch(error => console.error('Error:', error));
+                                                });
+                                            });
+                                        </script>
 
                                         
                                         <div class="form-group">

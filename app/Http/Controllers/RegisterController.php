@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\StorageHelper;
 use App\Models\City;
+use App\Models\Zone;
 use App\Models\CityUser;
 use App\Models\Image;
 use Illuminate\Support\Str;
@@ -44,7 +45,7 @@ class RegisterController extends Controller
         }
         
 
-        $cities = City::where('name', 'Barcelona')->orderBy('id', 'asc')->get();
+        $cities = City::where('name', 'Barcelona')->orWhere('name', 'Madrid')->orderBy('name', 'asc')->get();
 
         if(count($cities) == 0){
             return redirect()->route('admin.utilities.zones')->with('error', 'Antes de crear un usuario, debes tener alguna ciudad creada para poder asignarsela.');
@@ -495,5 +496,16 @@ class RegisterController extends Controller
             'nickname_exists' => $nicknameExists,
             'email_exists' => $emailExists,
         ]);
+    }
+
+    public function getByCity(Request $request)
+    {
+        $cityIds = $request->input('city_ids', []);
+        
+        $zones = Zone::whereIn('city_id', $cityIds)
+                     ->orderBy('name', 'asc')
+                     ->get(['id', 'name']);
+        
+        return response()->json($zones);
     }
 }

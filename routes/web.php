@@ -91,6 +91,8 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/register-user/{step}/{id?}', [App\Http\Controllers\RegisterController::class, 'save'])->name('user.save');
 
+Route::post('/register/zones/by-cities', [App\Http\Controllers\RegisterController::class, 'getByCity'])->name('user.cities');
+
 //NotificationController
 Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
 Route::get('/notifications/get', [App\Http\Controllers\NotificationController::class, 'get'])->name('notifications.get');
