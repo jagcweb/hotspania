@@ -11,7 +11,7 @@ class Zone extends Model
 
     protected $fillable = [
         'name',
-        'city'
+        'city_id'
     ];
 
     public function city(){

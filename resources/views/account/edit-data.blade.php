@@ -180,17 +180,31 @@
                             </div>
                         </div> --}}
 
+                        @php 
+                            $zones_madrid = \App\Models\Zone::where('city_id', 1)->orderBy('name')->get();
+                            $zones_barcelona = \App\Models\Zone::where('city_id', 2)->orderBy('name')->get();
+                        @endphp
                         <div class="col-md-6 col-sm-6 col-6 form-group">
                             <div class="form-group">
                                 <label for="working_zone">Zona</label>
                                 <select class="form-control" id="working_zone" name="working_zone" required>
                                     <option class="option" value="" disabled {{ old('working_zone') ? '' : 'selected' }}>Selecciona una zona</option>
+                                    @foreach($zones_madrid as $zone)
+                                        <option class="option" value="{{ $zone->name }}" {{ \Auth::user()->working_zone == $zone->name ? 'selected' : '' }}>
+                                            {{ $zone->name }} - (Madrid)
+                                        </option>
+                                    @endforeach
+                                    @foreach($zones_barcelona as $zone)
+                                        <option class="option" value="{{ $zone->name }}" {{ \Auth::user()->working_zone == $zone->name ? 'selected' : '' }}>
+                                            {{ $zone->name }} - (Barcelona)
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <script>
+                    {{--<script>
                         document.addEventListener('DOMContentLoaded', function() {
                             const ciudadesSelect = document. getElementById('ciudades');
                             const zonaSelect = document. getElementById('working_zone');
@@ -226,7 +240,7 @@
                                 .catch(error => console.error('Error:', error));
                             });
                         });
-                    </script>
+                    </script>--}}
 
                     
                     <div class="form-group">
