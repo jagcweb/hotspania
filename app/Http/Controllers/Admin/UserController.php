@@ -255,6 +255,17 @@ class UserController extends Controller
         return back()->with('exito', 'Usuario actualizado!');
     }
 
+    public function visibleAccount($id) {
+        $id = \Crypt::decryptString($id);
+        $user = User::find($id);
+        $user->visible = $user->visible == 1 ? null : 1;
+        $user->updated_at = \Carbon\Carbon::now();
+        $user->update();
+
+        $message = $user->visible == 1 ? 'Cuenta visible.' : 'Cuenta oculta.';
+        return back()->with('exito', $message);
+    }
+
     public function updatePassword(Request $request, $id)
     {
         $request->validate([  

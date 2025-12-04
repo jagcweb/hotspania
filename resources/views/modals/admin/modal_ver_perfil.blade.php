@@ -11,7 +11,7 @@
                     <li><a href="{{route('admin.users.edit', ['id' => $u->id])}}">Editar Datos</a></li>
                     <li><a href="#" data="fotos-{{$u->id}}">Ver Fotos</a></li>
                     <li><a href="#" data="cambiar-contraseña-{{$u->id}}">Cambiar Contraseña</a></li>
-                    <li><a title="Cambiar visibilidad" href="{{ route('account.visible', ['id' => \Crypt::encryptString($u->id)]) }}" data="hacer-cuenta-visible-{{$u->id}}">@if(!is_null($u->visible)) Cuenta: Visible @else Cuenta: NO Visible @endif</a></li>
+                    <li><a title="Cambiar visibilidad" href="{{ route('admin.users.visible', ['id' => \Crypt::encryptString($u->id)]) }}" data="hacer-cuenta-visible-{{$u->id}}">@if(!is_null($u->visible)) Cuenta: Visible @else Cuenta: NO Visible @endif</a></li>
                 </ul>
             </div>
         </div><!-- /.modal-content -->

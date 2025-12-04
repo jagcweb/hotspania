@@ -129,6 +129,7 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::post('users/update-positions', 'App\Http\Controllers\Admin\UserController@updatePositions')->name('admin.users.updatePositions');
     Route::post('users/make-available/{id}', 'App\Http\Controllers\Admin\UserController@makeAvailable')->name('admin.users.make_available');
     Route::get('users/make-unavailable/{id}', 'App\Http\Controllers\Admin\UserController@makeUnavailable')->name('admin.users.make_unavailable');
+    Route::get('/users/visible/{id}', 'App\Http\Controllers\Admin\UserController@visibleAccount')->name('admin.users.visible');
 
     // Image Management
     Route::get('images-get/{id}/{name}/{filter}', 'App\Http\Controllers\Admin\ImageController@get')->name('admin.images.getFilter');
