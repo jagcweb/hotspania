@@ -217,7 +217,7 @@ class RegisterController extends Controller
 
         }
 
-        return redirect()->route('admin.users.getActive')->with('exito', ' Si tu ficha se aprueba, recibirás un correo en las próximas 48 horas.');
+        return redirect()->route('admin.users.getActive')->with('exito', ' Si tu ficha se aprueba, recibirás un correo en las próximas 48 horas. (revisar la carpeta de spam)');
     }
 
     public function addWaterMark($file, $imageName, $extension, bool $generatedGif){
