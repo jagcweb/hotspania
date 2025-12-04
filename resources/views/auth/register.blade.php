@@ -205,7 +205,6 @@
                                                     </select>
                                                 </div>
                                             </div>
-
                                             @php 
                                                 $zones_madrid = \App\Models\Zone::where('city_id', 1)->orderBy('name')->get();
                                                 $zones_barcelona = \App\Models\Zone::where('city_id', 2)->orderBy('name')->get();
@@ -214,14 +213,14 @@
                                                 <div class="form-group">
                                                     <label for="working_zone">Zona</label>
                                                     <select class="form-control" id="working_zone" name="working_zone" required>
-                                                        <option value="" disabled selected>Selecciona primero una ciudad</option>
+                                                        <option value="" disabled {{ old('working_zone') ? '' : 'selected' }}>Selecciona primero una ciudad</option>
                                                         @foreach($zones_madrid as $zone)
-                                                            <option class="option" value="{{ $zone->name }}" {{ \Auth::user()->working_zone == $zone->name ? 'selected' : '' }}>
+                                                            <option class="option" value="{{ $zone->name }}" {{ old('working_zone') == $zone->name ? 'selected' : '' }}>
                                                                 {{ $zone->name }} - (Madrid)
                                                             </option>
                                                         @endforeach
                                                         @foreach($zones_barcelona as $zone)
-                                                            <option class="option" value="{{ $zone->name }}" {{ \Auth::user()->working_zone == $zone->name ? 'selected' : '' }}>
+                                                            <option class="option" value="{{ $zone->name }}" {{ old('working_zone') == $zone->name ? 'selected' : '' }}>
                                                                 {{ $zone->name }} - (Barcelona)
                                                             </option>
                                                         @endforeach
