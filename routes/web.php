@@ -51,7 +51,7 @@ Route::get('/logout', function(){
  Auth::routes(['register' => false]);
 
 //HomeController
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home/{city?}', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home/image-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getImage'])->name('home.imageget');
 Route::get('/home/gif-get/{filename}',  [App\Http\Controllers\HomeController::class, 'getGif'])->name('home.gifget');
 Route::get('/document/{filename}',  [App\Http\Controllers\HomeController::class, 'getDocument'])->name('home.document');

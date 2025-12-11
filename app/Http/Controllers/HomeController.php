@@ -9,6 +9,7 @@ use App\Helpers\StorageHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use App\Models\City;
 
 class HomeController extends Controller
 {
@@ -31,9 +32,14 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index(Request $request) {
-        $selected_city = isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : null;
+    public function index(Request $request, $city = null) {
+        $city_object = City::where('name', $city)->first();
+        $selected_city = is_object($city_object) ? $city_object->id : (isset($_COOKIE['selected_city']) ? $_COOKIE['selected_city'] : null);
         $selected_zone = isset($_COOKIE['selected_zone']) ? $_COOKIE['selected_zone'] : null;
+
+        if(is_null($selected_city)) {
+            return redirect()->route('start');
+        }
 
         $query = User::whereHas('roles', function ($q) {
             $q->where('name', 'user');
@@ -194,7 +200,7 @@ class HomeController extends Controller
         }
 
         $loadedUserIds = $users->pluck('id')->toArray();
-        return view('home', compact('users', 'loadedUserIds', 'selected_city'));
+        return view('home', compact('users', 'loadedUserIds', 'selected_city', 'city'));
     }
 
     public function loadMore($page) {

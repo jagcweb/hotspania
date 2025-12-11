@@ -974,6 +974,8 @@
                 }
                 return;
             }*/
+
+            setCookie('selected_city', citySelect.value, 30);
             
             const button = event.currentTarget;
             const span = button.querySelector('span');
