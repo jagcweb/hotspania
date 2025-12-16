@@ -104,7 +104,7 @@
                                 $zones_madrid = \App\Models\Zone::where('city_id', 1)->orderBy('name')->get();
                                 $zones_barcelona = \App\Models\Zone::where('city_id', 2)->orderBy('name')->get();
                             @endphp
-                            <div class="col-md-6 col-sm-6 col-6 form-group">
+                            <div class="form-group">
                                 <div class="form-group">
                                     <label for="working_zone">Zona</label>
                                     <select class="form-control" id="working_zone" name="working_zone" required>
