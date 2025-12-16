@@ -5,6 +5,125 @@
 @section('content')
 <div id="page-wrapper background-transparent">
 
+
+    <style>
+        /* === MODAL SOLO imageGuidelinesModal (FORZADO) === */
+
+        #imageGuidelinesModal {
+            backdrop-filter: blur(5px) !important;
+        }
+
+        #imageGuidelinesModal .modal-dialog {
+            max-width: 400px !important;
+            margin: auto !important;
+        }
+
+        #imageGuidelinesModal .modal-content {
+            min-height: 350px !important;
+            background: linear-gradient(145deg, rgba(25,25,25,0.98), rgba(15,15,15,0.98)) !important;
+            border: 1px solid rgba(247,110,8,0.3) !important;
+            border-radius: 20px !important;
+            backdrop-filter: blur(20px) !important;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4) !important;
+        }
+
+        #imageGuidelinesModal .modal-header {
+            background: transparent !important;
+            height: auto !important;
+            border-top-left-radius: 20px !important;
+            border-top-right-radius: 20px !important;
+
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            padding: 30px 30px 25px !important;
+            border-bottom: 1px solid rgba(247,110,8,0.2) !important;
+        }
+
+        #imageGuidelinesModal .modal-title {
+            color: #F76E08 !important;
+            font-weight: 700 !important;
+            font-size: 1.15em !important;
+            text-align: center !important;
+        }
+
+        #imageGuidelinesModal .modal-body {
+            padding: 30px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        #imageGuidelinesModal .modal-footer {
+            justify-content: center !important;
+            padding: 25px 30px 30px !important;
+            border-top: 1px solid rgba(247,110,8,0.2) !important;
+        }
+
+        #imageGuidelinesModal .form-check-label {
+            color: rgba(255,255,255,0.9) !important;
+        }
+
+        #imageGuidelinesModal .modal-footer .btn {
+            background: linear-gradient(135deg, #F76E08 0%, #ff4500 100%) !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 15px 40px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 5px 15px rgba(247,110,8,0.3) !important;
+        }
+
+        #imageGuidelinesModal .form-check {
+            position: relative !important;
+            display: block !important;
+            padding-left: 1.25rem !important;
+            text-align: center !important;
+        }
+
+        #imageGuidelinesModal .form-check-input {
+            position: absolute !important;
+            margin-top: 0.3rem !important;
+            margin-left: -1.25rem !important;
+            accent-color: #F76E08 !important;
+        }
+
+        #imageGuidelinesModal .form-check-label {
+            margin-bottom: 0 !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-family: 'Poppins', sans-serif !important;
+            font-weight: 400 !important;
+            line-height: 1.6 !important;
+            letter-spacing: normal !important;
+            text-transform: none !important;
+        }
+
+    </style>
+
+
+    <div class="modal fade" id="imageGuidelinesModal" tabindex="-1" role="dialog" aria-labelledby="imageGuidelinesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageGuidelinesModalLabel">Sitio para mayores de 18 años.</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="ageCheck" checked>
+                        <label class="form-check-label ml-1" for="ageCheck">
+                            <a target="_blank" style="color: #F76E08; text-decoration: underline!important;" href="/documents/Terminos_y_Condiciones.pdf">
+                                acepto los términos y condiciones.
+                            </a>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="acceptTerms()">Acceder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <main role="main" style="margin-top:-70px;">
         @php 
 
@@ -225,6 +344,45 @@
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si necesita mostrar el modal
+        if (!getCookie('terms')) {
+            showModal();
+        }
+    });
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    function setCookie(name, value, days) {
+        const expirationDate = new Date();
+        expirationDate.setDate(expirationDate.getDate() + days);
+        document.cookie = `${name}=${value}; expires=${expirationDate.toUTCString()}; path=/`;
+    }
+
+    function showModal() {
+        const modal = document.getElementById('imageGuidelinesModal');
+        modal.classList.add('show');
+        modal.style.display = 'block';
+    }
+
+    function hideModal() {
+        const modal = document.getElementById('imageGuidelinesModal');
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+    }
+
+    function acceptTerms() {
+        setCookie('terms', 'accepted', 365); // Cookie por 1 año
+        hideModal();
+    }
+</script>
+
 <script>
 $.ajaxSetup({
     headers: {
